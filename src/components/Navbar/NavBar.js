@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaDatabase, FaUserPlus, FaSignInAlt, FaSignOutAlt } from 'react-icons/fa';
-import UserContext from '../context/UserContext';
+import UserContext from '../../context/UserContext';
 import styles from './Navbar.module.css'; // Import the CSS module
 
 function NavBar() {
@@ -37,7 +37,7 @@ function NavBar() {
     return (
         <nav className={`navbar navbar-expand-lg navbar-light bg-light fixed-top ${styles.navbar}`}>
             <div className={styles.navbarHeader}>
-                <Link className="navbar-brand" to="/" style={{ marginRight: '60px', marginLeft: "30px" }}>CryprtoWire</Link>
+                <Link className="navbar-brand" to="/" style={{ marginRight: '60px', marginLeft: "30px" }}>CashConnect</Link>
                 <button className="navbar-toggler" type="button" onClick={() => setIsCollapsed(!isCollapsed)} aria-controls="navbarNav" aria-expanded={!isCollapsed} aria-label="Toggle navigation">
                     <span className="navbar-toggler-icon"></span>
                 </button>

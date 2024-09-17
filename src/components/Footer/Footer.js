@@ -14,7 +14,7 @@ function Footer() {
             height: '20px', 
             bottom: 0 
         }}>
-            <p style={{ margin: 0 }}>&copy; {new Date().getFullYear()} CryprtoWire. All rights reserved. Alvis Prieditis.</p>
+            <p style={{ margin: 0 }}>&copy; {new Date().getFullYear()} CashConnect. All rights reserved. Alvis Prieditis.</p>
         </footer>
     );
 }

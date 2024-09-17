@@ -1,70 +1,128 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useCallback } from 'react';
 import UserContext from '../context/UserContext';
-import TooltipIcon from './Tooltip';
-import TransactionHistory from './TransactionHistory';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Collapse, Typography } from '@mui/material';
-import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
+import TooltipIcon from './Tooltip/Tooltip';
+import UserTable from './UserTable/UserTable';
+import PasswordPromptDialog from './PasswordPromtDialog/PasswordPromptDialog';
+import ChangePasswordDialog from './ChangePasswordDialog/ChangePasswordDialog';
+import { Box, Typography } from '@mui/material';
 
 function AllData() {
-    const { users } = useContext(UserContext);
-    console.log(users);
+    const { users, setUsers, adminCredentials, removeUser } = useContext(UserContext);
     const [open, setOpen] = useState({});
+    const [passwordPromptOpen, setPasswordPromptOpen] = useState(false);
+    const [password, setPassword] = useState('');
+    const [userToRemove, setUserToRemove] = useState(null);
+    const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+    const [newPassword, setNewPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
 
-    const handleToggle = (index) => {
+    const handleToggle = useCallback((index) => {
         setOpen(prevOpen => ({ ...prevOpen, [index]: !prevOpen[index] }));
-    };
+    }, []);
+
+    const handleRemoveUser = useCallback(() => {
+        if (password === adminCredentials.password) {
+            removeUser(users[userToRemove].email);
+            setPasswordPromptOpen(false);
+            setPassword('');
+            setUserToRemove(null);
+        } else {
+            alert('Incorrect password');
+        }
+    }, [password, adminCredentials.password, removeUser, users, userToRemove]);
+
+    const openPasswordPrompt = useCallback((index) => {
+        console.log('openPasswordPrompt called:', index);
+        setUserToRemove(index);
+        setPasswordPromptOpen(true);
+    }, []);
+
+    const handleMenuOpen = useCallback((event, index) => {
+        setMenuAnchorEl({ anchorEl: event.currentTarget, index });
+        console.log('Menu opened for user index:', index);
+    }, []);
+
+    const handleMenuClose = useCallback(() => {
+        setMenuAnchorEl(null);
+    }, []);
+
+    const handleChangePassword = useCallback((index) => {
+        setSelectedUser(index);
+        setChangePasswordOpen(true);
+        handleMenuClose();
+        console.log('Change password for user index:', index);
+    }, [handleMenuClose]);
+
+    const handleSaveNewPassword = useCallback(() => {
+        console.log('handleSaveNewPassword called');
+        console.log('selectedUser:', selectedUser);
+        console.log('Password:', newPassword);
+
+        if (selectedUser !== null && selectedUser >= 0 && selectedUser < users.length) {
+            setUsers(prevUsers => {
+                const updatedUsers = [...prevUsers];
+                updatedUsers[selectedUser] = {
+                    ...updatedUsers[selectedUser],
+                    password: newPassword
+                };
+                console.log('Password updated for user:', updatedUsers[selectedUser]);
+                return updatedUsers;
+            });
+            setChangePasswordOpen(false);
+            setNewPassword('');
+            setSelectedUser(null);
+        } else {
+            console.error('Invalid selected user index:', selectedUser);
+        }
+    }, [selectedUser, newPassword, users.length, setUsers]);
+
+    const handleClickShowPassword = useCallback(() => {
+        setShowPassword(prev => !prev);
+    }, []);
 
     return (
-        <div style={{ width: '100%', padding: '20px' }}>
-            <Typography variant="h4" gutterBottom style={{ backgroundColor: "yellow", color: "black", fontSize: "18px", padding: "5px" }}>
+        <Box sx={{ width: '100%', padding: '20px' }}>
+            <Typography variant="h4" gutterBottom sx={{ backgroundColor: "yellow", color: "black", fontSize: "18px", padding: "5px" }}>
                 USER DATABASE
             </Typography>
-            <TableContainer component={Paper}>
-                <Table>
-                    <TableHead>
-                        <TableRow style={{ backgroundColor: '#343a40', color: 'white' }}>
-                            <TableCell style={{ color: 'white' }}>ID</TableCell>
-                            <TableCell style={{ color: 'white' }}>Name</TableCell>
-                            <TableCell style={{ color: 'white' }}>Email</TableCell>
-                            <TableCell style={{ color: 'white' }}>Password</TableCell>
-                            <TableCell style={{ color: 'white' }}>Balance</TableCell>
-                            <TableCell style={{ color: 'white' }}>Actions</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {users.map((user, index) => (
-                            <React.Fragment key={index}>
-                                <TableRow style={{ backgroundColor: index % 2 === 0 ? '#e9ecef' : '#dee2e6', color: '#333' }}>
-                                    <TableCell>{index + 1}</TableCell>
-                                    <TableCell>{user.name}</TableCell>
-                                    <TableCell>{user.email}</TableCell>
-                                    <TableCell>{user.password}</TableCell>
-                                    <TableCell>${user.balance}</TableCell>
-                                    <TableCell>
-                                        <IconButton onClick={() => handleToggle(index)}>
-                                            {open[index] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-                                        </IconButton>
-                                    </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-                                        <Collapse in={open[index]} timeout="auto" unmountOnExit>
-                                            <TransactionHistory transactions={user.transactions} />
-                                        </Collapse>
-                                    </TableCell>
-                                </TableRow>
-                            </React.Fragment>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+            <UserTable 
+                users={users}
+                open={open}
+                handleToggle={handleToggle}
+                handleMenuOpen={handleMenuOpen}
+                menuAnchorEl={menuAnchorEl}
+                handleMenuClose={handleMenuClose}
+                openPasswordPrompt={openPasswordPrompt}
+                handleChangePassword={handleChangePassword}
+            />
             <TooltipIcon 
                 text={`
                     Here we are mimicking users database. Once we add a new user to the database, 
                     it appears here together with all the credentials. 
                 `}
             />
-        </div>
+            <PasswordPromptDialog 
+                open={passwordPromptOpen}
+                password={password}
+                handlePasswordChange={(e) => setPassword(e.target.value)}
+                handleClose={() => setPasswordPromptOpen(false)}
+                handleConfirm={handleRemoveUser}
+            />
+            <ChangePasswordDialog 
+                open={changePasswordOpen}
+                newPassword={newPassword}
+                handlePasswordChange={(e) => setNewPassword(e.target.value)}
+                handleClose={() => {
+                    setChangePasswordOpen(false);
+                    setSelectedUser(null);
+                }}
+                handleSave={handleSaveNewPassword}
+                showPassword={showPassword}
+                handleClickShowPassword={handleClickShowPassword}
+            />
+        </Box>
     );
 }
 

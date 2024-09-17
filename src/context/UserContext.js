@@ -52,8 +52,12 @@ export const UserProvider = ({ children }) => {
         });
     };
 
+    const removeUser = (email) => {
+        setUsers(prevUsers => prevUsers.filter(user => user.email !== email));
+    };
+
     return (
-        <UserContext.Provider value={{ users, setUsers, currentUser, setCurrentUser, showLogin, setShowLogin, logout, setLogout, adminCredentials, userType, setUserType, logTransaction }}>
+        <UserContext.Provider value={{ users, setUsers, currentUser, setCurrentUser, showLogin, setShowLogin, logout, setLogout, adminCredentials, userType, setUserType, logTransaction, removeUser }}>
             {children}
         </UserContext.Provider>
     );

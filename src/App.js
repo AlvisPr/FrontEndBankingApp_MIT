@@ -1,19 +1,19 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import NavBar from './components/NavBar';
-import Home from './components/Home';
-import CreateAccount from './components/CreateAccount';
-import Login from './components/Login';
-import Deposit from './components/Deposit';
-import Withdraw from './components/Withdraw';
-import Balance from './components/Balance';
+import NavBar from './components/Navbar/NavBar';
+import Home from './Pages/Home/Home';
+import CreateAccount from './Pages/CreateAccount/CreateAccount';
+import Login from './Pages/Login/Login';
+import Deposit from './Pages/Deposit/Deposit';
+import Withdraw from './Pages/Withdraw/Withdraw';
+import Balance from './Pages/Balance/Balance';
 import AllData from './components/AllData';
-import Footer from './components/Footer';
+import Footer from './components/Footer/Footer';
 import { UserProvider, useUser } from './context/UserContext';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 import './App.css';
-import CanvasAnimation from './components/CanvasAnimation';
+import CanvasAnimation from './components/Animation/CanvasAnimation';
 
 function App() {
     return (

@@ -19,7 +19,7 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
     width: 70%; /* Reduce width for desktop */
-    max-width: 400px; /* Reduce max-width for desktop */
+    width: 400px; /* Reduce max-width for desktop */
 }
 
 .cardHeader {

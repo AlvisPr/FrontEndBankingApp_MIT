@@ -1,12 +1,12 @@
 // CreateAccount.js
 import React, { useState, useContext, useEffect } from 'react';
-import Card from './Card';
-import UserContext from '../context/UserContext';
-import FormInput from './FormInput';
-import { validateField } from './Validation';
+import Card from '../../components/Card/Card';
+import UserContext from '../../context/UserContext';
+import FormInput from '../../components/FormInput/FormInput';
+import { validateField } from '../../components/Validation/Validation';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import './sharedStyles.css';
+import "../../components/sharedStyles.css";
 
 function CreateAccount() {
     const [show, setShow] = useState(true);

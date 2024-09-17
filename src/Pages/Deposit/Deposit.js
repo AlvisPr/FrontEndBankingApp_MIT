@@ -1,52 +1,48 @@
 import React, { useState, useContext } from 'react';
-import Card from './Card';
-import UserContext from '../context/UserContext';
-import TooltipIcon from './Tooltip';
+import Card from '../../components/Card/Card';
+import UserContext from '../../context/UserContext';
+import TooltipIcon from '../../components/Tooltip/Tooltip';
 import ClipLoader from 'react-spinners/ClipLoader';
-import styles from './spinner.module.css';
+import styles from "../../components/spinner.module.css";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-function Withdraw() {
+function Deposit() {
     const [amount, setAmount] = useState('');
-    const [status, setStatus] = useState('');
     const [loading, setLoading] = useState(false);
     const ctx = useContext(UserContext);
 
-    function handleWithdraw() {
+    function handleDeposit() {
         if (isNaN(amount) || amount <= 0) {
-            setStatus('Error: Invalid amount');
-            setTimeout(() => setStatus(''), 3000);
+            toast.error('Error: Invalid amount');
             return;
         }
-        if (amount > ctx.currentUser.balance) {
-            toast.error('Error: Insufficient funds');
+        if (amount.length > 6) {
+            toast.error('Error: Amount exceeds 6 digits');
             return;
         }
         setLoading(true);
         setTimeout(() => {
-            ctx.logTransaction('Withdraw', parseFloat(amount));
-            setStatus('');
+            ctx.logTransaction('Deposit', parseFloat(amount));
             setAmount('');
             setLoading(false);
-            toast.success(`Success: Withdrew $${amount}`);
+            toast.success(`Success: Deposited $${amount}`);
         }, 700);
     }
 
     return (
         <>
             <Card
-                bgcolor="danger"
-                header="Withdraw"
-                status={status}
+                bgcolor="success"
+                header="Deposit"
                 body={
                     ctx.currentUser ? (
                         <>
                             <input type="input" className="form-control" id="amount" placeholder="Enter amount" value={amount} onChange={e => setAmount(e.currentTarget.value)} /><br />
-                            <button type="submit" className="btn btn-light" onClick={handleWithdraw}>Withdraw</button>
+                            <button type="submit" className="btn btn-light" onClick={handleDeposit}>Deposit</button>
                         </>
                     ) : (
-                        <h3>Please log in to withdraw money</h3>
+                        <h3>Please log in to deposit money</h3>
                     )
                 }
             />
@@ -57,7 +53,7 @@ function Withdraw() {
             )}
             <TooltipIcon
                 text={`
-                Here we are displaying the withdraw form. 
+                Here we are displaying the deposit form. 
                 If the user is not logged in, they will be prompted to log in.
             `}
             />
@@ -66,4 +62,4 @@ function Withdraw() {
     );
 }
 
-export default Withdraw;
+export default Deposit;

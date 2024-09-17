@@ -1,7 +1,7 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 
-const TransactionHistory = ({ transactions }) => {
+const TransactionHistory = ({ transactions = [] }) => {
     console.log(transactions);
     return (
         <TableContainer component={Paper} style={{ marginTop: '10px', padding: '10px' }}>

@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
-import Card from './Card';
-import UserContext from '../context/UserContext';
-import TooltipIcon from './Tooltip';
+import Card from '../../components/Card/Card';
+import UserContext from '../../context/UserContext';
+import TooltipIcon from '../../components/Tooltip/Tooltip';
 
 function Balance() {
     const ctx = useContext(UserContext);

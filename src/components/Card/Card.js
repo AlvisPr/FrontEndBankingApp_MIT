@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './Card.module.css'; // Import the CSS module
-import CanvasAnimation from './CanvasAnimation'; 
+import CanvasAnimation from '../Animation/CanvasAnimation'; 
 
 
 function Card(props) {

@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import Card from './Card';
-import bankImg from '../assets/logo-color.png'; 
-import { FaFacebook, FaTwitter, FaInstagram, FaReact, FaNodeJs, FaDatabase, FaLock, FaUserShield } from 'react-icons/fa';
+import Card from '../../components/Card/Card';
+import bankImg from '../../assets/logo-no-background.png';
+import { FaFacebook, FaTwitter, FaInstagram, FaReact,  FaDatabase, FaLock, FaUserShield } from 'react-icons/fa';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
-import ReactPlayer from 'react-player';
 import styles from './Home.module.css'; // Import the CSS file
 
 function Home() {
@@ -34,14 +33,21 @@ function Home() {
     return (
         <div >
             <Card
-                bgcolor="success"
-                txtcolor="white"
-                header="Home"
-                title=""
-                text=""
-                body={(<img src={bankImg} className="img-fluid" alt="Responsive image"/>)}
-                socialIcons={socialIcons}
+            bgcolor="success"
+            txtcolor="white"
+            header="Home"
+            title=""
+            text=""
+            body={(
+                <img 
+                src={bankImg} 
+                className="img-fluid" 
+                alt="Bank" 
+                style={{ filter: 'brightness(0) invert(1)' }}
             />
+            )}
+            socialIcons={socialIcons}
+        />
             <Button variant="outlined" color="primary" onClick={handleClickOpen} style={{marginLeft:"30px", zIndex: 1}}>
                 Learn More
             </Button>
@@ -87,7 +93,7 @@ function Home() {
                     </div>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleClose} color="primary">
+                    <Button onClick={handleClose} color="danger" >
                         Close
                     </Button>
                 </DialogActions>

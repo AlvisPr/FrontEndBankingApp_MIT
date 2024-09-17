@@ -1,11 +1,11 @@
 import React, { useState, useContext, useEffect } from 'react';
-import Card from './Card';
-import UserContext from '../context/UserContext';
-import TooltipIcon from './Tooltip';
-import styles from './spinner.module.css';
+import Card from '../../components/Card/Card';
+import UserContext from '../../context/UserContext';
+import TooltipIcon from '../../components/Tooltip/Tooltip';
+import styles from "../../components/spinner.module.css";
 import { ClipLoader } from 'react-spinners';
-import FormInput from './FormInput';
-import { validateField } from './Validation';
+import FormInput from '../../components/FormInput/FormInput';
+import { validateField } from '../../components/Validation/Validation';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FaUserCircle } from 'react-icons/fa';
@@ -92,13 +92,7 @@ function Login() {
         }, 700);
     };
 
-    const clearForm = () => {
-        setEmail('');
-        setPassword('');
-        setPasswordVisible(false); // Hide password
-        setStatus(''); // Clear status
-        setShowLogin(true); // Use context to manage show state
-    };
+
 
     const handleKeyPress = (e) => {
         if (e.key === 'Enter' && isFormValid) {
@@ -166,7 +160,7 @@ function Login() {
                     </form>
                 ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px' }}>
-                        <FaUserCircle size={100} color="grey" style={{ marginBottom: '10px' }} />
+                        <FaUserCircle size={150} color="white" style={{ marginBottom: '10px' }} />
                         <h3>{currentUser.name}</h3>
                         <p>{currentUser.email}</p>
                         

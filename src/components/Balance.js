@@ -5,7 +5,6 @@ import TooltipIcon from './Tooltip';
 
 function Balance() {
     const ctx = useContext(UserContext);
-    console.log(ctx);
 
     return (
         <>

@@ -6,18 +6,17 @@ import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 
 function AllData() {
-    const ctx = useContext(UserContext);
+    const { users } = useContext(UserContext);
+    console.log(users);
     const [open, setOpen] = useState({});
 
     const handleToggle = (index) => {
         setOpen(prevOpen => ({ ...prevOpen, [index]: !prevOpen[index] }));
     };
 
- 
-
     return (
         <div style={{ width: '100%', padding: '20px' }}>
-            <Typography variant="h4" gutterBottom style={{ color: 'white', backgroundColor: "yellow", color: "black", fontSize: "18px", padding: "5px" }}>
+            <Typography variant="h4" gutterBottom style={{ backgroundColor: "yellow", color: "black", fontSize: "18px", padding: "5px" }}>
                 USER DATABASE
             </Typography>
             <TableContainer component={Paper}>
@@ -33,7 +32,7 @@ function AllData() {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {ctx.users.map((user, index) => (
+                        {users.map((user, index) => (
                             <React.Fragment key={index}>
                                 <TableRow style={{ backgroundColor: index % 2 === 0 ? '#e9ecef' : '#dee2e6', color: '#333' }}>
                                     <TableCell>{index + 1}</TableCell>

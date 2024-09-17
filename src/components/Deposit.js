@@ -23,7 +23,6 @@ function Deposit() {
         }
         setLoading(true);
         setTimeout(() => {
-            ctx.currentUser.balance += parseFloat(amount);
             ctx.logTransaction('Deposit', parseFloat(amount));
             setAmount('');
             setLoading(false);

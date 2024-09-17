@@ -32,7 +32,7 @@ function Home() {
     ];
 
     return (
-        <div>
+        <div >
             <Card
                 bgcolor="success"
                 txtcolor="white"

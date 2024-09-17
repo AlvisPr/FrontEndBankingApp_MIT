@@ -1,20 +1,30 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
-    const [currentUser, setCurrentUser] = useState(null);
     const [users, setUsers] = useState([
         { name: "Abdul", email: "abdul@mit.edu", password: "secret", balance: 100, transactions: [] }
     ]);
+    const [currentUser, setCurrentUser] = useState(null);
     const [showLogin, setShowLogin] = useState(true);
     const [logout, setLogout] = useState(false);
     const adminCredentials = { email: "admin@system.lv", password: "admin2024" };
     const [userType, setUserType] = useState('user'); // 'user' or 'admin'
 
+    useEffect(() => {
+        setUsers(prevUsers => 
+            prevUsers.map(user => ({
+                ...user,
+                balance: user.balance !== undefined ? user.balance : 100,
+                transactions: Array.isArray(user.transactions) ? user.transactions : []
+            }))
+        );
+    }, []);
+
     const logTransaction = (type, amount) => {
         if (!currentUser) {
-            throw new Error('User must be logged in to send an email');
+            throw new Error('User must be logged in to perform a transaction');
         }
 
         const date = new Date();
@@ -26,47 +36,31 @@ export const UserProvider = ({ children }) => {
         };
 
         setCurrentUser(prevUser => {
-            if (!prevUser.transactions) {
-                prevUser.transactions = [];
-            }
-            return {
+            const newBalance = type === 'Deposit' ? prevUser.balance + amount : prevUser.balance - amount;
+            const updatedUser = {
                 ...prevUser,
-                transactions: [...prevUser.transactions, transaction]
+                balance: newBalance,
+                transactions: [...(prevUser.transactions || []), transaction]
             };
-        });
 
-        // Update the user in the users array
-        setUsers(prevUsers => prevUsers.map(user => 
-            user.email === currentUser.email ? { ...user, transactions: [...user.transactions, transaction] } : user
-        ));
+            // Update the user in the users array
+            setUsers(prevUsers => prevUsers.map(user => 
+                user.email === prevUser.email ? updatedUser : user
+            ));
+
+            return updatedUser;
+        });
     };
 
     return (
-        <UserContext.Provider value={{ 
-            currentUser, 
-            setCurrentUser, 
-            users, 
-            setUsers, 
-            showLogin, 
-            setShowLogin, 
-            logout, 
-            setLogout, 
-            adminCredentials, 
-            userType, 
-            setUserType,
-            logTransaction
-        }}>
+        <UserContext.Provider value={{ users, setUsers, currentUser, setCurrentUser, showLogin, setShowLogin, logout, setLogout, adminCredentials, userType, setUserType, logTransaction }}>
             {children}
         </UserContext.Provider>
     );
 };
 
 export const useUser = () => {
-    const context = useContext(UserContext);
-    if (context === undefined) {
-        throw new Error('useUser must be used within a UserProvider');
-    }
-    return context;
+    return useContext(UserContext);
 };
 
 export default UserContext;

@@ -1,10 +1,10 @@
 import React from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 
 const TransactionHistory = ({ transactions }) => {
+    console.log(transactions);
     return (
         <TableContainer component={Paper} style={{ marginTop: '10px', padding: '10px' }}>
-            
             <Table size="small">
                 <TableHead>
                     <TableRow style={{ backgroundColor: '#388e3c', color: 'white' }}>

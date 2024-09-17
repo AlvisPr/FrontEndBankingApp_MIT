@@ -25,7 +25,6 @@ function Withdraw() {
         }
         setLoading(true);
         setTimeout(() => {
-            ctx.currentUser.balance -= parseFloat(amount);
             ctx.logTransaction('Withdraw', parseFloat(amount));
             setStatus('');
             setAmount('');

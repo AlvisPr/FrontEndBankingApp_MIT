@@ -1,0 +1,93 @@
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px; /* Add padding to the edges */
+}
+
+.navbarHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: auto; /* Adjusted to auto to fit content */
+}
+
+.navbarCollapse {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.navbarNav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: auto; /* Adjusted to auto to fit content */
+    padding-right: 10px; /* Space between the logo and the rest of the elements */
+}
+
+.navbarLogo {
+    margin-right: 30px; /* Space between the logo and the rest of the elements */
+}
+
+.navbarButtons {
+    display: flex;
+    justify-content: flex-end; /* Align buttons to the end */
+    align-items: center; /* Center vertically */
+    flex-direction: row; /* Horizontal direction */
+    margin-left: auto; /* Push to the right */
+}
+
+.nav-item {
+    margin: 0 10px; /* Add horizontal margin to space out items */
+}
+
+@media (min-width: 992px) {
+    .navbarCollapse {
+        flex-direction: row;
+        align-items: center; /* Ensure items are centered vertically */
+    }
+
+    .navbarNav {
+        flex-direction: row;
+        justify-content: flex-start; /* Align items to the start */
+        align-items: center; /* Ensure items are centered vertically */
+        margin-left: 0px; /* Add margin to separate from the logo */
+    }
+
+    .navbarButtons {
+        flex-direction: row;
+        align-items: center;
+        margin-left: auto; /* Push logout button to the right */
+    }
+}
+
+@media (max-width: 991px) {
+    .navbarHeader {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .navbarCollapse {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .navbarNav {
+        flex-direction: column;
+        align-items: center;
+        text-align: center; /* Center the text of the menu items */
+        width: 100%; /* Ensure it takes full width */
+    }
+
+    .navbarButtons {
+        justify-content: flex-start; /* Align buttons to the start (left) */
+        width: 100%;
+    }
+
+    .navbarLogo {
+        margin-right: auto; /* Push logo to the left */
+    }
+}

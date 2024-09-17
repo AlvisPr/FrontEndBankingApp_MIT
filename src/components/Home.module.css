@@ -1,0 +1,62 @@
+/* Home.module.css */
+
+
+
+
+
+.dialogBackdrop {
+    position: relative;
+    width: 400px;
+    background: none;
+}
+
+.dialogContent {
+    max-height: 70vh;
+    overflow: auto;
+}
+
+.textBlock {
+    width: 100%;
+    max-width: 600px;
+    text-align: left;
+}
+
+.list {
+    list-style: none;
+    padding: 0;
+}
+
+.listItem {
+    margin-bottom: 10px;
+}
+
+.heading {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    color: #000080;
+}
+
+.videoWrapper {
+    width: 100%;
+    max-width: 500px;
+    margin: 20px auto;
+}
+
+@media (min-width: 756px) {
+    .dialogPaper {
+        width: 100%; 
+        margin-left: 250px;
+        margin-right: 50px;
+    }
+}
+
+/* Simplified styles for mobile devices */
+@media (max-width: 768px) {
+    .dialogPaper {
+        width: 100vw; 
+        margin: 0; 
+        
+    }
+}

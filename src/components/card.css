@@ -1,0 +1,11 @@
+.custom-card {
+    margin-top: 80px; /* Adjust this value based on the height of your navbar */
+    margin-left: 20px; /* Space from the left */
+}
+
+.navbar {
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+}

@@ -1,13 +1,18 @@
-# Deposit Application
+# Front-End Banking Application - CashConnect
 
-This project is a simple deposit application built with React. It allows users to deposit money into their account after logging in.
+This is a user-friendly banking application built with React, providing essential banking features such as deposits, withdrawals, and balance checks. The app incorporates extensive form validation and requires users to log in before accessing any transaction features. Each user starts with an initial balance of $100, and the balance is updated in real time based on their transactions.
 
 ## Features
 
-- User login
-- Display current balance
-- Deposit money
-- User-friendly interface
+- **User Login:** Secure login system required for all actions.
+- **Form Validation:** Extensive validation ensures proper input handling for all transactions.
+- **Balance Display:** View real-time account balances after login.
+- **Deposit & Withdraw:** Manage funds easily, but only after logging in.
+- **Admin Panel:** Admin users can:
+  - Change user passwords.
+  - Delete accounts.
+  - View transaction history and account balances.
+- **User-Friendly Interface:** Clean and intuitive UI for seamless interactions.
 
 ## Installation
 
@@ -19,7 +24,7 @@ This project is a simple deposit application built with React. It allows users t
     ```bash
     cd deposit-app
     ```
-3. Install the dependencies:
+3. Install the necessary dependencies:
     ```bash
     npm install
     ```
@@ -30,41 +35,25 @@ This project is a simple deposit application built with React. It allows users t
     ```bash
     npm start
     ```
-2. Open your browser and navigate to `http://localhost:3000`.
-
-## Components
-
-### Deposit.js
-
-This component handles the deposit functionality. It displays the current balance and a form to enter the deposit amount. If the user is not logged in, it prompts the user to log in.
-
-#### Key Functions
-
-- `handleDeposit`: Handles the deposit action by updating the user's balance and resetting the input field.
-- `setStatus`: Updates the status message displayed to the user.
-
-#### JSX Structure
-
-- `Card`: Displays the deposit form or a login prompt.
-- `TooltipIcon`: Provides additional information about the deposit form.
+2. Open your browser and go to `http://localhost:3000` to access the application.
 
 ## Contributing
 
 1. Fork the repository.
-2. Create a new branch:
+2. Create a feature branch:
     ```bash
     git checkout -b feature-branch
     ```
-3. Make your changes and commit them:
+3. Implement your changes and commit them:
     ```bash
     git commit -m "Description of changes"
     ```
-4. Push to the branch:
+4. Push the branch to GitHub:
     ```bash
     git push origin feature-branch
     ```
-5. Open a pull request.
+5. Submit a pull request.
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the [MIT License](./LICENSE).

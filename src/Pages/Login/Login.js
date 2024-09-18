@@ -18,7 +18,7 @@ function Login() {
     const [validationErrors, setValidationErrors] = useState({});
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [isFormValid, setIsFormValid] = useState(false);
-    const [userType, setUserType] = useState('user'); // Default to 'user'
+    const [userType, setUserType] = useState('user'); 
     const { showLogin, setShowLogin, users, setCurrentUser, currentUser, adminCredentials, setUserType: setContextUserType } = useContext(UserContext);
 
     useEffect(() => {
@@ -31,7 +31,6 @@ function Login() {
     }, [validationErrors, email, password]);
 
     useEffect(() => {
-        // Reset form fields when the component is rendered
         setEmail('');
         setPassword('');
     }, []);
@@ -67,14 +66,18 @@ function Login() {
                     return;
                 } else {
                     toast.error('Invalid admin credentials.');
+                    setEmail('');
+                    setPassword('');
                     setLoading(false);
                     return;
                 }
             }
-
+    
             const user = users.find(user => user.email === email);
             if (!user) {
                 toast.error('Email or password not found.');
+                setEmail('');
+                setPassword('');
                 setLoading(false);
                 return;
             }
@@ -82,18 +85,17 @@ function Login() {
                 setCurrentUser(user);
                 setContextUserType('user');
                 setStatus('');
-                setShowLogin(false); // Use context to manage show state
-                toast.success(`Welcome ${user.name}`); // Show greeting message as toast
+                setShowLogin(false); 
+                toast.success(`Welcome ${user.name}`); 
             } else {
-                setStatus('Error: Invalid login');
-                setTimeout(() => setStatus(''), 3000);
+                toast.error('Error: Invalid login');
+                setEmail('');
+                setPassword('');
             }
             setLoading(false);
         }, 700);
     };
-
-
-
+    
     const handleKeyPress = (e) => {
         if (e.key === 'Enter' && isFormValid) {
             handleLogin();

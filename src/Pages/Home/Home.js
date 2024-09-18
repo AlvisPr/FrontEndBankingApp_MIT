@@ -3,7 +3,7 @@ import Card from '../../components/Card/Card';
 import bankImg from '../../assets/logo-no-background.png';
 import { FaFacebook, FaTwitter, FaInstagram, FaReact,  FaDatabase, FaLock, FaUserShield } from 'react-icons/fa';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
-import styles from './Home.module.css'; // Import the CSS file
+import styles from './Home.module.css'; 
 
 function Home() {
     const [open, setOpen] = useState(false);
@@ -11,9 +11,9 @@ function Home() {
     useEffect(() => {
         const timer = setTimeout(() => {
             setOpen(true);
-        }, 2000); // 2 seconds delay
+        }, 2000); 
 
-        return () => clearTimeout(timer); // Cleanup the timer on component unmount
+        return () => clearTimeout(timer); 
     }, []);
 
     const handleClickOpen = () => {

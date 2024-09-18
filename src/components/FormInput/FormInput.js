@@ -1,4 +1,3 @@
-// FormInput.js
 import React from 'react';
 import { FaCheck, FaTimes, FaEye, FaEyeSlash, FaEnvelope, FaLock, FaUser } from 'react-icons/fa';
 import styles from './FormInput.module.css';

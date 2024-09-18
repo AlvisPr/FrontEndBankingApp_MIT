@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaDatabase, FaUserPlus, FaSignInAlt, FaSignOutAlt } from 'react-icons/fa';
 import UserContext from '../../context/UserContext';
-import styles from './Navbar.module.css'; // Import the CSS module
+import styles from './Navbar.module.css'; 
 
 function NavBar() {
     const location = useLocation();
@@ -24,14 +24,14 @@ function NavBar() {
 
     const handleLogout = () => {
         setCurrentUser(null);
-        setShowLogin(true); // Reset showLogin to true
-        setLogout(true); // Trigger logout state
-        navigate('/login'); // Navigate to login page
-        setIsCollapsed(true); // Close the hamburger menu
+        setShowLogin(true); 
+        setLogout(true); 
+        navigate('/login'); 
+        setIsCollapsed(true); 
     };
 
     const handleLinkClick = () => {
-        setIsCollapsed(true); // Close the hamburger menu
+        setIsCollapsed(true); 
     };
 
     return (

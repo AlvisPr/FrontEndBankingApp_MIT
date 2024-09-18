@@ -1,4 +1,4 @@
-// validation.js
+
 export const validateField = (fieldName, value, ctx, context) => {
     let errors = {};
     switch (fieldName) {

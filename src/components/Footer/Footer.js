@@ -4,7 +4,7 @@ import styles from './Footer.module.css';
 function Footer() {
     return (
         <footer className={styles.footer}>
-            <p className={styles.p}>&copy; {new Date().getFullYear()} CashConnect. All rights reserved. Alvis Prieditis.</p>
+            <p className={styles.title}>&copy; {new Date().getFullYear()} CashConnect. All rights reserved. Alvis Prieditis.</p>
         </footer>
     );
 }

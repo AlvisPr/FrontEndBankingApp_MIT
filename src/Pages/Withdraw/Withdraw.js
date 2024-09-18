@@ -15,8 +15,7 @@ function Withdraw() {
 
     function handleWithdraw() {
         if (isNaN(amount) || amount <= 0) {
-            setStatus('Error: Invalid amount');
-            setTimeout(() => setStatus(''), 3000);
+            toast.error('Error: Invalid amount');
             return;
         }
         if (amount > ctx.currentUser.balance) {
@@ -42,8 +41,22 @@ function Withdraw() {
                 body={
                     ctx.currentUser ? (
                         <>
-                            <input type="input" className="form-control" id="amount" placeholder="Enter amount" value={amount} onChange={e => setAmount(e.currentTarget.value)} /><br />
-                            <button type="submit" className="btn btn-light" onClick={handleWithdraw}>Withdraw</button>
+                            <input 
+                                type="input" 
+                                className="form-control" 
+                                id="amount" 
+                                placeholder="Enter amount" 
+                                value={amount} 
+                                onChange={e => setAmount(e.currentTarget.value)} 
+                            /><br />
+                            <button 
+                                type="submit" 
+                                className="btn btn-light" 
+                                onClick={handleWithdraw} 
+                                disabled={!amount}
+                            >
+                                Withdraw
+                            </button>
                         </>
                     ) : (
                         <h3>Please log in to withdraw money</h3>

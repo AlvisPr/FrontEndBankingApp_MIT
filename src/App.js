@@ -7,7 +7,7 @@ import Login from './Pages/Login/Login';
 import Deposit from './Pages/Deposit/Deposit';
 import Withdraw from './Pages/Withdraw/Withdraw';
 import Balance from './Pages/Balance/Balance';
-import AllData from './components/AllData';
+import AllData from './components/AllData/AllData';
 import Footer from './components/Footer/Footer';
 import { UserProvider, useUser } from './context/UserContext';
 import 'bootstrap/dist/css/bootstrap.min.css';

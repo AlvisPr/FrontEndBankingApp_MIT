@@ -1,9 +1,9 @@
 import React, { useContext, useState, useCallback } from 'react';
-import UserContext from '../context/UserContext';
-import TooltipIcon from './Tooltip/Tooltip';
-import UserTable from './UserTable/UserTable';
-import PasswordPromptDialog from './PasswordPromtDialog/PasswordPromptDialog';
-import ChangePasswordDialog from './ChangePasswordDialog/ChangePasswordDialog';
+import UserContext from '../../context/UserContext';
+import TooltipIcon from '../Tooltip/Tooltip';
+import UserTable from '../UserTable/UserTable';
+import PasswordPromptDialog from '../PasswordPromtDialog/PasswordPromptDialog';
+import ChangePasswordDialog from '../ChangePasswordDialog/ChangePasswordDialog';
 import { Box, Typography } from '@mui/material';
 
 function AllData() {

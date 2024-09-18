@@ -3,7 +3,7 @@ import Card from '../../components/Card/Card';
 import UserContext from '../../context/UserContext';
 import TooltipIcon from '../../components/Tooltip/Tooltip';
 import ClipLoader from 'react-spinners/ClipLoader';
-import styles from "../../components/spinner.module.css";
+import styles from "../../Styles/spinner.module.css";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 

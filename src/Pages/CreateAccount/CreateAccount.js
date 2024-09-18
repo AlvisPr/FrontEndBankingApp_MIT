@@ -6,7 +6,7 @@ import FormInput from '../../components/FormInput/FormInput';
 import { validateField } from '../../components/Validation/Validation';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import "../../components/sharedStyles.css";
+
 
 function CreateAccount() {
     const [show, setShow] = useState(true);

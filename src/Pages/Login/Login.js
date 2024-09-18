@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import Card from '../../components/Card/Card';
 import UserContext from '../../context/UserContext';
 import TooltipIcon from '../../components/Tooltip/Tooltip';
-import styles from "../../components/spinner.module.css";
+import styles from "../../Styles/spinner.module.css";
 import { ClipLoader } from 'react-spinners';
 import FormInput from '../../components/FormInput/FormInput';
 import { validateField } from '../../components/Validation/Validation';

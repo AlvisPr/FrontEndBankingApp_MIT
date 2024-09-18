@@ -1,13 +1,17 @@
 // FormInput.js
 import React from 'react';
-import { FaCheck, FaTimes, FaEye, FaEyeSlash, FaEnvelope, FaLock } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaEye, FaEyeSlash, FaEnvelope, FaLock, FaUser } from 'react-icons/fa';
+import styles from './FormInput.module.css';
+
+
 
 function FormInput({ id, type, value, onChange, onBlur, onKeyPress, validationError, togglePasswordVisibility, passwordVisible }) {
     return (
-        <div style={{ position: 'relative' }}>
-            <div style={{ position: 'absolute', left: '0', top: '0', bottom: '0', width: '40px', backgroundColor: 'transparent', display: 'flex', justifyContent: 'center', alignItems: 'center', borderRight: '1px solid #ccc' }}>
+        <div className={styles.formInputContainer}>
+            <div className={styles.iconContainer}>
                 {id === 'email' && <FaEnvelope style={{ color: 'black' }} />}
                 {id === 'password' && <FaLock style={{ color: 'black' }} />}
+                {id === 'name' && <FaUser style={{ color: 'black' }} />}
             </div>
             <input
                 type={type}

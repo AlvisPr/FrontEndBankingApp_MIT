@@ -20,6 +20,7 @@
     transition: all 0.3s ease;
     width: 70%; /* Reduce width for desktop */
     width: 400px; /* Reduce max-width for desktop */
+    height: 500px !important;
 }
 
 .cardHeader {

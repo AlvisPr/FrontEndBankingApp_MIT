@@ -25,7 +25,6 @@ function App() {
 
 function AppContent() {
     const { currentUser } = useUser();
-
     return (
         <Router>
             <NavBar />
@@ -43,6 +42,7 @@ function AppContent() {
                 {!currentUser && <CanvasAnimation />}
             </div>
             <Footer />
+            
         </Router>
     );
 }

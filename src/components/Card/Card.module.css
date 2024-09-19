@@ -119,6 +119,7 @@ button {
         width: 90%;
         max-width: 600px;
         margin: 16px auto;
+        margin-top: 80px;
     }
 
     canvas {

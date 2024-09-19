@@ -4,10 +4,12 @@
     align-items: center;
 }
 
+
 .cardContainer {
     padding: 20px;
     z-index: 1;
     position: relative;
+    animation: fadeInSlideUp 1s ease-out forwards, subtleShadow 1s ease-out 1s forwards;
 }
 
 .card {
@@ -16,12 +18,19 @@
     padding: 20px;
     margin: 10px;
     background-color: rgba(255, 255, 255, 0.8);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 10px 20px 30px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
-    width: 70%; /* Reduce width for desktop */
-    width: 400px; /* Reduce max-width for desktop */
+    width: 400px;
     height: 500px !important;
+    transform: scale(1);
 }
+
+.card:hover {
+    transform: scale(1.01);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+
 
 .cardHeader {
     background-color: rgba(0, 0, 0, 0.1);
@@ -65,27 +74,57 @@ canvas {
 }
 
 button {
-    z-index: 1; /* Ensure the button is on top */
+    z-index: 1;
 }
+
+
+/*animations*/
+
+
+@keyframes flyIn {
+    from {
+        transform: translateY(-30vh);
+
+    }
+
+    to {
+        transform: translateY(0);
+
+    }
+}
+
+
+@keyframes fadeInSlideUp {
+    0% {
+        transform: translateY(20px);
+        opacity: 0.7;
+    }
+
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+
 
 @media (max-width: 768px) {
     .cardContainer {
         display: flex;
-        justify-content: center; /* Center the card on mobile devices */
-        margin-top: 80px; /* Add margin-top to create space from the navbar on mobile devices */
+        justify-content: center;
     }
+
 
     .card {
         width: 90%;
-        max-width: 600px; /* Restore max-width for mobile */
+        max-width: 600px;
         margin: 16px auto;
     }
 
     canvas {
-        left: 0; /* Position the canvas below the card on mobile */
+        left: 0;
         top: 100%;
         width: 100%;
-        height: 300px; /* Adjust the height as needed */
+        height: 300px;
     }
 }
-

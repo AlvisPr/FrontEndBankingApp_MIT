@@ -2,14 +2,14 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 10px; /* Add padding to the edges */
+    padding: 0 10px; 
 }
 
 .navbarHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: auto; /* Adjusted to auto to fit content */
+    width: auto; 
 }
 
 .navbarCollapse {
@@ -23,8 +23,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: auto; /* Adjusted to auto to fit content */
-    padding-right: 10px; /* Space between the logo and the rest of the elements */
+    width: auto; 
+    padding-right: 10px; 
 }
 
 .navbarLogo {

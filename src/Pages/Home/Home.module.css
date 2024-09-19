@@ -1,19 +1,34 @@
 /* Home.module.css */
 
-
-
-
+.dialogPaper {
+    animation: fadeInSlideUp 2s ease-out;
+}
 
 .dialogBackdrop {
     position: relative;
-    width: 400px;
+    max-width: 400px;
     background: none;
+    margin-left: 900px;
 }
 
 .dialogContent {
     max-height: 70vh;
     overflow: auto;
 }
+
+
+
+
+.dialogContent p,
+.dialogContent h1,
+.dialogContent h2,
+.dialogContent h3,
+.dialogContent h4,
+.dialogContent h5,
+.dialogContent h6 {
+    animation: fadeInText 2s ease-out;
+}
+
 
 .textBlock {
     width: 100%;
@@ -44,9 +59,40 @@
     margin: 20px auto;
 }
 
+
+
+/*Animation for the dialog*/
+
+@keyframes fadeInSlideUp {
+    0% {
+        transform: translateY(20px);
+
+    }
+
+    100% {
+        transform: translateY(0);
+
+    }
+}
+
+@keyframes fadeInText {
+    0% {
+        opacity: 0.7;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+
+
+/*Media queries*/
+
+
 @media (min-width: 756px) {
     .dialogPaper {
-        width: 100%; 
+        width: 100%;
         margin-left: 250px;
         margin-right: 50px;
     }
@@ -55,8 +101,8 @@
 /* Simplified styles for mobile devices */
 @media (max-width: 768px) {
     .dialogPaper {
-        width: 100vw; 
-        margin: 0; 
-        
+        width: 100vw;
+        margin: 0;
+
     }
 }

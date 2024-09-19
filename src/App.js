@@ -38,6 +38,7 @@ function AppContent() {
                     <Route path="/withdraw" element={<Withdraw />} />
                     <Route path="/balance" element={<Balance />} />
                     <Route path="/alldata" element={<AllData />} />
+                    <Route path="*" element={<Home />} />
                 </Routes>
                 {!currentUser && <CanvasAnimation />}
             </div>

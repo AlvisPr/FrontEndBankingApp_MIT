@@ -2,18 +2,21 @@ import React, { useContext, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaDatabase, FaUserPlus, FaSignInAlt, FaSignOutAlt } from 'react-icons/fa';
 import UserContext from '../../context/UserContext';
+import ClipLoader from 'react-spinners/ClipLoader';
 import styles from './Navbar.module.css'; 
+import spinner from '../../Styles/spinner.module.css';
 
 function NavBar() {
     const location = useLocation();
     const navigate = useNavigate();
     const { currentUser, setCurrentUser, setShowLogin, setLogout, userType } = useContext(UserContext);
     const [isCollapsed, setIsCollapsed] = useState(true);
+    const [loading, setLoading] = useState(false);
 
     const highlightStyle = {
         backgroundColor: 'yellow',
         borderRadius: '5px',
-        padding: '7px',
+        padding: '5px',
         color: "black",
         border: '3px solid darkviolet'
     };
@@ -23,11 +26,15 @@ function NavBar() {
     };
 
     const handleLogout = () => {
-        setCurrentUser(null);
-        setShowLogin(true); 
-        setLogout(true); 
-        navigate('/login'); 
-        setIsCollapsed(true); 
+        setLoading(true);
+        setTimeout(() => {
+            setCurrentUser(null);
+            setShowLogin(true); 
+            setLogout(true); 
+            navigate('/login'); 
+            setIsCollapsed(true); 
+            setLoading(false);
+        }, 700);
     };
 
     const handleLinkClick = () => {
@@ -82,6 +89,11 @@ function NavBar() {
                     </ul>
                 </div>
             </div>
+            {loading && (
+                <div className={spinner.spinner}>
+                    <ClipLoader size={50} color={"#123abc"} loading={loading} />
+                </div>
+            )}
         </nav>
     );
 }

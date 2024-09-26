@@ -36,6 +36,8 @@
     background-color: rgba(0, 0, 0, 0.1);
     padding: 10px;
     border-radius: 10px 10px 0 0;
+    display: flex;
+    justify-content: space-between;
 }
 
 .cardTitle {
@@ -76,6 +78,7 @@ canvas {
 button {
     z-index: 1;
 }
+
 
 
 /*animations*/

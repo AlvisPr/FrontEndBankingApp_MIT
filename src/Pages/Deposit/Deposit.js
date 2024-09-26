@@ -6,6 +6,8 @@ import ClipLoader from 'react-spinners/ClipLoader';
 import styles from "../../Styles/spinner.module.css";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import bankImg from '../../assets/salary.png';
+import sharedLogos from '../../Styles/sharedlogos.module.css';
 
 function Deposit() {
     const [amount, setAmount] = useState('');
@@ -35,11 +37,19 @@ function Deposit() {
             <Card
                 bgcolor="success"
                 header="Deposit"
+                balance={ctx.currentUser ? ` Balance |  $${ctx.currentUser.balance}` : ''}
                 body={
                     ctx.currentUser ? (
                         <>
+                             
                             <input type="input" className="form-control" id="amount" placeholder="Enter amount" value={amount} onChange={e => setAmount(e.currentTarget.value)} /><br />
                             <button type="submit" className="btn btn-light" onClick={handleDeposit} disabled={!amount}>Deposit</button>
+                            <br />
+                            <br />
+                            <div className={sharedLogos.centeredImage}>
+                                <img src={bankImg} alt="deposit-img" className="img-fluid mb-3" style={{height:"180px"}}/>
+                            </div>
+
                         </>
                     ) : (
                         <h3>Please log in to deposit money</h3>

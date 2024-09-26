@@ -6,6 +6,8 @@ import ClipLoader from 'react-spinners/ClipLoader';
 import styles from "../../Styles/spinner.module.css";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import bankImg from '../../assets/atm.png';
+import sharedLogos from '../../Styles/sharedlogos.module.css';
 
 function Withdraw() {
     const [amount, setAmount] = useState('');
@@ -37,6 +39,7 @@ function Withdraw() {
             <Card
                 bgcolor="danger"
                 header="Withdraw"
+                balance={ctx.currentUser ? ` Balance |  $${ctx.currentUser.balance}` : ''}
                 status={status}
                 body={
                     ctx.currentUser ? (
@@ -57,6 +60,11 @@ function Withdraw() {
                             >
                                 Withdraw
                             </button>
+                            <br />
+                            <br />
+                            <div className={sharedLogos.centeredImage}>
+                                <img src={bankImg} alt="withdraw-img" className="img-fluid mb-3" style={{height:"180px"}}/>
+                            </div>
                         </>
                     ) : (
                         <h3>Please log in to withdraw money</h3>

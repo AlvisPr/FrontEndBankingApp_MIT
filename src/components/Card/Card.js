@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card as BootstrapCard} from 'react-bootstrap';
-import styles from './Card.module.css'; 
+import { Card as BootstrapCard } from 'react-bootstrap';
+import styles from './Card.module.css';
 
 function Card(props) {
     const cardClasses = `${props.bgcolor ? 'bg-' + props.bgcolor : ''} ${props.txtcolor ? 'text-' + props.txtcolor : 'text-white'}`;
@@ -8,9 +8,15 @@ function Card(props) {
     return (
         <div className={styles.cardContainer}>
             <BootstrapCard className={`${cardClasses} ${styles.card}`} style={{ backgroundColor: props.transparent ? 'transparent' : 'rgba(255, 255, 255, 0.8)', boxShadow: props.transparent ? 'none' : '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
-                <BootstrapCard.Header className={styles.cardHeader} style={{ backgroundColor: props.transparent ? 'transparent' : 'rgba(0, 0, 0, 0.1)' }}>
-                    {props.header}
-                </BootstrapCard.Header>
+                {(props.header || props.balance) && (
+                    <BootstrapCard.Header
+                        className={styles.cardHeader}
+                        style={{ backgroundColor: props.transparent ? 'transparent' : 'rgba(0, 0, 0, 0.1)'}}
+                    >
+                        {props.header}
+                        <span id="balance">{props.balance}</span>
+                    </BootstrapCard.Header>
+                )}
                 <BootstrapCard.Body className={styles.cardBody}>
                     {props.title && <BootstrapCard.Title className={styles.cardTitle}>{props.title}</BootstrapCard.Title>}
                     {props.text && <BootstrapCard.Text className={styles.cardText}>{props.text}</BootstrapCard.Text>}

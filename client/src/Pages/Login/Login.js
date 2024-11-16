@@ -19,7 +19,7 @@ function Login() {
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [isFormValid, setIsFormValid] = useState(false);
     const [userType, setUserType] = useState('user'); 
-    const { showLogin, setShowLogin, users, setCurrentUser, currentUser, adminCredentials, setUserType: setContextUserType } = useContext(UserContext);
+    const { showLogin, setShowLogin, users, setCurrentUser, currentUser, adminCredentials, setUserType: setContextUserType, loginUser } = useContext(UserContext);
 
     useEffect(() => {
         setIsFormValid(
@@ -52,9 +52,15 @@ function Login() {
         }
     };
 
-    const handleLogin = () => {
+    const clearForm = () => {
+        setEmail('');
+        setPassword('');
+        setValidationErrors({});
+    };
+
+    const handleLogin = async () => {
         setLoading(true);
-        setTimeout(() => {
+        try {
             if (userType === 'admin') {
                 if (email === adminCredentials.email && password === adminCredentials.password) {
                     setCurrentUser({ name: 'Admin', email: adminCredentials.email });
@@ -62,38 +68,22 @@ function Login() {
                     setStatus('');
                     setShowLogin(false);
                     toast.success('Welcome Admin');
-                    setLoading(false);
-                    return;
+                    clearForm();
                 } else {
                     toast.error('Invalid admin credentials.');
-                    setEmail('');
-                    setPassword('');
-                    setLoading(false);
-                    return;
+                    clearForm();
                 }
-            }
-    
-            const user = users.find(user => user.email === email);
-            if (!user) {
-                toast.error('Email or password not found.');
-                setEmail('');
-                setPassword('');
-                setLoading(false);
-                return;
-            }
-            if (user.password === password) {
-                setCurrentUser(user);
-                setContextUserType('user');
-                setStatus('');
-                setShowLogin(false); 
-                toast.success(`Welcome ${user.name}`); 
             } else {
-                toast.error('Error: Invalid login');
-                setEmail('');
-                setPassword('');
+                await loginUser(email, password);
+                toast.success(`Welcome back!`);
+                clearForm();
             }
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Login failed');
+            clearForm();
+        } finally {
             setLoading(false);
-        }, 700);
+        }
     };
     
     const handleKeyPress = (e) => {

@@ -1,4 +1,3 @@
-
 import React, { useState, useContext, useEffect } from 'react';
 import Card from '../../components/Card/Card';
 import UserContext from '../../context/UserContext';
@@ -45,7 +44,14 @@ function CreateAccount() {
         }
     };
 
-    const handleCreate = () => {
+    const clearForm = () => {
+        setName('');
+        setEmail('');
+        setPassword('');
+        setValidationErrors({});
+    };
+
+    const handleCreate = async () => {
         const errors = {
             ...validateField('name', name, ctx, 'createAccount'),
             ...validateField('email', email, ctx, 'createAccount'),
@@ -53,20 +59,17 @@ function CreateAccount() {
         };
 
         if (Object.keys(errors).length === 0) {
-            ctx.users.push({ name, email, password, balance: 100 });
-            setShow(false);
-            toast.success('Account created successfully');
+            try {
+                await ctx.createUser(name, email, password);
+                setShow(false);
+                toast.success('Account created successfully');
+                clearForm();
+            } catch (error) {
+                toast.error(error.response?.data?.message || 'Error creating account');
+            }
         } else {
             Object.values(errors).forEach(error => toast.error(error));
         }
-    };
-
-    const clearForm = () => {
-        setName('');
-        setEmail('');
-        setPassword('');
-        setValidationErrors({});
-        setShow(true);
     };
 
     const handleKeyPress = (e) => {

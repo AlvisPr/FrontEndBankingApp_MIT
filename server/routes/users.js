@@ -4,6 +4,7 @@ const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const { ObjectId } = mongoose.Types;
+const isAdmin = require('../middleware/isAdmin');
 
 // Get all users
 router.get('/', async (req, res) => {
@@ -17,13 +18,8 @@ router.get('/', async (req, res) => {
 });
 
 // Get all users (admin only)
-router.get('/all', async (req, res) => {
+router.get('/all', isAdmin, async (req, res) => {
     try {
-        const adminUser = await User.findById(req.userId);
-        if (!adminUser || !adminUser.isAdmin) {
-            return res.status(403).json({ error: 'Access denied' });
-        }
-
         const users = await User.find({}).select('-password');
         res.json(users);
     } catch (error) {

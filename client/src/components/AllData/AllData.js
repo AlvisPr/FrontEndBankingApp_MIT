@@ -1,4 +1,5 @@
-import React, { useContext, useState, useCallback } from 'react';
+import React, { useContext, useState, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import UserContext from '../../context/UserContext';
 import TooltipIcon from '../Tooltip/Tooltip';
 import UserTable from '../UserTable/UserTable';
@@ -17,6 +18,13 @@ function AllData() {
     const [changePasswordOpen, setChangePasswordOpen] = useState(false);
     const [newPassword, setNewPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!currentUser || !currentUser.isAdmin) {
+            navigate('/'); // Redirect to home or another appropriate page
+        }
+    }, [currentUser, navigate]);
 
     const handleToggle = useCallback((index) => {
         setOpen(prevOpen => ({ ...prevOpen, [index]: !prevOpen[index] }));

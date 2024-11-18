@@ -19,7 +19,7 @@ const TransactionHistory = ({ transactions = [] }) => {
                         <TableRow
                             key={index}
                             style={{
-                                backgroundColor: transaction.type === 'Withdraw' ? '#ffcccb' : index % 2 === 0 ? '#e8f5e9' : '#c8e6c9',
+                                backgroundColor: transaction.type.toLowerCase() === 'withdraw' ? '#ffcccb' : index % 2 === 0 ? '#e8f5e9' : '#c8e6c9',
                                 color: '#333'
                             }}
                         >

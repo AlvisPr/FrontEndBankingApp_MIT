@@ -62,6 +62,10 @@ const userSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    isAdmin: {
+        type: Boolean,
+        default: false
+    },
     transactions: [transactionSchema]
 }, { 
     timestamps: true,
@@ -85,4 +89,4 @@ userSchema.pre('save', async function(next) {
 
 const User = mongoose.model('User', userSchema);
 
-module.exports = User; 
+module.exports = User;

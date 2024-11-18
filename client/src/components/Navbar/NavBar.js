@@ -51,7 +51,7 @@ function NavBar() {
             </div>
             <div className={`collapse navbar-collapse ${!isCollapsed ? 'show' : ''} ${styles.navbarCollapse}`} id="navbarNav">
                 <ul className={`navbar-nav ${styles.navbarNav}`}>
-                    {currentUser && userType === 'user' && (
+                    {currentUser && !currentUser.isAdmin && (
                         <>
                             <li className="nav-item">
                                 <Link className="nav-link" to="/deposit" style={getLinkStyle('/deposit')} onClick={handleLinkClick}>Deposit</Link>
@@ -64,7 +64,7 @@ function NavBar() {
                             </li>
                         </>
                     )}
-                    {currentUser && userType === 'admin' && (
+                    {currentUser && currentUser.isAdmin && (
                         <li className="nav-item">
                             <Link className="nav-link" to="/alldata" style={getLinkStyle('/alldata')} onClick={handleLinkClick}><FaDatabase style={{ marginRight: '5px', fontSize: "25px" }} /></Link>
                         </li>

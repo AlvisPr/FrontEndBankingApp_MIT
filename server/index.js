@@ -13,6 +13,15 @@ app.use(cors({
     credentials: true
 }));
 
+// Middleware to extract user ID from headers
+app.use((req, res, next) => {
+    const userId = req.headers['user-id'];
+    if (userId) {
+        req.userId = userId;
+    }
+    next();
+});
+
 // Body parser middleware - MUST come before routes
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -42,4 +51,4 @@ mongoose.connect(process.env.MONGODB_URI)
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
-}); 
+});

@@ -13,6 +13,22 @@ router.get('/', async (req, res) => {
     }
 });
 
+// Get all users (admin only)
+router.get('/all', async (req, res) => {
+    try {
+        const adminUser = await User.findById(req.userId);
+        if (!adminUser || !adminUser.isAdmin) {
+            return res.status(403).json({ error: 'Access denied' });
+        }
+
+        const users = await User.find({}).select('-password');
+        res.json(users);
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Register new user
 router.post('/register', async (req, res) => {
     try {
@@ -113,7 +129,8 @@ router.post('/login', async (req, res) => {
             _id: user._id,
             name: user.name,
             email: user.email,
-            balance: user.balance
+            balance: user.balance,
+            isAdmin: user.isAdmin
         });
 
     } catch (error) {
@@ -236,4 +253,4 @@ router.post('/:userId/transaction', async (req, res) => {
     }
 });
 
-module.exports = router; 
+module.exports = router;

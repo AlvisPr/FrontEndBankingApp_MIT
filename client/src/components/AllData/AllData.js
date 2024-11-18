@@ -7,7 +7,7 @@ import ChangePasswordDialog from '../ChangePasswordDialog/ChangePasswordDialog';
 import { Box, Typography } from '@mui/material';
 
 function AllData() {
-    const { users, setUsers, adminCredentials, removeUser } = useContext(UserContext);
+    const { users, setUsers, adminCredentials, removeUser, currentUser } = useContext(UserContext);
     const [open, setOpen] = useState({});
     const [passwordPromptOpen, setPasswordPromptOpen] = useState(false);
     const [password, setPassword] = useState('');
@@ -96,6 +96,8 @@ function AllData() {
                 handleMenuClose={handleMenuClose}
                 openPasswordPrompt={openPasswordPrompt}
                 handleChangePassword={handleChangePassword}
+                currentUser={currentUser}
+                adminCredentials={adminCredentials}
             />
             <TooltipIcon 
                 text={`

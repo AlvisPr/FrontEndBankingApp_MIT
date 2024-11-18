@@ -153,6 +153,7 @@ export const UserProvider = ({ children }) => {
             console.log('Login successful');
             setCurrentUser(response.data);
             setShowLogin(false);
+            setUserType(response.data.isAdmin ? 'admin' : 'user');
             return response.data;
         } catch (error) {
             console.error('Login error:', {

@@ -9,7 +9,6 @@ export const UserProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState(null);
     const [showLogin, setShowLogin] = useState(true);
     const [logout, setLogout] = useState(false);
-    const adminCredentials = { email: process.env.REACT_APP_ADMIN_EMAIL || "admin@system.lv", password: process.env.REACT_APP_ADMIN_PASSWORD || "admin2024" };
     const [userType, setUserType] = useState('user');
 
     // Fetch all users (for admin view)
@@ -75,22 +74,27 @@ export const UserProvider = ({ children }) => {
         }
     };
 
-    const removeUser = async (email, adminPassword) => {
+    const removeUser = async (email) => {
         try {
             const userToDelete = users.find(user => user.email === email);
             if (userToDelete) {
-                console.log('Sending admin password:', adminPassword);
+                if (!currentUser || !currentUser.isAdmin) {
+                    throw new Error('Admin user must be logged in to remove a user');
+                }
+
+                console.log('Sending admin password:', currentUser.password);
                 await axios.delete(`${API_URL}/users/${userToDelete._id}`, {
                     headers: { 
-                        'Admin-Password': adminPassword,
-                        'Content-Type': 'application/json'
+                        'Admin-Password': currentUser.password,
+                        'Content-Type': 'application/json',
+                        'user-id': currentUser._id // Ensure the current user ID is sent
                     }
                 });
                 setUsers(prevUsers => prevUsers.filter(user => user.email !== email));
             }
         } catch (error) {
-            console.error('Error removing user:', error);
-            throw error;
+            console.error('Error removing user:', error.response?.data || error.message);
+            throw error.response?.data?.error || error.message;
         }
     };
 
@@ -157,9 +161,11 @@ export const UserProvider = ({ children }) => {
             });
 
             console.log('Login successful');
-            setCurrentUser(response.data);
+            const loggedInUser = response.data;
+            const isAdmin = users.some(user => user.email === email && user.isAdmin);
+            setCurrentUser({ ...loggedInUser, password, isAdmin });
             setShowLogin(false);
-            setUserType(response.data.isAdmin ? 'admin' : 'user');
+            setUserType(isAdmin ? 'admin' : 'user');
             return response.data;
         } catch (error) {
             console.error('Login error:', {
@@ -197,7 +203,6 @@ export const UserProvider = ({ children }) => {
             setShowLogin,
             logout,
             setLogout,
-            adminCredentials,
             userType,
             setUserType,
             removeUser,

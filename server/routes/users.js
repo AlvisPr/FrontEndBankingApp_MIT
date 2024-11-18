@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
+const { ObjectId } = mongoose.Types;
 
 // Get all users
 router.get('/', async (req, res) => {
@@ -253,7 +254,7 @@ router.delete('/:userId', async (req, res) => {
         const adminPassword = req.headers['admin-password'];
 
         // Validate userId format
-        if (!mongoose.Types.ObjectId.isValid(userId)) {
+        if (!ObjectId.isValid(userId)) {
             return res.status(400).json({ 
                 error: 'Invalid user ID format',
                 userId 
@@ -267,9 +268,12 @@ router.delete('/:userId', async (req, res) => {
             });
         }
 
-        // Find admin user
         const adminUser = await User.findById(req.userId);
         if (!adminUser || !adminUser.isAdmin) {
+            console.error('Admin access required:', {
+                userId: req.userId,
+                adminUser
+            });
             return res.status(403).json({ 
                 error: 'Admin access required',
                 details: 'User not found or not authorized as admin'
@@ -279,6 +283,10 @@ router.delete('/:userId', async (req, res) => {
         // Verify admin password
         const isPasswordValid = await bcrypt.compare(adminPassword, adminUser.password);
         if (!isPasswordValid) {
+            console.error('Invalid admin password:', {
+                userId: req.userId,
+                adminPassword
+            });
             return res.status(403).json({ 
                 error: 'Invalid admin password'
             });
@@ -294,13 +302,7 @@ router.delete('/:userId', async (req, res) => {
         }
 
         // Delete the user
-        const deletedUser = await User.findByIdAndDelete(userId);
-        if (!deletedUser) {
-            return res.status(500).json({ 
-                error: 'Failed to delete user',
-                userId 
-            });
-        }
+        await User.deleteOne({ _id: userId });
 
         // Log successful deletion
         console.log('User deleted successfully:', {
@@ -328,5 +330,5 @@ router.delete('/:userId', async (req, res) => {
         });
     }
 });
-
+  
 module.exports = router;

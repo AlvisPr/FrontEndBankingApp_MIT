@@ -9,11 +9,11 @@ const app = express();
 app.use(cors({
     origin: 'http://localhost:3000',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Admin-Password'],
     credentials: true
 }));
 
-// Middleware to extract user ID from headers
+// Middleware to extract user ID from headers or token
 app.use((req, res, next) => {
     const userId = req.headers['user-id'];
     if (userId) {

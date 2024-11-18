@@ -75,11 +75,17 @@ export const UserProvider = ({ children }) => {
         }
     };
 
-    const removeUser = async (email) => {
+    const removeUser = async (email, adminPassword) => {
         try {
             const userToDelete = users.find(user => user.email === email);
             if (userToDelete) {
-                await axios.delete(`${API_URL}/users/${userToDelete._id}`);
+                console.log('Sending admin password:', adminPassword);
+                await axios.delete(`${API_URL}/users/${userToDelete._id}`, {
+                    headers: { 
+                        'Admin-Password': adminPassword,
+                        'Content-Type': 'application/json'
+                    }
+                });
                 setUsers(prevUsers => prevUsers.filter(user => user.email !== email));
             }
         } catch (error) {
@@ -171,6 +177,16 @@ export const UserProvider = ({ children }) => {
         }
     };
 
+    const changeUserPassword = async (userId, newPassword) => {
+        try {
+            const response = await axios.patch(`${API_URL}/users/${userId}/password`, { newPassword });
+            return response.data;
+        } catch (error) {
+            console.error('Error changing password:', error);
+            throw error;
+        }
+    };
+
     return (
         <UserContext.Provider value={{
             users,
@@ -184,10 +200,11 @@ export const UserProvider = ({ children }) => {
             adminCredentials,
             userType,
             setUserType,
-            logTransaction,
             removeUser,
+            logTransaction,
             createUser,
-            loginUser
+            loginUser,
+            changeUserPassword
         }}>
             {children}
         </UserContext.Provider>

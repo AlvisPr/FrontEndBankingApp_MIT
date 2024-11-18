@@ -7,7 +7,7 @@ import ChangePasswordDialog from '../ChangePasswordDialog/ChangePasswordDialog';
 import { Box, Typography } from '@mui/material';
 
 function AllData() {
-    const { users, setUsers, adminCredentials, removeUser, currentUser } = useContext(UserContext);
+    const { users, setUsers, removeUser, changeUserPassword, currentUser } = useContext(UserContext);
     const [open, setOpen] = useState({});
     const [passwordPromptOpen, setPasswordPromptOpen] = useState(false);
     const [password, setPassword] = useState('');
@@ -23,25 +23,27 @@ function AllData() {
     }, []);
 
     const handleRemoveUser = useCallback(() => {
-        if (password === adminCredentials.password) {
-            removeUser(users[userToRemove].email);
-            setPasswordPromptOpen(false);
-            setPassword('');
-            setUserToRemove(null);
-        } else {
-            alert('Incorrect password');
+        if (currentUser) {
+            removeUser(users[userToRemove].email, password)
+                .then(() => {
+                    setPasswordPromptOpen(false);
+                    setPassword('');
+                    setUserToRemove(null);
+                })
+                .catch(error => {
+                    alert('Incorrect password');
+                    console.error('Error removing user:', error);
+                });
         }
-    }, [password, adminCredentials.password, removeUser, users, userToRemove]);
+    }, [password, currentUser, removeUser, users, userToRemove]);
 
     const openPasswordPrompt = useCallback((index) => {
-        console.log('openPasswordPrompt called:', index);
         setUserToRemove(index);
         setPasswordPromptOpen(true);
     }, []);
 
     const handleMenuOpen = useCallback((event, index) => {
         setMenuAnchorEl({ anchorEl: event.currentTarget, index });
-        console.log('Menu opened for user index:', index);
     }, []);
 
     const handleMenuClose = useCallback(() => {
@@ -52,31 +54,27 @@ function AllData() {
         setSelectedUser(index);
         setChangePasswordOpen(true);
         handleMenuClose();
-        console.log('Change password for user index:', index);
     }, [handleMenuClose]);
 
     const handleSaveNewPassword = useCallback(() => {
-        console.log('handleSaveNewPassword called');
-        console.log('selectedUser:', selectedUser);
-        console.log('Password:', newPassword);
-
         if (selectedUser !== null && selectedUser >= 0 && selectedUser < users.length) {
-            setUsers(prevUsers => {
-                const updatedUsers = [...prevUsers];
-                updatedUsers[selectedUser] = {
-                    ...updatedUsers[selectedUser],
-                    password: newPassword
-                };
-                console.log('Password updated for user:', updatedUsers[selectedUser]);
-                return updatedUsers;
-            });
-            setChangePasswordOpen(false);
-            setNewPassword('');
-            setSelectedUser(null);
-        } else {
-            console.error('Invalid selected user index:', selectedUser);
+            changeUserPassword(users[selectedUser]._id, newPassword)
+                .then(() => {
+                    setUsers(prevUsers => {
+                        const updatedUsers = [...prevUsers];
+                        updatedUsers[selectedUser] = {
+                            ...updatedUsers[selectedUser],
+                            password: newPassword
+                        };
+                        return updatedUsers;
+                    });
+                    setChangePasswordOpen(false);
+                    setNewPassword('');
+                    setSelectedUser(null);
+                })
+                .catch(error => console.error('Error updating password:', error));
         }
-    }, [selectedUser, newPassword, users.length, setUsers]);
+    }, [selectedUser, newPassword, users, changeUserPassword, setUsers]);
 
     const handleClickShowPassword = useCallback(() => {
         setShowPassword(prev => !prev);
@@ -97,7 +95,7 @@ function AllData() {
                 openPasswordPrompt={openPasswordPrompt}
                 handleChangePassword={handleChangePassword}
                 currentUser={currentUser}
-                adminCredentials={adminCredentials}
+                removeUser={removeUser}
             />
             <TooltipIcon 
                 text={`

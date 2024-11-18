@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const bcrypt = require('bcrypt');
+const mongoose = require('mongoose');
 
 // Get all users
 router.get('/', async (req, res) => {
@@ -32,67 +34,35 @@ router.get('/all', async (req, res) => {
 // Register new user
 router.post('/register', async (req, res) => {
     try {
-        console.log('New registration request');
-        console.log('Headers:', req.headers);
-        console.log('Body:', req.body);
-        
         const { name, email, password } = req.body;
-        
+
         if (!name || !email || !password) {
-            console.log('Missing required fields:', { 
-                name: !!name,
-                email: !!email, 
-                password: !!password 
-            });
-            return res.status(400).json({ 
-                error: 'Name, email and password are required',
-                received: { name: !!name, email: !!email, password: !!password }
-            });
+            return res.status(400).json({ error: 'Name, email and password are required' });
         }
 
-        console.log('Processing registration for:', { name, email });
-
-        // Check if user already exists
         const existingUser = await User.findOne({ email: email.toLowerCase() });
         if (existingUser) {
             return res.status(400).json({ error: 'Email already registered' });
         }
 
-        // Create new user with name field
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         const user = new User({
             name,
             email: email.toLowerCase(),
-            password
+            password: hashedPassword
         });
 
-        // Save user and handle any validation errors
-        try {
-            await user.save();
-            // Return user without password
-            res.status(201).json({
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                balance: user.balance
-            });
-        } catch (saveError) {
-            console.error('Error saving user:', saveError);
-            if (saveError.code === 11000) {
-                return res.status(400).json({ error: 'Email already registered' });
-            }
-            throw saveError;
-        }
-
+        await user.save();
+        res.status(201).json({
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            balance: user.balance
+        });
     } catch (error) {
-        console.error('Detailed registration error:', {
-            message: error.message,
-            stack: error.stack,
-            name: error.name
-        });
-        res.status(500).json({ 
-            error: 'Registration failed',
-            details: error.message
-        });
+        console.error('Error registering user:', error);
+        res.status(500).json({ error: 'Registration failed' });
     }
 });
 
@@ -117,8 +87,9 @@ router.post('/login', async (req, res) => {
             });
         }
 
-        // Check password (currently plain text comparison)
-        if (user.password !== password) {
+        // Use bcrypt to compare the password
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
             return res.status(401).json({
                 error: 'Invalid email or password'
             });
@@ -206,7 +177,7 @@ router.post('/:userId/transaction', async (req, res) => {
             minute: '2-digit',
             second: '2-digit',
             hour12: true,
-            timeZone: 'America/New_York' // Match this with your model
+            timeZone: 'America/New_York'
         });
 
         const transactionDate = new Date();
@@ -249,6 +220,111 @@ router.post('/:userId/transaction', async (req, res) => {
         res.status(500).json({
             error: 'Transaction failed',
             message: error.message
+        });
+    }
+});
+
+// Change user password
+router.patch('/:userId/password', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { newPassword } = req.body;
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+        await user.save();
+
+        res.json({ message: 'Password updated successfully' });
+    } catch (error) {
+        console.error('Error changing password:', error);
+        res.status(500).json({ error: 'Failed to change password' });
+    }
+});
+
+// Delete user with admin password verification
+router.delete('/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const adminPassword = req.headers['admin-password'];
+
+        // Validate userId format
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ 
+                error: 'Invalid user ID format',
+                userId 
+            });
+        }
+
+        // Validate admin password presence
+        if (!adminPassword) {
+            return res.status(400).json({ 
+                error: 'Admin password is required in headers'
+            });
+        }
+
+        // Find admin user
+        const adminUser = await User.findById(req.userId);
+        if (!adminUser || !adminUser.isAdmin) {
+            return res.status(403).json({ 
+                error: 'Admin access required',
+                details: 'User not found or not authorized as admin'
+            });
+        }
+
+        // Verify admin password
+        const isPasswordValid = await bcrypt.compare(adminPassword, adminUser.password);
+        if (!isPasswordValid) {
+            return res.status(403).json({ 
+                error: 'Invalid admin password'
+            });
+        }
+
+        // Find user to be deleted
+        const userToDelete = await User.findById(userId);
+        if (!userToDelete) {
+            return res.status(404).json({ 
+                error: 'User not found',
+                userId 
+            });
+        }
+
+        // Delete the user
+        const deletedUser = await User.findByIdAndDelete(userId);
+        if (!deletedUser) {
+            return res.status(500).json({ 
+                error: 'Failed to delete user',
+                userId 
+            });
+        }
+
+        // Log successful deletion
+        console.log('User deleted successfully:', {
+            deletedUserId: userId,
+            adminId: req.userId,
+            timestamp: new Date().toISOString(),
+            userEmail: userToDelete.email
+        });
+
+        res.json({ 
+            message: 'User deleted successfully',
+            deletedUserId: userId
+        });
+
+    } catch (error) {
+        console.error('Error deleting user:', {
+            error: error.message,
+            stack: error.stack,
+            userId: req.params.userId
+        });
+
+        res.status(500).json({ 
+            error: 'Failed to delete user',
+            details: error.message
         });
     }
 });

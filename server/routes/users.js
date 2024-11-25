@@ -92,21 +92,14 @@ router.post('/login', async (req, res) => {
             });
         }
 
-        // Check if user is an admin to conditionally return the password
-        const responseData = {
+        // Return user without password
+        res.json({
             _id: user._id,
             name: user.name,
             email: user.email,
             balance: user.balance,
-            isAdmin: user.isAdmin,
-        };
-        
-        // Include password only if the user is an admin
-        if (user.isAdmin) {
-            responseData.password = user.password;
-        }
-
-        res.json(responseData);
+            isAdmin: user.isAdmin
+        });
 
     } catch (error) {
         console.error('Login error:', error);
@@ -117,6 +110,7 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// Handle transactions (deposit/withdraw)
 router.post('/:userId/transaction', async (req, res) => {
     try {
         const { userId } = req.params;
@@ -222,6 +216,41 @@ router.post('/:userId/transaction', async (req, res) => {
         });
         res.status(500).json({
             error: 'Transaction failed',
+            message: error.message
+        });
+    }
+});
+
+// Get transactions for a specific user
+router.get('/:userId/transactions', async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        // Validate userId format
+        if (!ObjectId.isValid(userId)) {
+            return res.status(400).json({ 
+                error: 'Invalid user ID format',
+                userId 
+            });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                error: 'User not found',
+                message: 'Could not find user with provided ID',
+                userId
+            });
+        }
+
+        // Sort transactions by date in descending order (newest first)
+        const sortedTransactions = user.transactions.sort((a, b) => b.date - a.date);
+
+        res.json(sortedTransactions);
+    } catch (error) {
+        console.error('Error fetching transactions:', error);
+        res.status(500).json({
+            error: 'Failed to fetch transactions',
             message: error.message
         });
     }

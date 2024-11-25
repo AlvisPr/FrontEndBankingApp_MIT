@@ -29,7 +29,7 @@ export const UserProvider = ({ children }) => {
         if (!currentUser) {
             throw new Error('User must be logged in to perform a transaction');
         }
-
+    
         try {
             const normalizedType = type.toLowerCase();
             console.log('Starting transaction:', { 
@@ -37,30 +37,30 @@ export const UserProvider = ({ children }) => {
                 amount, 
                 userId: currentUser._id 
             });
-
+    
             // Validate transaction type
             if (!['deposit', 'withdraw'].includes(normalizedType)) {
                 throw new Error(`Invalid transaction type: ${type}. Must be 'deposit' or 'withdraw'`);
             }
-
+    
             // Validate amount
             const numericAmount = parseFloat(amount);
             if (isNaN(numericAmount) || numericAmount <= 0) {
                 throw new Error('Amount must be a positive number');
             }
-
+    
             const response = await axios.post(`${API_URL}/users/${currentUser._id}/transaction`, {
                 type: normalizedType,
                 amount: numericAmount
             });
-
+    
             console.log('Transaction successful:', response.data);
             
             setCurrentUser(response.data);
             await fetchUsers();
             
             return response.data;
-
+    
         } catch (error) {
             console.error('Transaction failed:', {
                 error: error.response?.data || error.message,
@@ -159,20 +159,14 @@ export const UserProvider = ({ children }) => {
                 email: email.toLowerCase(),
                 password
             });
-    
+
             console.log('Login successful');
             const loggedInUser = response.data;
-            const isAdmin = loggedInUser.isAdmin;
-    
-            // Set the current user, including password if it's an admin
-            const currentUserData = isAdmin
-                ? { ...loggedInUser, password, isAdmin }
-                : { ...loggedInUser, isAdmin };
-    
-            setCurrentUser(currentUserData);
+            const isAdmin = users.some(user => user.email === email && user.isAdmin);
+            setCurrentUser({ ...loggedInUser, password, isAdmin });
             setShowLogin(false);
             setUserType(isAdmin ? 'admin' : 'user');
-            console.log(response.data);
+            console.log(response.data)
             return response.data;
         } catch (error) {
             console.error('Login error:', {
@@ -180,7 +174,8 @@ export const UserProvider = ({ children }) => {
                 data: error.response?.data,
                 message: error.message
             });
-    
+
+            // Throw a user-friendly error message
             throw {
                 message: error.response?.data?.error || 
                         error.response?.data?.message || 
@@ -188,7 +183,7 @@ export const UserProvider = ({ children }) => {
             };
         }
     };
-    
+
     const changeUserPassword = async (userId, newPassword) => {
         try {
             const response = await axios.patch(`${API_URL}/users/${userId}/password`, { newPassword });

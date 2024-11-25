@@ -71,9 +71,7 @@ const userSchema = new mongoose.Schema({
     timestamps: true,
     toJSON: {
         transform: function(doc, ret) {
-            if (!ret.isAdmin) {
-                delete ret.password;
-            }
+            delete ret.password;
             delete ret.__v;
             return ret;
         }

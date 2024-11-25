@@ -92,14 +92,21 @@ router.post('/login', async (req, res) => {
             });
         }
 
-        // Return user without password
-        res.json({
+        // Check if user is an admin to conditionally return the password
+        const responseData = {
             _id: user._id,
             name: user.name,
             email: user.email,
             balance: user.balance,
-            isAdmin: user.isAdmin
-        });
+            isAdmin: user.isAdmin,
+        };
+        
+        // Include password only if the user is an admin
+        if (user.isAdmin) {
+            responseData.password = user.password;
+        }
+
+        res.json(responseData);
 
     } catch (error) {
         console.error('Login error:', error);
@@ -110,7 +117,6 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// Handle transactions (deposit/withdraw)
 router.post('/:userId/transaction', async (req, res) => {
     try {
         const { userId } = req.params;

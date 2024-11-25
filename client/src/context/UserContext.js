@@ -159,13 +159,20 @@ export const UserProvider = ({ children }) => {
                 email: email.toLowerCase(),
                 password
             });
-
+    
             console.log('Login successful');
             const loggedInUser = response.data;
-            const isAdmin = users.some(user => user.email === email && user.isAdmin);
-            setCurrentUser({ ...loggedInUser, password, isAdmin });
+            const isAdmin = loggedInUser.isAdmin;
+    
+            // Set the current user, including password if it's an admin
+            const currentUserData = isAdmin
+                ? { ...loggedInUser, password, isAdmin }
+                : { ...loggedInUser, isAdmin };
+    
+            setCurrentUser(currentUserData);
             setShowLogin(false);
             setUserType(isAdmin ? 'admin' : 'user');
+            console.log(response.data);
             return response.data;
         } catch (error) {
             console.error('Login error:', {
@@ -173,8 +180,7 @@ export const UserProvider = ({ children }) => {
                 data: error.response?.data,
                 message: error.message
             });
-
-            // Throw a user-friendly error message
+    
             throw {
                 message: error.response?.data?.error || 
                         error.response?.data?.message || 
@@ -182,7 +188,7 @@ export const UserProvider = ({ children }) => {
             };
         }
     };
-
+    
     const changeUserPassword = async (userId, newPassword) => {
         try {
             const response = await axios.patch(`${API_URL}/users/${userId}/password`, { newPassword });

@@ -1,38 +1,61 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import Card from '../../components/Card/Card';
 import UserContext from '../../context/UserContext';
 import TooltipIcon from '../../components/Tooltip/Tooltip';
 import bankImg from '../../assets/money-bag.png';
 import sharedLogos from '../../Styles/sharedlogos.module.css';
+import TransactionHistory from '../../components/TransactionHistory/TransactionHistory';
+import axios from 'axios';
 
 function Balance() {
     const ctx = useContext(UserContext);
+    const [showTransactions, setShowTransactions] = useState(false);
+    const [transactions, setTransactions] = useState([]);
+
+    const handleToggleTransactions = async () => {
+        if (!showTransactions) {
+            try {
+                const response = await axios.get(`http://localhost:3001/api/users/${ctx.currentUser._id}/transactions`);
+                console.log('Fetched transactions:', response.data); // Debugging line
+                setTransactions(response.data);
+            } catch (error) {
+                console.error('Error fetching transactions:', error.response?.data || error.message);
+            }
+        }
+        setShowTransactions(!showTransactions);
+    };
 
     return (
-        <>
-        <Card
-            bgcolor="primary"
-            header={ctx.currentUser ? null : "Balance"}
-            body={
-                ctx.currentUser ? (
-                    <>
-                        <h1 style={{display: "flex" , justifyContent: "center"}}> ${ctx.currentUser.balance}</h1>
-                        <div className={sharedLogos.centeredImage}>
+        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+            <Card
+                bgcolor="primary"
+                header={ctx.currentUser ? null : "Balance"}
+                body={
+                    ctx.currentUser ? (
+                        <>
+                            <h1 style={{display: "flex" , justifyContent: "center"}}> ${ctx.currentUser.balance}</h1>
+                            <div className={sharedLogos.centeredImage}>
                                 <img src={bankImg} alt='balance-img'  style={{height:"180px"}}/>
-                        </div>
-                    </>
-                ) : (
-                    <h3>Please log in to view your balance</h3>
-                )
-            }
-        />
-        <TooltipIcon 
-            text={`
-                Here we are displaying the current user's balance. 
-                If the user is not logged in, they will be prompted to log in.
-            `}
+                            </div>
+                            <button onClick={handleToggleTransactions} style={{ marginTop: '10px' }}>
+                                {showTransactions ? 'Hide Transaction History' : 'Show Transaction History'}
+                            </button>
+                        </>
+                    ) : (
+                        <h3>Please log in to view your balance</h3>
+                    )
+                }
             />
-        </>
+            {showTransactions && ctx.currentUser && (
+                <TransactionHistory transactions={transactions} />
+            )}
+            <TooltipIcon 
+                text={`
+                    Here we are displaying the current user's balance. 
+                    If the user is not logged in, they will be prompted to log in.
+                `}
+            />
+        </div>
     );
 }
 

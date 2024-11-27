@@ -34,7 +34,7 @@ function Home() {
         {
             icon: <FaReact />,
             title: "Advanced Banking Application with React",
-            text: "I have leveraged the power of React to deliver a seamless and responsive user experience. With a component-based architecture, I ensure that the application is both scalable and maintainable. This approach allows me to efficiently manage complex state and UI updates, providing users with a smooth and intuitive interface."
+            text: "CashConnect, is a full-stack banking application. For this app , I have leveraged the power of React to deliver a seamless and responsive user experience. With a component-based architecture, I ensure that the application is both scalable and maintainable. This approach allows me to efficiently manage complex state and UI updates, providing users with a smooth and intuitive interface."
         },
         {
             icon: <FaDatabase />,
@@ -102,7 +102,7 @@ function Home() {
 
                 }}
             >
-                <DialogTitle>Application Overview</DialogTitle>
+                <DialogTitle></DialogTitle>
                 <DialogContent className={styles.dialogContent}>
                     {dialogContent.map((section, index) => (
                         <div key={index}>

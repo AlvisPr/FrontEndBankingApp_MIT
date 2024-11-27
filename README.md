@@ -1,59 +1,64 @@
-# Front-End Banking Application - CashConnect
+# CashConnect Banking Application
 
-This is a user-friendly banking application built with React, providing essential banking features such as deposits, withdrawals, and balance checks. The app incorporates extensive form validation and requires users to log in before accessing any transaction features. Each user starts with an initial balance of $100, and the balance is updated in real time based on their transactions.
+## Description/Motivation
+CashConnect is a full-stack banking application designed to provide users with a seamless and secure online banking experience. This project aims to help individuals manage their finances efficiently by offering features such as account balance tracking, transaction history, and role-based access control. The application is built to solve the problem of managing personal finances in a user-friendly and secure manner.
 
-## Features
-
-- **User Login:** Secure login system required for all actions.
-- **Form Validation:** Extensive validation ensures proper input handling for all transactions.
-- **Balance Display:** View real-time account balances after login.
-- **Deposit & Withdraw:** Manage funds easily, but only after logging in.
-- **Admin Panel:** Admin users can:
-  - Change user passwords.
-  - Delete accounts.
-  - View transaction history and account balances.
-- **User-Friendly Interface:** Clean and intuitive UI for seamless interactions.
-
-## Installation
+## Installation Guidelines
+To get the project up and running, follow these steps:
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/yourusername/deposit-app.git
+    git clone https://github.com/yourusername/frontendbankingappassignment.git
     ```
+
 2. Navigate to the project directory:
     ```bash
-    cd deposit-app
-    ```
-3. Install the necessary dependencies:
-    ```bash
-    npm install
+    cd frontendbankingappassignment
     ```
 
-## Usage
+3. Install dependencies for both client and server:
+    ```bash
+    npm run install-all
+    ```
 
-1. Start the development server:
+4. Start the development server:
     ```bash
-    npm start
+    npm run dev
     ```
-2. Open your browser and go to `http://localhost:3000` to access the application.
 
-## Contributing
+## Screenshots
+![Home Page](./readme%20assets/HomePage.png)
+![Balance Page](./readme%20assets/BalancePage.png)
 
-1. Fork the repository.
-2. Create a feature branch:
-    ```bash
-    git checkout -b feature-branch
-    ```
-3. Implement your changes and commit them:
-    ```bash
-    git commit -m "Description of changes"
-    ```
-4. Push the branch to GitHub:
-    ```bash
-    git push origin feature-branch
-    ```
-5. Submit a pull request.
+## Technology Used
+- **Frontend:**
+  - React
+  - React Router DOM
+  - Bootstrap
+  - Axios
+  - MUI (Material-UI)
+  - React Icons
+
+- **Backend:**
+  - Node.js
+  - Express
+  - Mongoose
+  - MongoDB
+  - Bcrypt
+  - CORS
+  - Dotenv
+
+## Features
+- User authentication and authorization
+- Account balance tracking
+- Transaction history with real-time updates
+- Role-based access control for admin and regular users
+- Responsive design for mobile and desktop
+
+## Future Features
+- Enhanced security measures
+- Integration with third-party financial services
+- Advanced analytics and reporting
 
 ## License
-
-This project is licensed under the [MIT License](./LICENSE).
+This project is licensed under the ISC License. See the [LICENSE](./LICENSE) file for more details.

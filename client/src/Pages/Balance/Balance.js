@@ -37,7 +37,21 @@ function Balance() {
                             <div className={sharedLogos.centeredImage}>
                                 <img src={bankImg} alt='balance-img'  style={{height:"180px"}}/>
                             </div>
-                            <button onClick={handleToggleTransactions} style={{ marginTop: '10px' }}>
+                            <button 
+                                onClick={handleToggleTransactions} 
+                                style={{ 
+                                    marginTop: '10px', 
+                                    borderRadius: "15px", 
+                                    padding: "10px 20px", 
+                                    backgroundColor: "#388e3c", 
+                                    color: "white", 
+                                    cursor: "pointer",
+                                    transition: "background-color 0.3s ease",
+                                    border: "1px solid #388e3c"
+                                }}
+                                onMouseOver={(e) => e.target.style.backgroundColor = "#2e7d32"}
+                                onMouseOut={(e) => e.target.style.backgroundColor = "#388e3c"}
+                            >
                                 {showTransactions ? 'Hide Transaction History' : 'Show Transaction History'}
                             </button>
                         </>

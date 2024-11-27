@@ -8,31 +8,29 @@ To get the project up and running, follow these steps:
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/yourusername/frontendbankingappassignment.git
+    git clone https://github.com/AlvisPr/FrontEndBankingApp_MIT.git
     ```
 
 2. Navigate to the project directory:
     ```bash
-    cd frontendbankingappassignment
+    cd FrontEndBankingApp_MIT
     ```
 
 3. Install dependencies for both client and server:
     ```bash
-    npm run install-all
+    cd client 
+    npm i
+    cd server 
+    npm i
     ```
 
 4. Start the development server:
     ```bash
-    npm run dev
+    cd client 
+    npm start 
+    cd server 
+    node --watch index.js
     ```
-
-## Screenshots
-
-**Home Page**
-![Home Page](./readme%20assets/HomePage.png)
-
-**Balance Page**
-![Balance Page](./readme%20assets/BalancePage.png)
 
 ## Technology Used
 - **Frontend:**
@@ -63,6 +61,16 @@ To get the project up and running, follow these steps:
 - Enhanced security measures
 - Integration with third-party financial services
 - Advanced analytics and reporting
+
+## Screenshots
+
+**Home Page**
+
+![Home Page](./readme%20assets/HomePage.png)
+
+**Balance Page**
+
+![Balance Page](./readme%20assets/BalancePage.png)
 
 ## License
 This project is licensed under the ISC License. See the [LICENSE](./LICENSE) file for more details.

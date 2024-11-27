@@ -14,6 +14,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 import './App.css';
 import CanvasAnimation from './components/Animation/CanvasAnimation';
+import Transfer from './Pages/Transfer/Transfer';
+import Profile from './Pages/Profile/Profile';
 
 function App() {
     return (
@@ -36,13 +38,14 @@ function AppContent() {
                     <Route path="/deposit" element={<Deposit />} />
                     <Route path="/withdraw" element={<Withdraw />} />
                     <Route path="/balance" element={<Balance />} />
+                    <Route path="/transfer" element={<Transfer />} />
+                    <Route path="/profile" element={<Profile />} />
                     <Route path="/alldata" element={<AllData />} />
                     <Route path="*" element={<Home />} />
                 </Routes>
                 {!currentUser && <CanvasAnimation />}
             </div>
             <Footer />
-            
         </Router>
     );
 }

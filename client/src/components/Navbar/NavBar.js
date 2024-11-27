@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FaDatabase, FaUserPlus, FaSignInAlt, FaSignOutAlt } from 'react-icons/fa';
+import { FaUserPlus, FaSignInAlt, FaSignOutAlt, FaCog } from 'react-icons/fa';
 import UserContext from '../../context/UserContext';
 import ClipLoader from 'react-spinners/ClipLoader';
 import styles from './Navbar.module.css'; 
@@ -9,7 +9,7 @@ import spinner from '../../Styles/spinner.module.css';
 function NavBar() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { currentUser, setCurrentUser, setShowLogin, setLogout, userType } = useContext(UserContext);
+    const { currentUser, setCurrentUser, setShowLogin, setLogout } = useContext(UserContext);
     const [isCollapsed, setIsCollapsed] = useState(true);
     const [loading, setLoading] = useState(false);
 
@@ -51,8 +51,11 @@ function NavBar() {
             </div>
             <div className={`collapse navbar-collapse ${!isCollapsed ? 'show' : ''} ${styles.navbarCollapse}`} id="navbarNav">
                 <ul className={`navbar-nav ${styles.navbarNav}`}>
-                    {currentUser && !currentUser.isAdmin && (
+                    {currentUser && (
                         <>
+                            <li className="nav-item">
+                                <Link className="nav-link" to="/balance" style={getLinkStyle('/balance')} onClick={handleLinkClick}>Balance</Link>
+                            </li>
                             <li className="nav-item">
                                 <Link className="nav-link" to="/deposit" style={getLinkStyle('/deposit')} onClick={handleLinkClick}>Deposit</Link>
                             </li>
@@ -60,21 +63,25 @@ function NavBar() {
                                 <Link className="nav-link" to="/withdraw" style={getLinkStyle('/withdraw')} onClick={handleLinkClick}>Withdraw</Link>
                             </li>
                             <li className="nav-item">
-                                <Link className="nav-link" to="/balance" style={getLinkStyle('/balance')} onClick={handleLinkClick}>Balance</Link>
+                                <Link className="nav-link" to="/transfer" style={getLinkStyle('/transfer')} onClick={handleLinkClick}>Transfer</Link>
                             </li>
                         </>
-                    )}
-                    {currentUser && currentUser.isAdmin && (
-                        <li className="nav-item">
-                            <Link className="nav-link" to="/alldata" style={getLinkStyle('/alldata')} onClick={handleLinkClick}><FaDatabase style={{ marginRight: '5px', fontSize: "25px" }} /></Link>
-                        </li>
                     )}
                 </ul>
                 <div className={styles.navbarButtons}>
                     <ul className={`navbar-nav ${styles.navbarNav}`}>
                         {!currentUser && (
                             <li className="nav-item">
-                                <Link className="nav-link" to="/CreateAccount" style={getLinkStyle('/CreateAccount')} onClick={handleLinkClick}><FaUserPlus style={{ marginRight: '5px' }} />Create Account</Link>
+                                <Link className="nav-link" to="/createaccount" style={getLinkStyle('/createaccount')} onClick={handleLinkClick}>
+                                    <FaUserPlus style={{ marginRight: '5px' }} />Create Account
+                                </Link>
+                            </li>
+                        )}
+                        {currentUser && (
+                            <li className="nav-item">
+                                <Link className="nav-link" to="/profile" style={getLinkStyle('/profile')} onClick={handleLinkClick}>
+                                    <FaCog style={{ marginRight: '5px' }} />
+                                </Link>
                             </li>
                         )}
                         <li className="nav-item">

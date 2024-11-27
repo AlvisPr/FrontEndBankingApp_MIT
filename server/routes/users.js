@@ -44,10 +44,14 @@ router.post('/register', async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        // Generate a unique account number
+        const accountNumber = Math.random().toString(36).substr(2, 9).toUpperCase();
+
         const user = new User({
             name,
             email: email.toLowerCase(),
-            password: hashedPassword
+            password: hashedPassword,
+            accountNumber // Assign the generated account number
         });
 
         await user.save();
@@ -55,7 +59,8 @@ router.post('/register', async (req, res) => {
             _id: user._id,
             name: user.name,
             email: user.email,
-            balance: user.balance
+            balance: user.balance,
+            accountNumber: user.accountNumber // Include account number in response
         });
     } catch (error) {
         console.error('Error registering user:', error);
@@ -361,5 +366,60 @@ router.delete('/:userId', async (req, res) => {
         });
     }
 });
-  
+
+// Transfer money between users
+router.post('/transfer', async (req, res) => {
+    try {
+        const { fromEmail, toAccountNumber, amount } = req.body;
+
+        if (!fromEmail || !toAccountNumber || !amount) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+
+        const sender = await User.findOne({ email: fromEmail });
+        const receiver = await User.findOne({ accountNumber: toAccountNumber });
+
+        if (!sender || !receiver) {
+            return res.status(404).json({ error: 'Sender or receiver not found' });
+        }
+
+        const numericAmount = parseFloat(amount);
+        if (isNaN(numericAmount) || numericAmount <= 0) {
+            return res.status(400).json({ error: 'Invalid amount' });
+        }
+
+        if (sender.balance < numericAmount) {
+            return res.status(400).json({ error: 'Insufficient funds' });
+        }
+
+        // Update balances
+        sender.balance -= numericAmount;
+        receiver.balance += numericAmount;
+
+        // Record transactions
+        const transactionDate = new Date();
+        const transaction = {
+            type: 'transfer',
+            amount: numericAmount,
+            date: transactionDate,
+            from: sender.email,
+            to: receiver.accountNumber
+        };
+
+        sender.transactions.push(transaction);
+        receiver.transactions.push(transaction);
+
+        await sender.save();
+        await receiver.save();
+
+        // Log transaction details
+        console.log('Transaction successful:', transaction);
+
+        res.json({ message: 'Transfer successful' });
+    } catch (error) {
+        console.error('Transfer error:', error);
+        res.status(500).json({ error: 'Transfer failed' });
+    }
+});
+
 module.exports = router;

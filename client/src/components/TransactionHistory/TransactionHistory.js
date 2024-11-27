@@ -2,7 +2,6 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 
 const TransactionHistory = ({ transactions = [] }) => {
-    console.log('Transactions in TransactionHistory:', transactions); // Debugging line
     return (
         <TableContainer component={Paper} sx={{ marginTop: '10px', marginRight: "30px", padding: '10px' }}>
             <Table size="small">
@@ -11,7 +10,8 @@ const TransactionHistory = ({ transactions = [] }) => {
                         <TableCell sx={{ color: 'white', padding: '6px', fontSize: '0.875rem' }}>Type</TableCell>
                         <TableCell sx={{ color: 'white', padding: '6px', fontSize: '0.875rem' }}>Amount</TableCell>
                         <TableCell sx={{ color: 'white', padding: '6px', fontSize: '0.875rem' }}>Date</TableCell>
-                        <TableCell sx={{ color: 'white', padding: '6px', fontSize: '0.875rem' }}></TableCell>
+                        <TableCell sx={{ color: 'white', padding: '6px', fontSize: '0.875rem' }}>From</TableCell>
+                        <TableCell sx={{ color: 'white', padding: '6px', fontSize: '0.875rem' }}>To</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
@@ -27,7 +27,8 @@ const TransactionHistory = ({ transactions = [] }) => {
                             <TableCell sx={{ padding: '6px', fontSize: '0.875rem' }}>{transaction.type}</TableCell>
                             <TableCell sx={{ padding: '6px', fontSize: '0.875rem' }}>${transaction.amount}</TableCell>
                             <TableCell sx={{ padding: '6px', fontSize: '0.875rem' }}>{transaction.date}</TableCell>
-                            <TableCell sx={{ padding: '6px', fontSize: '0.875rem' }}>{transaction.time}</TableCell>
+                            <TableCell sx={{ padding: '6px', fontSize: '0.875rem' }}>{transaction.from}</TableCell>
+                            <TableCell sx={{ padding: '6px', fontSize: '0.875rem' }}>{transaction.to}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>

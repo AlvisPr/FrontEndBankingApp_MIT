@@ -27,7 +27,11 @@ To get the project up and running, follow these steps:
     ```
 
 ## Screenshots
+
+**Home Page**
 ![Home Page](./readme%20assets/HomePage.png)
+
+**Balance Page**
 ![Balance Page](./readme%20assets/BalancePage.png)
 
 ## Technology Used

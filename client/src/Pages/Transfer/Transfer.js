@@ -1,7 +1,8 @@
 import React, { useState, useContext } from 'react';
 import Card from '../../components/Card/Card';
 import UserContext from '../../context/UserContext';
-import { toast } from 'react-hot-toast';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 import styles from '../../Styles/formStyles.module.css';
 

@@ -194,6 +194,49 @@ export const UserProvider = ({ children }) => {
         }
     };
 
+    const updateUserProfile = async (profileData) => {
+        try {
+            console.log('Updating profile for user:', currentUser?._id);
+            console.log('Profile data:', profileData);
+
+            if (!currentUser?._id) {
+                throw new Error('User must be logged in to update profile');
+            }
+
+            const response = await axios.patch(
+                `${API_URL}/users/${currentUser._id}/profile`,
+                profileData,
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'user-id': currentUser._id
+                    }
+                }
+            );
+
+            console.log('Profile update response:', response.data);
+            
+            // Update the current user with the new data
+            setCurrentUser(prev => ({
+                ...prev,
+                ...response.data
+            }));
+
+            // Update the user in the users array
+            setUsers(prev => prev.map(user => 
+                user._id === currentUser._id ? { ...user, ...response.data } : user
+            ));
+
+            return response.data;
+        } catch (error) {
+            console.error('Profile update error:', {
+                message: error.message,
+                response: error.response?.data
+            });
+            throw error.response?.data?.error || error.message;
+        }
+    };
+
     return (
         <UserContext.Provider value={{
             users,
@@ -210,7 +253,8 @@ export const UserProvider = ({ children }) => {
             logTransaction,
             createUser,
             loginUser,
-            changeUserPassword
+            changeUserPassword,
+            updateUserProfile
         }}>
             {children}
         </UserContext.Provider>

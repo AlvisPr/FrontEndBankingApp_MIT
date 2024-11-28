@@ -261,6 +261,44 @@ router.get('/:userId/transactions', async (req, res) => {
     }
 });
 
+// Update user profile
+router.patch('/:userId/profile', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const profileData = req.body;
+
+        // Validate userId
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ error: 'Invalid user ID' });
+        }
+
+        // Find and update user
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            {
+                $set: {
+                    phoneNumber: profileData.phoneNumber,
+                    email: profileData.email,
+                    address: profileData.address,
+                    preferredName: profileData.preferredName,
+                    language: profileData.language,
+                    communicationPreferences: profileData.communicationPreferences
+                }
+            },
+            { new: true, runValidators: true }
+        ).select('-password');
+
+        if (!updatedUser) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.json(updatedUser);
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Change user password
 router.patch('/:userId/password', async (req, res) => {
     try {
@@ -392,33 +430,65 @@ router.post('/transfer', async (req, res) => {
             return res.status(400).json({ error: 'Insufficient funds' });
         }
 
+        // Generate unique transaction ID
+        const transactionId = `TR-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+
         // Update balances
         sender.balance -= numericAmount;
         receiver.balance += numericAmount;
 
-        // Record transactions
+        // Record transactions with detailed tracing
         const transactionDate = new Date();
-        const transaction = {
-            type: 'transfer',
+        const senderTransaction = {
+            type: 'transfer-sent',
             amount: numericAmount,
             date: transactionDate,
             from: sender.email,
-            to: receiver.accountNumber
+            to: receiver.email,
+            transactionId: transactionId,
+            status: 'completed'
         };
 
-        sender.transactions.push(transaction);
-        receiver.transactions.push(transaction);
+        const receiverTransaction = {
+            type: 'transfer-received',
+            amount: numericAmount,
+            date: transactionDate,
+            from: sender.email,
+            to: receiver.email,
+            transactionId: transactionId,
+            status: 'completed'
+        };
+
+        sender.transactions.push(senderTransaction);
+        receiver.transactions.push(receiverTransaction);
 
         await sender.save();
         await receiver.save();
 
-        // Log transaction details
-        console.log('Transaction successful:', transaction);
+        // Log transaction details with tracing
+        console.log('Transfer Trace:', {
+            transactionId,
+            sender: sender.email,
+            receiver: receiver.email,
+            amount: numericAmount,
+            timestamp: transactionDate
+        });
 
-        res.json({ message: 'Transfer successful' });
+        res.json({ 
+            message: 'Transfer successful',
+            transactionId: transactionId,
+            details: {
+                sender: sender.email,
+                receiver: receiver.email,
+                amount: numericAmount
+            }
+        });
     } catch (error) {
         console.error('Transfer error:', error);
-        res.status(500).json({ error: 'Transfer failed' });
+        res.status(500).json({ 
+            error: 'Transfer failed', 
+            details: error.message 
+        });
     }
 });
 

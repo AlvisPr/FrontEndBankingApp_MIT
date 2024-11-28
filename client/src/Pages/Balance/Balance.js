@@ -61,7 +61,10 @@ function Balance() {
                 }
             />
             {showTransactions && ctx.currentUser && (
-                <TransactionHistory transactions={transactions} />
+                <TransactionHistory 
+                    transactions={transactions} 
+                    currentUser={ctx.currentUser}
+                />
             )}
             <TooltipIcon 
                 text={`

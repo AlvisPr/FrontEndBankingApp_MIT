@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FaUserPlus, FaSignInAlt, FaSignOutAlt, FaCog } from 'react-icons/fa';
+import { FaUserPlus, FaSignInAlt, FaSignOutAlt, FaCog, FaUsers, FaDatabase, StorageIcon } from 'react-icons/fa';
 import UserContext from '../../context/UserContext';
 import ClipLoader from 'react-spinners/ClipLoader';
 import styles from './Navbar.module.css'; 
@@ -51,7 +51,7 @@ function NavBar() {
             </div>
             <div className={`collapse navbar-collapse ${!isCollapsed ? 'show' : ''} ${styles.navbarCollapse}`} id="navbarNav">
                 <ul className={`navbar-nav ${styles.navbarNav}`}>
-                    {currentUser && (
+                    {currentUser && !currentUser.isAdmin && (
                         <>
                             <li className="nav-item">
                                 <Link className="nav-link" to="/balance" style={getLinkStyle('/balance')} onClick={handleLinkClick}>Balance</Link>
@@ -67,6 +67,13 @@ function NavBar() {
                             </li>
                         </>
                     )}
+                    {currentUser && currentUser.isAdmin && (
+                        <li className="nav-item">
+                            <Link className="nav-link" to="/alldata" style={getLinkStyle('/alldata')} onClick={handleLinkClick}>
+                                <FaDatabase style={{ marginRight: '5px' }} />All Data
+                            </Link>
+                        </li>
+                    )}
                 </ul>
                 <div className={styles.navbarButtons}>
                     <ul className={`navbar-nav ${styles.navbarNav}`}>
@@ -77,30 +84,34 @@ function NavBar() {
                                 </Link>
                             </li>
                         )}
-                        {currentUser && (
+                        {currentUser && !currentUser.isAdmin && (
                             <li className="nav-item">
                                 <Link className="nav-link" to="/profile" style={getLinkStyle('/profile')} onClick={handleLinkClick}>
-                                    <FaCog style={{ marginRight: '5px' }} />
+                                    <FaCog style={{ marginRight: '5px' }} />Profile
                                 </Link>
                             </li>
                         )}
                         <li className="nav-item">
                             {currentUser ? (
                                 <button className="nav-link btn" onClick={handleLogout} style={{ display: 'flex', alignItems: 'center' }}>
-                                    <FaSignOutAlt style={{ marginRight: '5px' }} />Logout
+                                    {loading ? (
+                                        <ClipLoader color="#2e7d32" loading={loading} size={20} className={spinner.spinnerButton} />
+                                    ) : (
+                                        <>
+                                            <FaSignOutAlt style={{ marginRight: '5px' }} />
+                                            Logout
+                                        </>
+                                    )}
                                 </button>
                             ) : (
-                                <Link className="nav-link" to="/login" style={getLinkStyle('/login')} onClick={handleLinkClick}><FaSignInAlt style={{ marginRight: '5px' }} />Login</Link>
+                                <Link className="nav-link" to="/login" style={getLinkStyle('/login')} onClick={handleLinkClick}>
+                                    <FaSignInAlt style={{ marginRight: '5px' }} />Login
+                                </Link>
                             )}
                         </li>
                     </ul>
                 </div>
             </div>
-            {loading && (
-                <div className={spinner.spinner}>
-                    <ClipLoader size={50} color={"#123abc"} loading={loading} />
-                </div>
-            )}
         </nav>
     );
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Collapse, Menu, MenuItem} from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Collapse, Menu, MenuItem, Box, Typography} from '@mui/material';
 import { KeyboardArrowDown, KeyboardArrowUp, MoreVert as MoreVertIcon } from '@mui/icons-material';
 import TransactionHistory from '../TransactionHistory/TransactionHistory';
 import PasswordPromptDialog from '../PasswordPromtDialog/PasswordPromptDialog';
@@ -85,7 +85,16 @@ function UserTable({ users, open, handleToggle, handleMenuOpen, menuAnchorEl, ha
                                 <TableRow>
                                     <TableCell sx={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
                                         <Collapse in={open[index]} timeout="auto" unmountOnExit>
-                                            <TransactionHistory transactions={user.transactions} />
+                                            <Box sx={{ margin: 2 }}>
+                                                <Typography variant="h6" gutterBottom component="div">
+                                                    Transaction History for {user.name}
+                                                </Typography>
+                                                <TransactionHistory 
+                                                    transactions={user.transactions || []} 
+                                                    currentUser={currentUser}
+                                                    userEmail={user.email}
+                                                />
+                                            </Box>
                                         </Collapse>
                                     </TableCell>
                                 </TableRow>

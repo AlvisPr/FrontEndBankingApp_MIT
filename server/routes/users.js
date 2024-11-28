@@ -103,7 +103,9 @@ router.post('/login', async (req, res) => {
             name: user.name,
             email: user.email,
             balance: user.balance,
-            isAdmin: user.isAdmin
+            accountNumber: user.accountNumber,
+            isAdmin: user.isAdmin,
+            communicationPreferences: user.communicationPreferences
         });
 
     } catch (error) {

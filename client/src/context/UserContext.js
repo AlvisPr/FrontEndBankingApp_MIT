@@ -162,11 +162,14 @@ export const UserProvider = ({ children }) => {
 
             console.log('Login successful');
             const loggedInUser = response.data;
-            const isAdmin = users.some(user => user.email === email && user.isAdmin);
-            setCurrentUser({ ...loggedInUser, password, isAdmin });
+            
+            // Set user type based on the isAdmin flag from the server response
+            const isAdmin = loggedInUser.isAdmin === true;
+            setCurrentUser({ ...loggedInUser, password });
             setShowLogin(false);
             setUserType(isAdmin ? 'admin' : 'user');
-            console.log(response.data)
+            console.log('User type set to:', isAdmin ? 'admin' : 'user');
+            console.log('Current user:', { ...loggedInUser, isAdmin });
             return response.data;
         } catch (error) {
             console.error('Login error:', {
@@ -175,7 +178,6 @@ export const UserProvider = ({ children }) => {
                 message: error.message
             });
 
-            // Throw a user-friendly error message
             throw {
                 message: error.response?.data?.error || 
                         error.response?.data?.message || 

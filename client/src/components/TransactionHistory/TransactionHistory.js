@@ -5,7 +5,18 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 
-const TransactionHistory = ({ transactions = [], currentUser }) => {
+const TransactionHistory = ({ transactions = [], currentUser, userEmail }) => {
+    // If no transactions, show a message
+    if (!transactions || transactions.length === 0) {
+        return (
+            <Box sx={{ padding: 2, textAlign: 'center' }}>
+                <Typography variant="body1" color="textSecondary">
+                    No transactions found
+                </Typography>
+            </Box>
+        );
+    }
+
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         return new Intl.DateTimeFormat('en-US', {
@@ -21,35 +32,26 @@ const TransactionHistory = ({ transactions = [], currentUser }) => {
     const getTransactionStyle = (transaction) => {
         let backgroundColor, iconColor, amountColor, icon;
         
-        // Check if this is a transfer and determine if user is sender or receiver
-        const isTransfer = transaction.type.toLowerCase() === 'transfer';
-        const isSender = isTransfer && transaction.from === currentUser.email;
-        const isReceiver = isTransfer && transaction.to === currentUser.accountNumber;
+        const isTransfer = transaction.type?.toLowerCase() === 'transfer';
+        const isSender = isTransfer && transaction.from === userEmail;
 
         if (isTransfer) {
             if (isSender) {
-                // Outgoing transfer
                 backgroundColor = '#FFE5B4'; // light orange
                 iconColor = '#FF6347'; // tomato red
                 amountColor = '#FF6347';
-            } else if (isReceiver) {
-                // Incoming transfer
+            } else {
                 backgroundColor = '#E6F2E6'; // light green
                 iconColor = '#2E8B57'; // sea green
                 amountColor = '#2E8B57';
-            } else {
-                // Default for transfers not involving the current user
-                backgroundColor = '#F5F5F5';
-                iconColor = '#757575';
-                amountColor = '#000';
             }
             icon = <SwapHorizIcon sx={{ color: iconColor, marginLeft: '4px', fontSize: '1rem' }} />;
-        } else if (transaction.type.toLowerCase() === 'withdraw') {
+        } else if (transaction.type?.toLowerCase() === 'withdraw') {
             backgroundColor = '#FFEBEE'; // light red
             iconColor = '#D32F2F'; // dark red
             amountColor = '#D32F2F';
             icon = <ArrowUpwardIcon sx={{ color: iconColor, marginLeft: '4px', fontSize: '1rem' }} />;
-        } else if (transaction.type.toLowerCase() === 'deposit') {
+        } else if (transaction.type?.toLowerCase() === 'deposit') {
             backgroundColor = '#C8E6C9'; // light green
             iconColor = '#388E3C'; // dark green
             amountColor = '#388E3C';
@@ -64,34 +66,22 @@ const TransactionHistory = ({ transactions = [], currentUser }) => {
         return { backgroundColor, iconColor, amountColor, icon };
     };
 
+    // Format amount with 2 decimal places, handling undefined/null cases
+    const formatAmount = (amount) => {
+        if (amount === undefined || amount === null) return '$0.00';
+        return `$${Number(amount).toFixed(2)}`;
+    };
+
     return (
         <TableContainer component={Paper} sx={{ 
-            marginTop: '30px', 
+            marginTop: '20px', 
             marginRight: "30px", 
             padding: '0px', 
-            height: '60vh', 
+            maxHeight: '400px', 
             overflowY: 'auto',
             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
             borderRadius: '8px'
         }}>
-            {!currentUser.isAdmin && (
-                <Box sx={{ 
-                    padding: '20px',
-                    backgroundColor: '#f8f9fa',
-                    borderBottom: '1px solid #e9ecef'
-                }}>
-                    <Typography variant="h6" sx={{ 
-                        fontWeight: 600,
-                        color: '#2c3e50',
-                        marginBottom: '4px'
-                    }}>
-                        Transaction History
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: '#6c757d' }}>
-                        View and track all your financial activities
-                    </Typography>
-                </Box>
-            )}
             <Table size="small" stickyHeader>
                 <TableHead>
                     <TableRow sx={{ 
@@ -116,68 +106,54 @@ const TransactionHistory = ({ transactions = [], currentUser }) => {
                 </TableHead>
                 <TableBody>
                     {transactions.map((transaction, index) => {
-                        const { 
-                            backgroundColor, 
-                            iconColor, 
-                            amountColor, 
-                            icon 
-                        } = getTransactionStyle(transaction);
+                        const style = getTransactionStyle(transaction);
+                        const isTransfer = transaction.type?.toLowerCase() === 'transfer';
 
-                        // Determine if current user is sender or receiver for transfers
-                        const isTransfer = transaction.type.toLowerCase() === 'transfer';
-                        const isSender = isTransfer && transaction.from === currentUser.email;
-                        const isReceiver = isTransfer && transaction.to === currentUser.accountNumber;
-
-                        // Format amount based on transaction type and user role
+                        // Format amount based on transaction type
                         let displayAmount = transaction.amount;
-                        if (isTransfer) {
-                            displayAmount = isSender ? `-${displayAmount}` : `+${displayAmount}`;
-                        } else if (transaction.type.toLowerCase() === 'withdraw') {
+                        if (isTransfer && transaction.from === userEmail) {
                             displayAmount = `-${displayAmount}`;
-                        } else if (transaction.type.toLowerCase() === 'deposit') {
-                            displayAmount = `+${displayAmount}`;
+                        } else if (transaction.type?.toLowerCase() === 'withdraw') {
+                            displayAmount = `-${displayAmount}`;
                         }
 
                         return (
-                            <TableRow
-                                key={`transaction-${transaction._id || index}`}
-                                sx={{
-                                    backgroundColor: backgroundColor,
-                                    '&:hover': {
-                                        filter: 'brightness(0.95)',
-                                        transition: 'all 0.2s ease-in-out'
-                                    }
-                                }}
-                            >
+                            <TableRow key={transaction._id || index} sx={{ 
+                                backgroundColor: style.backgroundColor,
+                                '&:hover': {
+                                    filter: 'brightness(0.95)',
+                                    transition: 'all 0.2s ease-in-out'
+                                }
+                            }}>
                                 <TableCell sx={{ 
                                     padding: '12px',
                                     display: 'flex',
                                     alignItems: 'center',
                                     fontSize: '0.875rem',
-                                    color: iconColor
+                                    color: style.iconColor
                                 }}>
                                     {transaction.type}
-                                    {icon}
+                                    {style.icon}
                                 </TableCell>
                                 <TableCell sx={{ 
                                     padding: '12px', 
                                     fontSize: '0.875rem', 
-                                    color: amountColor,
+                                    color: style.amountColor,
                                     fontWeight: 'bold'
                                 }}>
-                                    {displayAmount}$
+                                    {formatAmount(displayAmount)}
                                 </TableCell>
                                 <TableCell sx={{ padding: '12px', fontSize: '0.875rem' }}>
                                     {formatDate(transaction.date)}
                                 </TableCell>
                                 <TableCell sx={{ padding: '12px', fontSize: '0.875rem' }}>
-                                    {transaction.from}
+                                    {transaction.from || '-'}
                                 </TableCell>
                                 <TableCell sx={{ padding: '12px', fontSize: '0.875rem' }}>
-                                    {transaction.to}
+                                    {transaction.to || '-'}
                                 </TableCell>
                                 <TableCell sx={{ padding: '12px', fontSize: '0.875rem' }}>
-                                    {transaction._id}
+                                    {transaction._id || `TR-${index + 1}`}
                                 </TableCell>
                             </TableRow>
                         );
@@ -191,19 +167,20 @@ const TransactionHistory = ({ transactions = [], currentUser }) => {
 TransactionHistory.propTypes = {
     transactions: PropTypes.arrayOf(
         PropTypes.shape({
-            type: PropTypes.string.isRequired,
-            amount: PropTypes.number.isRequired,
-            date: PropTypes.string.isRequired,
+            type: PropTypes.string,
+            amount: PropTypes.number,
+            date: PropTypes.string,
             from: PropTypes.string,
             to: PropTypes.string,
-            _id: PropTypes.string.isRequired
+            _id: PropTypes.string
         })
     ),
     currentUser: PropTypes.shape({
-        email: PropTypes.string.isRequired,
-        accountNumber: PropTypes.string.isRequired,
-        isAdmin: PropTypes.bool.isRequired
-    }).isRequired
+        email: PropTypes.string,
+        accountNumber: PropTypes.string,
+        isAdmin: PropTypes.bool
+    }),
+    userEmail: PropTypes.string
 };
 
 export default TransactionHistory;

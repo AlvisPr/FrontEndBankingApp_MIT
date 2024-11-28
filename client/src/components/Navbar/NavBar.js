@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FaUserPlus, FaSignInAlt, FaSignOutAlt, FaCog, FaUsers, FaDatabase, StorageIcon } from 'react-icons/fa';
+import { FaUserPlus, FaSignInAlt, FaSignOutAlt, FaCog, FaUsers } from 'react-icons/fa';
 import UserContext from '../../context/UserContext';
 import ClipLoader from 'react-spinners/ClipLoader';
 import styles from './Navbar.module.css'; 
@@ -70,7 +70,7 @@ function NavBar() {
                     {currentUser && currentUser.isAdmin && (
                         <li className="nav-item">
                             <Link className="nav-link" to="/alldata" style={getLinkStyle('/alldata')} onClick={handleLinkClick}>
-                                <FaDatabase style={{ marginRight: '5px' }} />All Data
+                                <FaUsers style={{ marginRight: '5px' }} />All Data
                             </Link>
                         </li>
                     )}

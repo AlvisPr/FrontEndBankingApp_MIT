@@ -1,168 +1,180 @@
 import React from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Box, Typography } from '@mui/material';
+import { 
+    Table, 
+    TableBody, 
+    TableCell, 
+    TableContainer, 
+    TableHead, 
+    TableRow, 
+    Paper,
+    Typography 
+} from '@mui/material';
+import { format } from 'date-fns';
 import PropTypes from 'prop-types';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 
-const TransactionHistory = ({ transactions = [], currentUser, userEmail }) => {
-    // If no transactions, show a message
+function TransactionHistory({ transactions = [], currentUser, userEmail }) {
     if (!transactions || transactions.length === 0) {
         return (
-            <Box sx={{ padding: 2, textAlign: 'center' }}>
-                <Typography variant="body1" color="textSecondary">
-                    No transactions found
-                </Typography>
-            </Box>
+            <Typography variant="body1" style={{ padding: '20px', textAlign: 'center' }}>
+                No transactions to display
+            </Typography>
         );
     }
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
-        return new Intl.DateTimeFormat('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        }).format(date);
+        return format(date, 'MM/dd/yyyy HH:mm');
     };
 
-    // Function to determine transaction status and color
-    const getTransactionStyle = (transaction) => {
-        let backgroundColor, iconColor, amountColor, icon;
-        
-        const isTransfer = transaction.type?.toLowerCase() === 'transfer';
-        const isSender = isTransfer && transaction.from === userEmail;
-
-        if (isTransfer) {
-            if (isSender) {
-                backgroundColor = '#FFE5B4'; // light orange
-                iconColor = '#FF6347'; // tomato red
-                amountColor = '#FF6347';
-            } else {
-                backgroundColor = '#E6F2E6'; // light green
-                iconColor = '#2E8B57'; // sea green
-                amountColor = '#2E8B57';
-            }
-            icon = <SwapHorizIcon sx={{ color: iconColor, marginLeft: '4px', fontSize: '1rem' }} />;
-        } else if (transaction.type?.toLowerCase() === 'withdraw') {
-            backgroundColor = '#FFEBEE'; // light red
-            iconColor = '#D32F2F'; // dark red
-            amountColor = '#D32F2F';
-            icon = <ArrowUpwardIcon sx={{ color: iconColor, marginLeft: '4px', fontSize: '1rem' }} />;
-        } else if (transaction.type?.toLowerCase() === 'deposit') {
-            backgroundColor = '#C8E6C9'; // light green
-            iconColor = '#388E3C'; // dark green
-            amountColor = '#388E3C';
-            icon = <ArrowDownwardIcon sx={{ color: iconColor, marginLeft: '4px', fontSize: '1rem' }} />;
-        } else {
-            backgroundColor = '#F5F5F5';
-            iconColor = '#757575';
-            amountColor = '#000';
-            icon = null;
+    const getDisplayValue = (transaction, field) => {
+        if (transaction.type === 'withdraw' || 
+            (transaction.type === 'deposit' && (!transaction.from && !transaction.to))) {
+            return '-';
         }
-
-        return { backgroundColor, iconColor, amountColor, icon };
+        return transaction[field] || 'N/A';
     };
 
-    // Format amount with 2 decimal places, handling undefined/null cases
-    const formatAmount = (amount) => {
-        if (amount === undefined || amount === null) return '$0.00';
-        return `$${Number(amount).toFixed(2)}`;
+    const getRowStyle = (type) => {
+        switch (type) {
+            case 'deposit':
+                return { backgroundColor: 'rgba(46, 125, 50, 0.1)' }; // Light green
+            case 'withdraw':
+                return { backgroundColor: 'rgba(211, 47, 47, 0.1)' }; // Light red
+            case 'transfer':
+                return { backgroundColor: 'rgba(25, 118, 210, 0.1)' }; // Light blue
+            default:
+                return {};
+        }
     };
 
     return (
-        <TableContainer component={Paper} sx={{ 
-            marginTop: '20px', 
-            marginRight: "30px", 
-            padding: '0px', 
-            maxHeight: '400px', 
-            overflowY: 'auto',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-            borderRadius: '8px'
-        }}>
-            <Table size="small" stickyHeader>
+        <TableContainer 
+            component={Paper} 
+            sx={{ 
+                maxHeight: '60vh',
+                overflow: 'auto',
+                marginRight: '30px',
+                marginTop: '20px',
+                '& .MuiTableCell-root': {
+                    padding: '8px 16px',
+                    whiteSpace: 'nowrap',
+                    fontSize: '0.875rem'
+                }
+            }}
+        >
+            <Table stickyHeader size="small" aria-label="transaction history table">
                 <TableHead>
-                    <TableRow sx={{ 
-                        backgroundColor: '#388E3C',
-                        '& th': {
-                            backgroundColor: '#388E3C',
-                            borderBottom: 'none',
-                            fontSize: '0.9rem',
-                            fontWeight: 600,
-                            color: 'white',
-                            padding: '16px 12px',
-                            whiteSpace: 'nowrap'
-                        }
-                    }}>
-                        <TableCell>Type</TableCell>
-                        <TableCell>Amount</TableCell>
-                        <TableCell>Date</TableCell>
-                        <TableCell>From</TableCell>
-                        <TableCell>To</TableCell>
-                        <TableCell>Transaction ID</TableCell>
+                    <TableRow>
+                        <TableCell 
+                            sx={{ 
+                                fontWeight: 'bold', 
+                                backgroundColor: '#2e7d32 !important',
+                                color: 'white'
+                            }}
+                        >
+                            Type
+                        </TableCell>
+                        <TableCell 
+                            sx={{ 
+                                fontWeight: 'bold', 
+                                backgroundColor: '#2e7d32 !important',
+                                color: 'white'
+                            }}
+                        >
+                            Amount
+                        </TableCell>
+                        <TableCell 
+                            sx={{ 
+                                fontWeight: 'bold', 
+                                backgroundColor: '#2e7d32 !important',
+                                color: 'white'
+                            }}
+                        >
+                            Date
+                        </TableCell>
+                        <TableCell 
+                            sx={{ 
+                                fontWeight: 'bold', 
+                                backgroundColor: '#2e7d32 !important',
+                                color: 'white'
+                            }}
+                        >
+                            From
+                        </TableCell>
+                        <TableCell 
+                            sx={{ 
+                                fontWeight: 'bold', 
+                                backgroundColor: '#2e7d32 !important',
+                                color: 'white'
+                            }}
+                        >
+                            To
+                        </TableCell>
+                        <TableCell 
+                            sx={{ 
+                                fontWeight: 'bold', 
+                                backgroundColor: '#2e7d32 !important',
+                                color: 'white'
+                            }}
+                        >
+                            Transaction ID
+                        </TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {transactions.map((transaction, index) => {
-                        const style = getTransactionStyle(transaction);
-                        const isTransfer = transaction.type?.toLowerCase() === 'transfer';
-
-                        // Format amount based on transaction type
-                        let displayAmount = transaction.amount;
-                        if (isTransfer && transaction.from === userEmail) {
-                            displayAmount = `-${displayAmount}`;
-                        } else if (transaction.type?.toLowerCase() === 'withdraw') {
-                            displayAmount = `-${displayAmount}`;
-                        }
-
-                        return (
-                            <TableRow key={transaction._id || index} sx={{ 
-                                backgroundColor: style.backgroundColor,
-                                '&:hover': {
+                    {transactions.map((transaction, index) => (
+                        <TableRow 
+                            key={transaction._id || index}
+                            sx={{
+                                ...getRowStyle(transaction.type),
+                                '&:hover': { 
                                     filter: 'brightness(0.95)',
                                     transition: 'all 0.2s ease-in-out'
                                 }
+                            }}
+                        >
+                            <TableCell 
+                                sx={{ 
+                                    color: transaction.type === 'deposit' ? '#2e7d32' : 
+                                           transaction.type === 'withdraw' ? '#d32f2f' : '#1976d2',
+                                    fontWeight: '500'
+                                }}
+                            >
+                                {transaction.type?.charAt(0).toUpperCase() + transaction.type?.slice(1) || 'N/A'}
+                                {transaction.type === 'deposit' && <ArrowDownwardIcon sx={{ color: '#2e7d32', marginLeft: '4px', fontSize: '1rem' }} />}
+                                {transaction.type === 'withdraw' && <ArrowUpwardIcon sx={{ color: '#d32f2f', marginLeft: '4px', fontSize: '1rem' }} />}
+                                {transaction.type === 'transfer' && <SwapHorizIcon sx={{ color: '#1976d2', marginLeft: '4px', fontSize: '1rem' }} />}
+                            </TableCell>
+                            <TableCell>
+                                {transaction.amount ? `$${Number(transaction.amount).toFixed(2)}` : '$0.00'}
+                            </TableCell>
+                            <TableCell>
+                                {transaction.date ? formatDate(transaction.date) : 'N/A'}
+                            </TableCell>
+                            <TableCell sx={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {getDisplayValue(transaction, 'from')}
+                            </TableCell>
+                            <TableCell sx={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {getDisplayValue(transaction, 'to')}
+                            </TableCell>
+                            <TableCell sx={{ 
+                                maxWidth: '100px', 
+                                overflow: 'hidden', 
+                                textOverflow: 'ellipsis',
+                                color: '#666'
                             }}>
-                                <TableCell sx={{ 
-                                    padding: '12px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    fontSize: '0.875rem',
-                                    color: style.iconColor
-                                }}>
-                                    {transaction.type}
-                                    {style.icon}
-                                </TableCell>
-                                <TableCell sx={{ 
-                                    padding: '12px', 
-                                    fontSize: '0.875rem', 
-                                    color: style.amountColor,
-                                    fontWeight: 'bold'
-                                }}>
-                                    {formatAmount(displayAmount)}
-                                </TableCell>
-                                <TableCell sx={{ padding: '12px', fontSize: '0.875rem' }}>
-                                    {formatDate(transaction.date)}
-                                </TableCell>
-                                <TableCell sx={{ padding: '12px', fontSize: '0.875rem' }}>
-                                    {transaction.from || '-'}
-                                </TableCell>
-                                <TableCell sx={{ padding: '12px', fontSize: '0.875rem' }}>
-                                    {transaction.to || '-'}
-                                </TableCell>
-                                <TableCell sx={{ padding: '12px', fontSize: '0.875rem' }}>
-                                    {transaction._id || `TR-${index + 1}`}
-                                </TableCell>
-                            </TableRow>
-                        );
-                    })}
+                                {transaction._id || 'N/A'}
+                            </TableCell>
+                        </TableRow>
+                    ))}
                 </TableBody>
             </Table>
         </TableContainer>
     );
-};
+}
 
 TransactionHistory.propTypes = {
     transactions: PropTypes.arrayOf(

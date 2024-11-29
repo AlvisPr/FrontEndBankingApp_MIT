@@ -90,9 +90,6 @@ function AllData() {
 
     return (
         <Box sx={{ width: '100%', padding: '20px' }}>
-            <Typography variant="h4" gutterBottom sx={{ backgroundColor: "yellow", color: "black", fontSize: "18px", padding: "5px" }}>
-                USER DATABASE
-            </Typography>
             <UserTable 
                 users={users}
                 open={open}

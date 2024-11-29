@@ -1,20 +1,28 @@
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#root {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
 .content-container {
-    padding-top: 70px;
+    flex: 1;
     background-image: url(https://wallpaperaccess.com/full/1153698.jpg);
     background-size: cover;
     background-position: center;
-    min-height: 100vh;
     backdrop-filter: blur(5px);
+    overflow-y: hidden;
+    padding: 20px;
 }
-
 
 @media only screen and (max-width: 767px) {
     .content-container {
-        padding-top: 50px;
-        background-image: url(https://wallpaperaccess.com/full/1153698.jpg);
-        background-size: cover;
-        background-position: center;
-        min-height: 100vh;
         backdrop-filter: blur(3px);
     }
 }

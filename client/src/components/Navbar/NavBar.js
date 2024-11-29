@@ -12,11 +12,13 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import SettingsIcon from '@mui/icons-material/Settings';
+import LoginIcon from '@mui/icons-material/Login';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
 function NavBar() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { currentUser, logout } = useContext(UserContext);
+    const { currentUser, handleLogout } = useContext(UserContext);
     const [isCollapsed, setIsCollapsed] = useState(true);
     const [anchorEl, setAnchorEl] = useState(null);
     const [open, setOpen] = useState(false);
@@ -31,23 +33,18 @@ function NavBar() {
         setOpen(false);
     };
 
-    const handleLogout = () => {
+    const onLogout = () => {
         handleClose();
-        logout();
-    };
-
-    const handleProfile = () => {
-        handleClose();
-        navigate('/profile');
+        handleLogout();
     };
 
     const handleSettings = () => {
         handleClose();
-        navigate('/settings');
+        navigate('/profile');
     };
 
     return (
-        <nav className="navbar navbar-expand-lg bg-success">
+        <nav className="navbar navbar-expand-lg bg-success sticky-top">
             <div className="container-fluid">
                 <Link className="navbar-brand" to="/" onClick={() => setIsCollapsed(true)}>
                     CashConnect
@@ -62,27 +59,27 @@ function NavBar() {
                 </button>
 
                 <div className={`collapse navbar-collapse ${!isCollapsed ? 'show' : ''}`}>
-                    <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+                    <ul className="navbar-nav me-auto mb-2 mb-lg-0" style={{ gap: '0', display: 'flex', alignItems: 'center' }}>
                         {currentUser && !currentUser.isAdmin && (
                             <>
-                                <li className="nav-item">
-                                    <Link className={`nav-link ${location.pathname === '/balance' ? 'active' : ''}`} to="/balance">
-                                        <AccountBalanceWalletIcon /> Balance
+                                <li className="nav-item" style={{ marginRight: '-4px' }}>
+                                    <Link className={`nav-link ${location.pathname === '/balance' ? 'active' : ''}`} to="/balance" style={{ display: 'flex', alignItems: 'center', gap: '2px', padding: '8px 4px' }}>
+                                        <AccountBalanceWalletIcon fontSize="small" /> Balance
+                                    </Link>
+                                </li>
+                                <li className="nav-item" style={{ marginRight: '-4px' }}>
+                                    <Link className={`nav-link ${location.pathname === '/deposit' ? 'active' : ''}`} to="/deposit" style={{ display: 'flex', alignItems: 'center', gap: '2px', padding: '8px 4px' }}>
+                                        <AddCircleOutlineIcon fontSize="small" /> Deposit
+                                    </Link>
+                                </li>
+                                <li className="nav-item" style={{ marginRight: '-4px' }}>
+                                    <Link className={`nav-link ${location.pathname === '/withdraw' ? 'active' : ''}`} to="/withdraw" style={{ display: 'flex', alignItems: 'center', gap: '2px', padding: '8px 4px' }}>
+                                        <RemoveCircleOutlineIcon fontSize="small" /> Withdraw
                                     </Link>
                                 </li>
                                 <li className="nav-item">
-                                    <Link className={`nav-link ${location.pathname === '/deposit' ? 'active' : ''}`} to="/deposit">
-                                        <AddCircleOutlineIcon /> Deposit
-                                    </Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link className={`nav-link ${location.pathname === '/withdraw' ? 'active' : ''}`} to="/withdraw">
-                                        <RemoveCircleOutlineIcon /> Withdraw
-                                    </Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link className={`nav-link ${location.pathname === '/transfer' ? 'active' : ''}`} to="/transfer">
-                                        <SwapHorizIcon /> Transfer
+                                    <Link className={`nav-link ${location.pathname === '/transfer' ? 'active' : ''}`} to="/transfer" style={{ display: 'flex', alignItems: 'center', gap: '2px', padding: '8px 4px' }}>
+                                        <SwapHorizIcon fontSize="small" /> Transfer
                                     </Link>
                                 </li>
                             </>
@@ -96,7 +93,7 @@ function NavBar() {
                         )}
                     </ul>
 
-                    <div className="d-flex align-items-center">
+                    <div className="navbar-nav">
                         {currentUser ? (
                             <>
                                 <div className={styles.userProfile} onClick={handleClick}>
@@ -138,35 +135,35 @@ function NavBar() {
                                                 gap: '8px',
                                                 '&:hover': {
                                                     backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                                                },
-                                                '& .MuiSvgIcon-root': {
-                                                    color: 'white'
                                                 }
-                                            },
-                                            '& .MuiDivider-root': {
-                                                borderColor: 'rgba(255, 255, 255, 0.2)'
                                             }
-                                        },
+                                        }
                                     }}
                                     transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                                     anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
                                 >
-                                    <MenuItem onClick={handleProfile}>
-                                        <PersonIcon /> Profile
-                                    </MenuItem>
                                     <MenuItem onClick={handleSettings}>
                                         <SettingsIcon /> Settings
                                     </MenuItem>
                                     <Divider />
-                                    <MenuItem onClick={handleLogout}>
+                                    <MenuItem onClick={onLogout}>
                                         <LogoutIcon /> Logout
                                     </MenuItem>
                                 </Menu>
                             </>
                         ) : (
-                            <Link to="/login" className="nav-link">
-                                Login
-                            </Link>
+                            <>
+                                <li className="nav-item">
+                                    <Link to="/login" className="nav-link">
+                                        <LoginIcon className="me-1" /> Login
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link to="/createaccount" className="nav-link">
+                                        <PersonAddIcon className="me-1" /> Create Account
+                                    </Link>
+                                </li>
+                            </>
                         )}
                     </div>
                 </div>

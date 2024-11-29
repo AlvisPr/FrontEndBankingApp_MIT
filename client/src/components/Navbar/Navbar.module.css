@@ -193,6 +193,40 @@
     box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
 }
 
+.userProfile {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.userProfile:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.userName {
+    color: white;
+    margin: 0 8px;
+}
+
+.avatar {
+    width: 32px !important;
+    height: 32px !important;
+}
+
+:global(.navbar) {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+:global(.sticky-top) {
+    position: sticky;
+    top: 0;
+    width: 100%;
+}
+
 @media (min-width: 992px) {
     .navbarCollapse {
         flex-direction: row;

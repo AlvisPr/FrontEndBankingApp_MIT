@@ -1,0 +1,11 @@
+.formContainer {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.error {
+    color: #dc3545;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}

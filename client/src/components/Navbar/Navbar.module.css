@@ -2,45 +2,195 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 10px; 
+    background-color: #2e7d32 !important;
+    padding: 0.5rem 1rem !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    min-height: 60px;
+    border-bottom: 3px solid rgba(255, 255, 255, 0.2) !important;
+    position: relative;
+}
+
+.navbar::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: rgba(255, 255, 255, 0.2);
+    opacity: 0.6;
 }
 
 .navbarHeader {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    width: auto; 
+    justify-content: space-between;
+    width: 100%;
 }
 
 .navbarCollapse {
+    flex-grow: 1;
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
+    justify-content: space-between;
 }
 
 .navbarNav {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    width: auto; 
-    padding-right: 10px; 
+}
+
+.navbarButtons {
+    display: flex;
+    align-items: center;
 }
 
 .navbarLogo {
     margin-right: 30px; /* Space between the logo and the rest of the elements */
 }
 
-.navbarButtons {
-    display: flex;
-    justify-content: flex-end; /* Align buttons to the end */
-    align-items: center; /* Center vertically */
-    flex-direction: row; /* Horizontal direction */
-    margin-left: auto; /* Push to the right */
-}
-
 .nav-item {
     margin: 0 10px; /* Add horizontal margin to space out items */
+}
+
+.userProfile {
+    display: flex;
+    align-items: center;
+    margin-right: 1rem;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    border-radius: 30px;
+    background-color: #198754 !important;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+.userProfile:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-1px);
+}
+
+.avatar {
+    width: 35px !important;
+    height: 35px !important;
+    margin-right: 0.75rem;
+    border: 2px solid #ffffff;
+    transition: all 0.3s ease;
+}
+
+.avatar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.userName {
+    color: #ffffff;
+    margin-right: 0.75rem;
+    font-weight: 500;
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
+}
+
+:global(.nav-link) {
+    display: flex !important;
+    align-items: center !important;
+    color: #ffffff !important;
+    font-size: 1rem !important;
+    padding: 0.7rem 1.2rem !important;
+    margin: 0 0.3rem;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+:global(.nav-link:hover) {
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+}
+
+:global(.nav-link.active) {
+    background-color: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    font-weight: 600;
+}
+
+:global(.nav-link svg) {
+    margin-right: 8px;
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+:global(.nav-link:hover svg) {
+    transform: scale(1.1);
+}
+
+:global(.navbar-brand) {
+    font-size: 1.4rem !important;
+    padding: 0.5rem 1rem !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+}
+
+:global(.navbar-brand:hover) {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+:global(.navbar-toggler) {
+    padding: 0.4rem 0.8rem !important;
+    border: 2px solid rgba(255, 255, 255, 0.4) !important;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+:global(.navbar-toggler:hover) {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+:global(.navbar-toggler:focus) {
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25);
+}
+
+:global(.navbar-toggler-icon) {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.8)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+
+.navLink {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.95rem !important;
+    color: #ffffff !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.3px;
+    position: relative;
+    margin: 0 0.2rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.navLink:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+}
+
+.navLink svg {
+    font-size: 1.1rem;
+    margin-right: 4px;
+}
+
+.activeLink {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    border: 3px solid rgba(255, 255, 255, 0.8) !important;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
 }
 
 @media (min-width: 992px) {
@@ -72,7 +222,16 @@
 
     .navbarCollapse {
         flex-direction: column;
-        align-items: center;
+        padding: 1rem 0;
+    }
+    
+    .navbarButtons {
+        margin-top: 1rem;
+        width: 100%;
+    }
+    
+    .navbarNav {
+        width: 100%;
     }
 
     .navbarNav {
@@ -89,5 +248,29 @@
 
     .navbarLogo {
         margin-right: auto; /* Push logo to the left */
+    }
+
+    :global(.nav-link) {
+        padding: 0.8rem 1.2rem !important;
+        margin: 0.3rem 0;
+    }
+
+    .userProfile {
+        margin: 0.5rem 0;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .userName {
+        display: none;
+    }
+    
+    .userProfile {
+        padding: 0.4rem;
+    }
+
+    .avatar {
+        margin-right: 0;
     }
 }

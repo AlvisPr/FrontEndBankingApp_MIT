@@ -7,7 +7,10 @@ function Card(props) {
 
     return (
         <div className={styles.cardContainer}>
-            <BootstrapCard className={`${cardClasses} ${styles.card}`} style={{ backgroundColor: props.transparent ? 'transparent' : 'rgba(255, 255, 255, 0.8)', boxShadow: props.transparent ? 'none' : '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
+            <BootstrapCard className={`${cardClasses} ${styles.card}`} style={{ 
+                backgroundColor: props.bgcolor === 'success' ? 'var(--bs-success)' : props.transparent ? 'transparent' : 'rgba(255, 255, 255, 0.8)', 
+                boxShadow: props.transparent ? 'none' : '0 4px 8px rgba(0, 0, 0, 0.1)' 
+            }}>
                 {(props.header || props.balance) && (
                     <BootstrapCard.Header
                         className={styles.cardHeader}

@@ -148,13 +148,13 @@ function Profile() {
         }
     };
 
-    // Custom green theme colors
+    // Custom green theme colors matching Bootstrap's success color
     const greenTheme = {
         primary: {
-            main: '#2e7d32', // Dark green
-            light: '#4caf50', // Medium green
-            lighter: '#e8f5e9', // Very light green
-            border: '#81c784' // Light green for borders
+            main: 'var(--bs-success)',      // Using Bootstrap's success color
+            light: 'var(--bs-success)',      // Using the same color for consistency
+            lighter: 'var(--bs-success)',    // Using the same color for consistency
+            border: 'var(--bs-success)'      // Using the same color for borders
         }
     };
 
@@ -194,7 +194,11 @@ function Profile() {
                     boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
                     borderRadius: '6px',
                     border: `1px solid ${greenTheme.primary.border}`,
-                    backgroundColor: '#ffffff'
+                    backgroundColor: '#ffffff',
+                    '& .MuiCardHeader-root': {
+                        backgroundColor: greenTheme.primary.main,
+                        color: 'white'
+                    }
                 }}>
                     <Box sx={{ 
                         borderBottom: `1px solid ${greenTheme.primary.border}`,

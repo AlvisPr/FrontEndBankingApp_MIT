@@ -21,6 +21,12 @@ const communicationPreferencesSchema = new mongoose.Schema({
     paperlessStatements: { type: Boolean, default: false }
 }, { _id: false });
 
+const sessionSchema = new mongoose.Schema({
+    secret: String,
+    createdAt: { type: Date, default: Date.now },
+    expiresAt: Date
+}, { _id: false });
+
 const userSchema = new mongoose.Schema({
     name: String,
     email: { type: String, unique: true },
@@ -32,11 +38,26 @@ const userSchema = new mongoose.Schema({
     phoneNumber: String,
     address: addressSchema,
     preferredName: String,
+    profilePicture: { 
+        type: String, 
+        default: 'https://ui-avatars.com/api/?background=0D8ABC&color=fff' // Default avatar URL
+    },
     language: { type: String, default: 'English' },
     communicationPreferences: {
         type: communicationPreferencesSchema,
         default: () => ({})
-    }
+    },
+    activeSessions: [sessionSchema]
 });
+
+// Clean up expired sessions
+userSchema.methods.cleanExpiredSessions = async function() {
+    this.activeSessions = this.activeSessions.filter(session => 
+        session.expiresAt > new Date()
+    );
+    if (this.isModified('activeSessions')) {
+        await this.save();
+    }
+};
 
 module.exports = mongoose.model('User', userSchema);

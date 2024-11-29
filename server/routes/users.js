@@ -5,6 +5,13 @@ const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const { ObjectId } = mongoose.Types;
 const isAdmin = require('../middleware/isAdmin');
+const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+
+// Helper function to generate a random secret
+const generateSecret = () => {
+    return crypto.randomBytes(64).toString('hex');
+};
 
 // Get all users
 router.get('/', async (req, res) => {
@@ -97,15 +104,50 @@ router.post('/login', async (req, res) => {
             });
         }
 
-        // Return user without password
+        // Clean up expired sessions
+        await user.cleanExpiredSessions();
+
+        // Generate new session with unique secret
+        const sessionSecret = generateSecret();
+        const expiresAt = new Date();
+        expiresAt.setHours(expiresAt.getHours() + 24); // 24 hour expiration
+
+        const newSession = {
+            secret: sessionSecret,
+            expiresAt
+        };
+
+        user.activeSessions.push(newSession);
+        await user.save();
+
+        // Get the ID of the newly created session
+        const sessionId = user.activeSessions[user.activeSessions.length - 1]._id;
+
+        // Generate JWT token with session-specific secret
+        const token = jwt.sign(
+            { 
+                userId: user._id,
+                email: user.email,
+                isAdmin: user.isAdmin,
+                sessionId: sessionId
+            },
+            sessionSecret,
+            { expiresIn: '24h' }
+        );
+
+        // Return user without password and include token
         res.json({
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            balance: user.balance,
-            accountNumber: user.accountNumber,
-            isAdmin: user.isAdmin,
-            communicationPreferences: user.communicationPreferences
+            token,
+            user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                balance: user.balance,
+                accountNumber: user.accountNumber,
+                isAdmin: user.isAdmin,
+                profilePicture: user.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=0D8ABC&color=fff`,
+                communicationPreferences: user.communicationPreferences
+            }
         });
 
     } catch (error) {
@@ -114,6 +156,27 @@ router.post('/login', async (req, res) => {
             error: 'Login failed',
             details: error.message
         });
+    }
+});
+
+// Logout endpoint
+router.post('/logout', async (req, res) => {
+    try {
+        const user = await User.findById(req.user.userId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Remove the current session
+        user.activeSessions = user.activeSessions.filter(session => 
+            session._id.toString() !== req.user.sessionId
+        );
+        await user.save();
+
+        res.json({ message: 'Logged out successfully' });
+    } catch (error) {
+        console.error('Logout error:', error);
+        res.status(500).json({ error: 'Logout failed' });
     }
 });
 

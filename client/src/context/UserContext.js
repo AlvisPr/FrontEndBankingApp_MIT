@@ -8,8 +8,8 @@ export const UserProvider = ({ children }) => {
     const [users, setUsers] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
     const [showLogin, setShowLogin] = useState(true);
-    const [logout, setLogout] = useState(false);
     const [userType, setUserType] = useState('user');
+    const [token, setToken] = useState(localStorage.getItem('token'));
 
     // Fetch all users (for admin view)
     const fetchUsers = async () => {
@@ -24,6 +24,20 @@ export const UserProvider = ({ children }) => {
     useEffect(() => {
         fetchUsers();
     }, []);
+
+    useEffect(() => {
+        if (token) {
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            // Try to get user data using the token
+            const userData = JSON.parse(localStorage.getItem('user'));
+            if (userData) {
+                setCurrentUser(userData);
+                setUserType(userData.isAdmin ? 'admin' : 'user');
+            }
+        } else {
+            delete axios.defaults.headers.common['Authorization'];
+        }
+    }, [token]);
 
     const logTransaction = async (type, amount) => {
         if (!currentUser) {
@@ -161,16 +175,18 @@ export const UserProvider = ({ children }) => {
             });
 
             console.log('Login successful');
-            const loggedInUser = response.data;
+            const { token, user } = response.data;
             
-            // Set user type based on the isAdmin flag from the server response
-            const isAdmin = loggedInUser.isAdmin === true;
-            setCurrentUser({ ...loggedInUser, password });
+            // Store token and user data
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify(user));
+            
+            setToken(token);
+            setCurrentUser(user);
             setShowLogin(false);
-            setUserType(isAdmin ? 'admin' : 'user');
-            console.log('User type set to:', isAdmin ? 'admin' : 'user');
-            console.log('Current user:', { ...loggedInUser, isAdmin });
-            return response.data;
+            setUserType(user.isAdmin ? 'admin' : 'user');
+            
+            return user;
         } catch (error) {
             console.error('Login error:', {
                 status: error.response?.status,
@@ -183,6 +199,45 @@ export const UserProvider = ({ children }) => {
                         error.response?.data?.message || 
                         'Invalid email or password'
             };
+        }
+    };
+
+    // Add axios interceptor to handle token expiration
+    useEffect(() => {
+        const interceptor = axios.interceptors.response.use(
+            response => response,
+            async error => {
+                if (error.response?.status === 401) {
+                    // Token is invalid or expired
+                    handleLogout();
+                }
+                return Promise.reject(error);
+            }
+        );
+
+        return () => {
+            // Remove interceptor on cleanup
+            axios.interceptors.response.eject(interceptor);
+        };
+    }, []);
+
+    const handleLogout = async () => {
+        try {
+            if (token) {
+                // Call logout endpoint to invalidate session
+                await axios.post(`${API_URL}/users/logout`);
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+        } finally {
+            // Clear local storage and state regardless of server response
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            setToken(null);
+            setCurrentUser(null);
+            setUserType('user');
+            setShowLogin(true);
+            delete axios.defaults.headers.common['Authorization'];
         }
     };
 
@@ -247,14 +302,13 @@ export const UserProvider = ({ children }) => {
             setCurrentUser,
             showLogin,
             setShowLogin,
-            logout,
-            setLogout,
             userType,
             setUserType,
             removeUser,
             logTransaction,
             createUser,
             loginUser,
+            handleLogout,
             changeUserPassword,
             updateUserProfile
         }}>

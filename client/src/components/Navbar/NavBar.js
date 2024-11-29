@@ -1,115 +1,174 @@
-import React, { useContext, useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FaUserPlus, FaSignInAlt, FaSignOutAlt, FaCog, FaUsers } from 'react-icons/fa';
 import UserContext from '../../context/UserContext';
-import ClipLoader from 'react-spinners/ClipLoader';
-import styles from './Navbar.module.css'; 
-import spinner from '../../Styles/spinner.module.css';
+import styles from './Navbar.module.css';
+import { FaUsers } from 'react-icons/fa';
+import { Avatar, Menu, MenuItem, IconButton, Divider } from '@mui/material';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import LogoutIcon from '@mui/icons-material/Logout';
+import PersonIcon from '@mui/icons-material/Person';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 function NavBar() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { currentUser, setCurrentUser, setShowLogin, setLogout } = useContext(UserContext);
+    const { currentUser, logout } = useContext(UserContext);
     const [isCollapsed, setIsCollapsed] = useState(true);
-    const [loading, setLoading] = useState(false);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [open, setOpen] = useState(false);
 
-    const highlightStyle = {
-        backgroundColor: 'yellow',
-        borderRadius: '5px',
-        padding: '5px',
-        color: "black",
-        border: '3px solid darkviolet'
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+        setOpen(true);
     };
 
-    const getLinkStyle = (path) => {
-        return location.pathname === path ? highlightStyle : {};
+    const handleClose = () => {
+        setAnchorEl(null);
+        setOpen(false);
     };
 
     const handleLogout = () => {
-        setLoading(true);
-        setTimeout(() => {
-            setCurrentUser(null);
-            setShowLogin(true); 
-            setLogout(true); 
-            navigate('/login'); 
-            setIsCollapsed(true); 
-            setLoading(false);
-        }, 700);
+        handleClose();
+        logout();
     };
 
-    const handleLinkClick = () => {
-        setIsCollapsed(true); 
+    const handleProfile = () => {
+        handleClose();
+        navigate('/profile');
+    };
+
+    const handleSettings = () => {
+        handleClose();
+        navigate('/settings');
     };
 
     return (
-        <nav className={`navbar navbar-expand-lg navbar-light bg-light fixed-top ${styles.navbar}`}>
-            <div className={styles.navbarHeader}>
-                <Link className="navbar-brand" to="/" style={{ marginRight: '60px', marginLeft: "30px" }}>CashConnect</Link>
-                <button className="navbar-toggler" type="button" onClick={() => setIsCollapsed(!isCollapsed)} aria-controls="navbarNav" aria-expanded={!isCollapsed} aria-label="Toggle navigation">
+        <nav className="navbar navbar-expand-lg bg-success">
+            <div className="container-fluid">
+                <Link className="navbar-brand" to="/" onClick={() => setIsCollapsed(true)}>
+                    CashConnect
+                </Link>
+
+                <button
+                    className="navbar-toggler"
+                    type="button"
+                    onClick={() => setIsCollapsed(!isCollapsed)}
+                >
                     <span className="navbar-toggler-icon"></span>
                 </button>
-            </div>
-            <div className={`collapse navbar-collapse ${!isCollapsed ? 'show' : ''} ${styles.navbarCollapse}`} id="navbarNav">
-                <ul className={`navbar-nav ${styles.navbarNav}`}>
-                    {currentUser && !currentUser.isAdmin && (
-                        <>
-                            <li className="nav-item">
-                                <Link className="nav-link" to="/balance" style={getLinkStyle('/balance')} onClick={handleLinkClick}>Balance</Link>
-                            </li>
-                            <li className="nav-item">
-                                <Link className="nav-link" to="/deposit" style={getLinkStyle('/deposit')} onClick={handleLinkClick}>Deposit</Link>
-                            </li>
-                            <li className="nav-item">
-                                <Link className="nav-link" to="/withdraw" style={getLinkStyle('/withdraw')} onClick={handleLinkClick}>Withdraw</Link>
-                            </li>
-                            <li className="nav-item">
-                                <Link className="nav-link" to="/transfer" style={getLinkStyle('/transfer')} onClick={handleLinkClick}>Transfer</Link>
-                            </li>
-                        </>
-                    )}
-                    {currentUser && currentUser.isAdmin && (
-                        <li className="nav-item">
-                            <Link className="nav-link" to="/alldata" style={getLinkStyle('/alldata')} onClick={handleLinkClick}>
-                                <FaUsers style={{ marginRight: '5px' }} />All Data
-                            </Link>
-                        </li>
-                    )}
-                </ul>
-                <div className={styles.navbarButtons}>
-                    <ul className={`navbar-nav ${styles.navbarNav}`}>
-                        {!currentUser && (
-                            <li className="nav-item">
-                                <Link className="nav-link" to="/createaccount" style={getLinkStyle('/createaccount')} onClick={handleLinkClick}>
-                                    <FaUserPlus style={{ marginRight: '5px' }} />Create Account
-                                </Link>
-                            </li>
-                        )}
+
+                <div className={`collapse navbar-collapse ${!isCollapsed ? 'show' : ''}`}>
+                    <ul className="navbar-nav me-auto mb-2 mb-lg-0">
                         {currentUser && !currentUser.isAdmin && (
+                            <>
+                                <li className="nav-item">
+                                    <Link className={`nav-link ${location.pathname === '/balance' ? 'active' : ''}`} to="/balance">
+                                        <AccountBalanceWalletIcon /> Balance
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className={`nav-link ${location.pathname === '/deposit' ? 'active' : ''}`} to="/deposit">
+                                        <AddCircleOutlineIcon /> Deposit
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className={`nav-link ${location.pathname === '/withdraw' ? 'active' : ''}`} to="/withdraw">
+                                        <RemoveCircleOutlineIcon /> Withdraw
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className={`nav-link ${location.pathname === '/transfer' ? 'active' : ''}`} to="/transfer">
+                                        <SwapHorizIcon /> Transfer
+                                    </Link>
+                                </li>
+                            </>
+                        )}
+                        {currentUser && currentUser.isAdmin && (
                             <li className="nav-item">
-                                <Link className="nav-link" to="/profile" style={getLinkStyle('/profile')} onClick={handleLinkClick}>
-                                    <FaCog style={{ marginRight: '5px' }} />Profile
+                                <Link className={`nav-link ${location.pathname === '/alldata' ? 'active' : ''}`} to="/alldata">
+                                    <FaUsers /> All Data
                                 </Link>
                             </li>
                         )}
-                        <li className="nav-item">
-                            {currentUser ? (
-                                <button className="nav-link btn" onClick={handleLogout} style={{ display: 'flex', alignItems: 'center' }}>
-                                    {loading ? (
-                                        <ClipLoader color="#2e7d32" loading={loading} size={20} className={spinner.spinnerButton} />
-                                    ) : (
-                                        <>
-                                            <FaSignOutAlt style={{ marginRight: '5px' }} />
-                                            Logout
-                                        </>
-                                    )}
-                                </button>
-                            ) : (
-                                <Link className="nav-link" to="/login" style={getLinkStyle('/login')} onClick={handleLinkClick}>
-                                    <FaSignInAlt style={{ marginRight: '5px' }} />Login
-                                </Link>
-                            )}
-                        </li>
                     </ul>
+
+                    <div className="d-flex align-items-center">
+                        {currentUser ? (
+                            <>
+                                <div className={styles.userProfile} onClick={handleClick}>
+                                    <Avatar 
+                                        src={currentUser.profilePicture}
+                                        alt={currentUser.name}
+                                        className={styles.avatar}
+                                    />
+                                    <span className={styles.userName}>{currentUser.name}</span>
+                                    <IconButton
+                                        size="small"
+                                        sx={{ 
+                                            ml: 1,
+                                            color: 'white',
+                                            '&:hover': {
+                                                backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                            }
+                                        }}
+                                    >
+                                        <AccountCircleIcon />
+                                    </IconButton>
+                                </div>
+                                <Menu
+                                    anchorEl={anchorEl}
+                                    open={open}
+                                    onClose={handleClose}
+                                    onClick={handleClose}
+                                    PaperProps={{
+                                        elevation: 3,
+                                        sx: {
+                                            mt: 1.5,
+                                            backgroundColor: '#198754',
+                                            color: 'white',
+                                            minWidth: '200px',
+                                            '& .MuiMenuItem-root': {
+                                                padding: '10px 20px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '8px',
+                                                '&:hover': {
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                                },
+                                                '& .MuiSvgIcon-root': {
+                                                    color: 'white'
+                                                }
+                                            },
+                                            '& .MuiDivider-root': {
+                                                borderColor: 'rgba(255, 255, 255, 0.2)'
+                                            }
+                                        },
+                                    }}
+                                    transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                                    anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                                >
+                                    <MenuItem onClick={handleProfile}>
+                                        <PersonIcon /> Profile
+                                    </MenuItem>
+                                    <MenuItem onClick={handleSettings}>
+                                        <SettingsIcon /> Settings
+                                    </MenuItem>
+                                    <Divider />
+                                    <MenuItem onClick={handleLogout}>
+                                        <LogoutIcon /> Logout
+                                    </MenuItem>
+                                </Menu>
+                            </>
+                        ) : (
+                            <Link to="/login" className="nav-link">
+                                Login
+                            </Link>
+                        )}
+                    </div>
                 </div>
             </div>
         </nav>

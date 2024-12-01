@@ -82,7 +82,7 @@ function Withdraw() {
                 If the user is not logged in, they will be prompted to log in.
             `}
             />
-            <ToastContainer style={{ top: '80px' }}/>
+            <ToastContainer style={{ top: '20px' }}/>
         </>
     );
 }

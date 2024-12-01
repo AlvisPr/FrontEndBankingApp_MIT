@@ -59,26 +59,62 @@ function NavBar() {
                 </button>
 
                 <div className={`collapse navbar-collapse ${!isCollapsed ? 'show' : ''}`}>
-                    <ul className="navbar-nav me-auto mb-2 mb-lg-0" style={{ gap: '0', display: 'flex', alignItems: 'center' }}>
+                    <ul className="navbar-nav me-auto mb-2 mb-lg-0" style={{ display: 'flex', gap: 0 }}>
                         {currentUser && !currentUser.isAdmin && (
                             <>
-                                <li className="nav-item" style={{ marginRight: '-4px' }}>
-                                    <Link className={`nav-link ${location.pathname === '/balance' ? 'active' : ''}`} to="/balance" style={{ display: 'flex', alignItems: 'center', gap: '2px', padding: '8px 4px' }}>
+                                <li className="nav-item" style={{ marginRight: '-8px' }}>
+                                    <Link 
+                                        className={`nav-link ${location.pathname === '/balance' ? 'active' : ''}`} 
+                                        to="/balance"
+                                        style={{ 
+                                            display: 'flex', 
+                                            alignItems: 'center', 
+                                            gap: '2px',
+                                            padding: '8px 4px'
+                                        }}
+                                    >
                                         <AccountBalanceWalletIcon fontSize="small" /> Balance
                                     </Link>
                                 </li>
-                                <li className="nav-item" style={{ marginRight: '-4px' }}>
-                                    <Link className={`nav-link ${location.pathname === '/deposit' ? 'active' : ''}`} to="/deposit" style={{ display: 'flex', alignItems: 'center', gap: '2px', padding: '8px 4px' }}>
+                                <li className="nav-item" style={{ marginRight: '-8px' }}>
+                                    <Link 
+                                        className={`nav-link ${location.pathname === '/deposit' ? 'active' : ''}`} 
+                                        to="/deposit"
+                                        style={{ 
+                                            display: 'flex', 
+                                            alignItems: 'center', 
+                                            gap: '2px',
+                                            padding: '8px 4px'
+                                        }}
+                                    >
                                         <AddCircleOutlineIcon fontSize="small" /> Deposit
                                     </Link>
                                 </li>
-                                <li className="nav-item" style={{ marginRight: '-4px' }}>
-                                    <Link className={`nav-link ${location.pathname === '/withdraw' ? 'active' : ''}`} to="/withdraw" style={{ display: 'flex', alignItems: 'center', gap: '2px', padding: '8px 4px' }}>
+                                <li className="nav-item" style={{ marginRight: '-8px' }}>
+                                    <Link 
+                                        className={`nav-link ${location.pathname === '/withdraw' ? 'active' : ''}`} 
+                                        to="/withdraw"
+                                        style={{ 
+                                            display: 'flex', 
+                                            alignItems: 'center', 
+                                            gap: '2px',
+                                            padding: '8px 4px'
+                                        }}
+                                    >
                                         <RemoveCircleOutlineIcon fontSize="small" /> Withdraw
                                     </Link>
                                 </li>
                                 <li className="nav-item">
-                                    <Link className={`nav-link ${location.pathname === '/transfer' ? 'active' : ''}`} to="/transfer" style={{ display: 'flex', alignItems: 'center', gap: '2px', padding: '8px 4px' }}>
+                                    <Link 
+                                        className={`nav-link ${location.pathname === '/transfer' ? 'active' : ''}`} 
+                                        to="/transfer"
+                                        style={{ 
+                                            display: 'flex', 
+                                            alignItems: 'center', 
+                                            gap: '2px',
+                                            padding: '8px 4px'
+                                        }}
+                                    >
                                         <SwapHorizIcon fontSize="small" /> Transfer
                                     </Link>
                                 </li>

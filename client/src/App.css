@@ -25,4 +25,17 @@ body {
     .content-container {
         backdrop-filter: blur(3px);
     }
+}keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.flying-lock:nth-child(odd) {
+    animation: floatAround 25s infinite ease-in-out, pulse 8s infinite ease-in-out;
+}
+
+/* Add hover effect for more interactivity */
+.flying-lock:hover {
+    opacity: 0.4;
+    transition: opacity 0.3s ease;
 }

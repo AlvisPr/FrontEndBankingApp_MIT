@@ -10,11 +10,23 @@
     width: 100%;
     position: relative;
     z-index: 1;
+    animation: slideIn 0.8s ease-out;
+}
+
+@keyframes slideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .card {
     border-radius: 12px !important;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.5s, box-shadow 0.5s;
     backdrop-filter: blur(5px);
     background-image: linear-gradient(135deg, rgba(85, 45, 168, 0.95) 0%, rgba(49, 27, 146, 0.95) 100%);
     padding: 20px;
@@ -25,7 +37,7 @@
 }
 
 .card:hover {
-    transform: translateY(-2px);
+    transform: translateY(-5px);
     box-shadow: 0 8px 25px rgba(69, 39, 160, 0.4) !important;
 }
 
@@ -40,6 +52,7 @@
     align-items: center;
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(5px);
+    transition: all 0.5s ease;
 }
 
 .cardTitle {
@@ -71,7 +84,7 @@
 .socialIcon {
     font-size: 2rem;
     margin: 0 10px;
-    transition: transform 0.2s, opacity 0.2s;
+    transition: transform 0.5s, opacity 0.5s;
     opacity: 0.8;
 }
 
@@ -111,7 +124,7 @@ button {
     background: rgba(255, 255, 255, 0.15);
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: white;
-    transition: all 0.2s;
+    transition: all 0.5s;
 }
 
 .card :global(.btn-light:hover) {

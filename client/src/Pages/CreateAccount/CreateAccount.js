@@ -130,7 +130,7 @@ function CreateAccount() {
                     </>
                 )}
             />
-            <ToastContainer style={{ top: '80px' }}/>
+            <ToastContainer style={{ top: '20px' }}/>
         </>
     );
 }

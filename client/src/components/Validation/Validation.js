@@ -58,6 +58,27 @@ export const validateField = (fieldName, value, ctx, context) => {
                 errors.street = 'Street address should be at least 2 characters long';
             }
             break;
+        case 'accountNumber':
+            if (!value) {
+                errors.accountNumber = 'Account number is required';
+            } else if (!/^\d{10}$/.test(value)) {
+                errors.accountNumber = 'Account number must be 10 digits';
+            }
+            break;
+        case 'routingNumber':
+            if (!value) {
+                errors.routingNumber = 'Routing number is required';
+            } else if (!/^\d{9}$/.test(value)) {
+                errors.routingNumber = 'Routing number must be 9 digits';
+            }
+            break;
+        case 'amount':
+            if (!value) {
+                errors.amount = 'Amount is required';
+            } else if (isNaN(value) || parseFloat(value) <= 0) {
+                errors.amount = 'Amount must be a positive number';
+            }
+            break;
         default:
             break;
     }

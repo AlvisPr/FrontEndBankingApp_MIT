@@ -128,26 +128,7 @@ function Login() {
                             placeholder="Password"
                         />
                         <br />
-                        <div style={{ marginBottom: '15px' }}>
-                            <label>
-                                <input
-                                    type="radio"
-                                    value="user"
-                                    checked={userType === 'user'}
-                                    onChange={() => setUserType('user')}
-                                />
-                                User
-                            </label>
-                            <label style={{ marginLeft: '20px' }}>
-                                <input
-                                    type="radio"
-                                    value="admin"
-                                    checked={userType === 'admin'}
-                                    onChange={() => setUserType('admin')}
-                                />
-                                Admin
-                            </label>
-                        </div>
+                   
                         <button type="button" className="btn btn-primary" onClick={handleLogin} disabled={userType === 'user' && !isFormValid}>Login</button>
                     </form>
                 ) : (

@@ -1,13 +1,13 @@
 import React from 'react';
-import { 
-    Table, 
-    TableBody, 
-    TableCell, 
-    TableContainer, 
-    TableHead, 
-    TableRow, 
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
     Paper,
-    Typography 
+    Typography
 } from '@mui/material';
 import { format } from 'date-fns';
 import PropTypes from 'prop-types';
@@ -30,7 +30,7 @@ function TransactionHistory({ transactions = [], currentUser, userEmail }) {
     };
 
     const getDisplayValue = (transaction, field) => {
-        if (transaction.type === 'withdraw' || 
+        if (transaction.type === 'withdraw' ||
             (transaction.type === 'deposit' && (!transaction.from && !transaction.to))) {
             return '-';
         }
@@ -51,11 +51,12 @@ function TransactionHistory({ transactions = [], currentUser, userEmail }) {
     };
 
     return (
-        <TableContainer 
-            component={Paper} 
-            sx={{ 
-                maxHeight: '60vh',
-                overflow: 'auto',
+        <TableContainer
+            component={Paper}
+            sx={{
+                maxHeight: '60vh',          // Limit the height of the table container
+                overflowY: 'auto',         // Allow scrolling, but only when necessary
+                overflowX: 'auto',         // Allow horizontal scrolling if necessary
                 marginRight: '30px',
                 marginTop: '20px',
                 borderRadius: '16px',
@@ -69,15 +70,17 @@ function TransactionHistory({ transactions = [], currentUser, userEmail }) {
                     borderRadius: '16px',
                 },
                 background: 'rgba(255, 255, 255, 0.9)',
-                backdropFilter: 'blur(10px)'
-            }}
-        >
+                backdropFilter: 'blur(10px)',
+                '&::-webkit-scrollbar': {
+                    display: 'none',  // Hide the scrollbar for Webkit browsers (Chrome, Safari)
+                }
+            }} >
             <Table stickyHeader size="small" aria-label="transaction history table">
                 <TableHead>
                     <TableRow>
-                        <TableCell 
-                            sx={{ 
-                                fontWeight: 'bold', 
+                        <TableCell
+                            sx={{
+                                fontWeight: 'bold',
                                 backgroundColor: '#208454 !important',
                                 color: 'white',
                                 '&:first-of-type': {
@@ -90,45 +93,45 @@ function TransactionHistory({ transactions = [], currentUser, userEmail }) {
                         >
                             Type
                         </TableCell>
-                        <TableCell 
-                            sx={{ 
-                                fontWeight: 'bold', 
+                        <TableCell
+                            sx={{
+                                fontWeight: 'bold',
                                 backgroundColor: '#208454 !important',
                                 color: 'white'
                             }}
                         >
                             Amount
                         </TableCell>
-                        <TableCell 
-                            sx={{ 
-                                fontWeight: 'bold', 
+                        <TableCell
+                            sx={{
+                                fontWeight: 'bold',
                                 backgroundColor: '#208454 !important',
                                 color: 'white'
                             }}
                         >
                             Date
                         </TableCell>
-                        <TableCell 
-                            sx={{ 
-                                fontWeight: 'bold', 
+                        <TableCell
+                            sx={{
+                                fontWeight: 'bold',
                                 backgroundColor: '#208454 !important',
                                 color: 'white'
                             }}
                         >
                             From
                         </TableCell>
-                        <TableCell 
-                            sx={{ 
-                                fontWeight: 'bold', 
+                        <TableCell
+                            sx={{
+                                fontWeight: 'bold',
                                 backgroundColor: '#208454 !important',
                                 color: 'white'
                             }}
                         >
                             To
                         </TableCell>
-                        <TableCell 
-                            sx={{ 
-                                fontWeight: 'bold', 
+                        <TableCell
+                            sx={{
+                                fontWeight: 'bold',
                                 backgroundColor: '#208454 !important',
                                 color: 'white'
                             }}
@@ -139,11 +142,11 @@ function TransactionHistory({ transactions = [], currentUser, userEmail }) {
                 </TableHead>
                 <TableBody>
                     {transactions.map((transaction, index) => (
-                        <TableRow 
+                        <TableRow
                             key={transaction._id || index}
                             sx={{
                                 ...getRowStyle(transaction.type),
-                                '&:hover': { 
+                                '&:hover': {
                                     filter: 'brightness(0.95)',
                                     transition: 'all 0.3s ease-in-out',
                                     backgroundColor: 'rgba(32, 132, 84, 0.05)'
@@ -153,10 +156,10 @@ function TransactionHistory({ transactions = [], currentUser, userEmail }) {
                                 }
                             }}
                         >
-                            <TableCell 
-                                sx={{ 
-                                    color: transaction.type === 'deposit' ? '#208454' : 
-                                           transaction.type === 'withdraw' ? '#d32f2f' : '#1976d2',
+                            <TableCell
+                                sx={{
+                                    color: transaction.type === 'deposit' ? '#208454' :
+                                        transaction.type === 'withdraw' ? '#d32f2f' : '#1976d2',
                                     fontWeight: '500',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -180,9 +183,9 @@ function TransactionHistory({ transactions = [], currentUser, userEmail }) {
                             <TableCell sx={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                 {getDisplayValue(transaction, 'to')}
                             </TableCell>
-                            <TableCell sx={{ 
-                                maxWidth: '100px', 
-                                overflow: 'hidden', 
+                            <TableCell sx={{
+                                maxWidth: '100px',
+                                overflow: 'hidden',
                                 textOverflow: 'ellipsis',
                                 color: '#666',
                                 fontSize: '0.8rem'

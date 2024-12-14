@@ -28,3 +28,11 @@ yarn-error.log*
 .env.development
 .env.production
 node_modules/
+
+
+#getridoflogfiles 
+*.log
+error.log
+app.log
+
+

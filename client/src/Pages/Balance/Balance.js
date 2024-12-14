@@ -11,12 +11,15 @@ function Balance() {
     const ctx = useContext(UserContext);
     const [showTransactions, setShowTransactions] = useState(false);
     const [transactions, setTransactions] = useState([]);
+    const API_URL = process.env.NODE_ENV === 'development'
+        ? process.env.REACT_APP_DEVELOP
+        : process.env.REACT_APP_DEPLOY;
 
     const handleToggleTransactions = async () => {
         if (!showTransactions) {
             try {
-                const response = await axios.get(`http://localhost:3001/api/users/${ctx.currentUser._id}/transactions`);
-                console.log('Fetched transactions:', response.data); // Debugging line
+                const response = await axios.get(`${API_URL}/users/${ctx.currentUser._id}/transactions`);
+                console.log('Fetched transactions:', response.data); 
                 setTransactions(response.data);
             } catch (error) {
                 console.error('Error fetching transactions:', error.response?.data || error.message);

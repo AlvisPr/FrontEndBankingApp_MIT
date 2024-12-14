@@ -42,6 +42,9 @@ function Transfer() {
         const accountErrors = validateField('accountNumber', toAccountNumber);
         const amountErrors = validateField('amount', amount);
         const errors = { ...accountErrors, ...amountErrors };
+        const API_URL = process.env.NODE_ENV === 'development'
+            ? process.env.REACT_APP_DEVELOP
+            : process.env.REACT_APP_DEPLOY;
 
         if (Object.keys(errors).length > 0) {
             setValidationErrors(errors);
@@ -51,7 +54,7 @@ function Transfer() {
 
         setLoading(true);
         try {
-            const response = await axios.post('http://localhost:3001/api/users/transfer', {
+            const response = await axios.post( API_URL , {
                 fromEmail: currentUser.email,
                 toAccountNumber,
                 amount: parseFloat(amount)
@@ -78,29 +81,29 @@ function Transfer() {
                 body={
                     currentUser ? (
                         <>
-                            <input 
-                                type="text" 
-                                className="form-control" 
-                                id="accountNumber" 
-                                placeholder="Enter recipient account number" 
-                                value={toAccountNumber} 
+                            <input
+                                type="text"
+                                className="form-control"
+                                id="accountNumber"
+                                placeholder="Enter recipient account number"
+                                value={toAccountNumber}
                                 onChange={handleChange}
                                 onBlur={handleBlur}
                             />
                             <br />
-                            <input 
-                                type="number" 
-                                className="form-control" 
-                                id="amount" 
-                                placeholder="Enter amount" 
+                            <input
+                                type="number"
+                                className="form-control"
+                                id="amount"
+                                placeholder="Enter amount"
                                 value={amount}
                                 onChange={handleChange}
                                 onBlur={handleBlur}
                             />
                             <br />
-                            <button 
-                                type="submit" 
-                                className="btn btn-light" 
+                            <button
+                                type="submit"
+                                className="btn btn-light"
                                 onClick={handleTransfer}
                                 disabled={!amount || !toAccountNumber || Object.keys(validationErrors).length > 0}
                             >
@@ -124,7 +127,7 @@ function Transfer() {
                 If the user is not logged in, they will be prompted to log in.
             `}
             />
-            <ToastContainer style={{ top: '20px' }}/>
+            <ToastContainer style={{ top: '20px' }} />
         </>
     );
 }

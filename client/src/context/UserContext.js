@@ -2,7 +2,11 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
 const UserContext = createContext();
-const API_URL = 'http://localhost:3001/api';
+const API_URL = process.env.NODE_ENV === 'development' 
+  ? process.env.REACT_APP_DEVELOP 
+  : process.env.REACT_APP_DEPLOY;
+
+  console.log(API_URL)
 
 export const UserProvider = ({ children }) => {
     const [users, setUsers] = useState([]);

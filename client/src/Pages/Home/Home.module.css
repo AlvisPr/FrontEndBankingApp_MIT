@@ -11,6 +11,7 @@
 .cardSection {
     flex: 0 0 auto;
     max-width: 500px;
+   
 }
 
 .learnMoreButton {
@@ -282,6 +283,88 @@
     background: linear-gradient(135deg, rgba(85, 45, 168, 0.4), rgba(49, 27, 146, 0.4));
 }
 
+.carouselSection {
+    margin: 2rem 0;
+    width: 800px;
+    height: 510px;
+    margin-left: auto;
+    border-radius: 15px;
+    z-index: 2;
+    margin-left: 0%;
+    
+}
+
+
+.customCarousel {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    
+}
+
+.customCarousel img {
+    object-fit: cover;
+    height: 500px;
+}
+
+.customCarousel .carousel-caption {
+    background-color: rgba(0,0,0,0.6);
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.customCarousel .carousel-caption h3 {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.customCarousel .carousel-caption p {
+    font-size: 1.1rem;
+}
+
+.carousel-caption {
+    background-color: black;
+}
+
+.customCarousel .carousel-control-prev,
+.customCarousel .carousel-control-next {
+    width: 5%;
+}
+
+.customCarousel .carousel-indicators button {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.carouselCaption {
+    left: auto;
+    right: 100px;
+    bottom: 30px;
+    width: 90%;
+    padding: 0;
+}
+
+.captionContent {
+    background: linear-gradient(135deg, rgba(13, 132, 76, 0.9), rgba(8, 90, 51, 0.9));
+    border-radius: 15px;
+    padding: 20px;
+    width: 100%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.captionContent h3 {
+    margin-bottom: 10px;
+}
+
+.captionContent p {
+    margin-bottom: 0;
+}
+
+
+
 /* Animated gradient background */
 @keyframes gradientShift {
     0% {
@@ -403,3 +486,20 @@
         padding: 20px 16px !important;
     }
 }
+
+@media (max-width: 1200px) {
+    .homeContainer {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .cardSection,
+    .carouselSection {
+        max-width: 100%;
+    }
+
+    .cardSection {
+        position: static;
+        margin-bottom: 40px;
+    }
+} 

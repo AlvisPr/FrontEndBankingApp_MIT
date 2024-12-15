@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import Card from '../../components/Card/Card';
 import bankImg from '../../assets/logo-no-background.png';
+import bankImage2 from '../../assets/confident-good-looking-female-entrepreneur-pointing-her-credit-card-against-isolated-background.jpg';
+import secureTransaction from '../../assets/hand-pushing-button-touch-screen.jpg';
+import businessMan from '../../assets/smiling-middle-aged-businessman-cafe-counter.jpg';
 import { FaFacebook, FaTwitter, FaInstagram, FaReact, FaDatabase, FaLock, FaUserShield, FaTimes } from 'react-icons/fa';
 import { Dialog, DialogContent } from '@mui/material';
+import { Carousel } from 'react-bootstrap';
 import styles from './Home.module.css';
 
 function Home() {
@@ -23,6 +27,27 @@ function Home() {
     const handleClose = () => {
         setOpen(false);
     };
+
+
+
+    const carouselItems = [
+        {
+            image: bankImage2,
+            caption: 'Experience Modern Online Banking',
+            description: 'Manage your finances anytime, anywhere with our secure online platform.'
+        },
+        {
+            image: businessMan,
+            caption: 'Empower Your Business',
+            description: 'Easily manage your finances and operations with our intuitive and user-friendly interface.'
+            
+        },
+        {
+            image: secureTransaction,
+            caption: 'Your Security is Our Priority',
+            description: 'Rest easy with our advanced encryption and security measures.'
+        }
+    ]
 
     const socialIcons = [
         { icon: <FaFacebook />, link: 'https://www.facebook.com', alt: 'Facebook' },
@@ -80,6 +105,28 @@ function Home() {
                     Learn More
                 </button>
             </div>
+
+            <div className={styles.carouselSection}>
+                <Carousel fade interval={10000} className={styles.customCarousel}>
+                    {carouselItems.map((item, index) => (
+                        <Carousel.Item key={index}>
+                            <img
+                                className="d-block w-100"
+                                src={item.image}
+                                alt={item.caption}
+                            />
+                            <Carousel.Caption className={styles.carouselCaption}>
+                                <div className={styles.captionContent}>
+                                    <h3>{item.caption}</h3>
+                                    <p>{item.description}</p>
+                                </div>
+                            </Carousel.Caption>
+                        </Carousel.Item>
+                    ))}
+                </Carousel>
+            </div>
+            
+
             <Dialog
                 open={open}
                 onClose={handleClose}

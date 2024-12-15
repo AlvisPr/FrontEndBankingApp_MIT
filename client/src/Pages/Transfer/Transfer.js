@@ -54,7 +54,7 @@ function Transfer() {
 
         setLoading(true);
         try {
-            const response = await axios.post( API_URL , {
+            const response = await axios.post(`${API_URL}/users/transfer`, {
                 fromEmail: currentUser.email,
                 toAccountNumber,
                 amount: parseFloat(amount)

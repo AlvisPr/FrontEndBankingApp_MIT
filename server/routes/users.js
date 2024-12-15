@@ -52,7 +52,7 @@ router.post('/register', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Generate a unique account number
-        const accountNumber = Math.random().toString(36).substr(2, 9).toUpperCase();
+        const accountNumber = Math.random().toString().slice(2, 19).padStart(17, '0');
 
         const user = new User({
             name,

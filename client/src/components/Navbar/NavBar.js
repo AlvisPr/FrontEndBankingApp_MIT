@@ -204,7 +204,9 @@ function NavBar() {
                     </div>
                 </div>
             </div>
+            <div className={styles.navbarLine}></div>
         </nav>
+        
     );
 }
 

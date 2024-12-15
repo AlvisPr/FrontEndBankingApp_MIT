@@ -286,11 +286,12 @@
 .carouselSection {
     margin: 2rem 0;
     width: 800px;
-    height: 510px;
+    height: 503px;
     margin-left: auto;
     border-radius: 15px;
     z-index: 2;
     margin-left: 0%;
+    border: 1px solid #f8f8f8
     
 }
 

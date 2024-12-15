@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import Card from '../../components/Card/Card';
 import bankImg from '../../assets/logo-no-background.png';
 import bankImage2 from '../../assets/confident-good-looking-female-entrepreneur-pointing-her-credit-card-against-isolated-background.jpg';
-import secureTransaction from '../../assets/hand-pushing-button-touch-screen.jpg';
-import businessMan from '../../assets/smiling-middle-aged-businessman-cafe-counter.jpg';
+import bankImage3 from '../../assets/onlinebanking.jpg';
+import bankImage4 from '../../assets/securebanking2.jpeg';
+import bankImage5 from '../../assets/mortgage2.jpeg';
+import bankImage6 from '../../assets/savemoney.jpeg';
 import { FaFacebook, FaTwitter, FaInstagram, FaReact, FaDatabase, FaLock, FaUserShield, FaTimes } from 'react-icons/fa';
 import { Dialog, DialogContent } from '@mui/material';
 import { Carousel } from 'react-bootstrap';
@@ -32,20 +34,30 @@ function Home() {
 
     const carouselItems = [
         {
-            image: bankImage2,
+            image: bankImage3,
             caption: 'Experience Modern Online Banking',
-            description: 'Manage your finances anytime, anywhere with our secure online platform.'
+            description: 'Manage your finances anytime, anywhere on mobile or on the web.'
         },
         {
-            image: businessMan,
+            image: bankImage2,
             caption: 'Empower Your Business',
-            description: 'Easily manage your finances and operations with our intuitive and user-friendly interface.'
+            description: 'Easily manage your financial operations with our intuitive and user-friendly interface.'
             
         },
         {
-            image: secureTransaction,
+            image: bankImage4,
             caption: 'Your Security is Our Priority',
-            description: 'Rest easy with our advanced encryption and security measures.'
+            description: 'Our team is making sure that your banking system is secure and active 24/7.'
+        },
+        {
+            image: bankImage5,
+            caption: 'Purchase your own property',
+            description: 'We offer the lowest interest rates in the market for motgage loans.'
+        },
+        {
+            image: bankImage6,
+            caption: 'Savings Account',
+            description: 'Save money for your next family trip and personal expenses.'
         }
     ]
 

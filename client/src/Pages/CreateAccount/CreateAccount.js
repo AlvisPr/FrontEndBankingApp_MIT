@@ -15,7 +15,6 @@ import { ClipLoader } from 'react-spinners';
 import styles from "../../Styles/spinner.module.css";
 
 const GoogleButton = styled(Button)(({ theme }) => ({
-    marginTop: '1rem',
     width: '100%',
     padding: '10px',
     borderRadius: '4px',

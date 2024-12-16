@@ -13,6 +13,11 @@ const generateSecret = () => {
     return crypto.randomBytes(64).toString('hex');
 };
 
+// Helper function to generate account number
+const generateAccountNumber = () => {
+    return Math.random().toString().slice(2, 19).padStart(17, '0');
+};
+
 // Get all users
 router.get('/', async (req, res) => {
     try {
@@ -38,40 +43,72 @@ router.get('/all', isAdmin, async (req, res) => {
 // Register new user
 router.post('/register', async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, email, password, isGoogleUser = false, googleId = null } = req.body;
 
-        if (!name || !email || !password) {
-            return res.status(400).json({ error: 'Name, email and password are required' });
+        if (!name || !email || (!isGoogleUser && !password)) {
+            return res.status(400).json({ 
+                success: false,
+                error: 'Required fields missing' 
+            });
         }
 
         const existingUser = await User.findOne({ email: email.toLowerCase() });
         if (existingUser) {
-            return res.status(400).json({ error: 'Email already registered' });
+            return res.status(400).json({ 
+                success: false,
+                error: 'Email already registered' 
+            });
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        // Generate account number
+        const accountNumber = generateAccountNumber();
 
-        // Generate a unique account number
-        const accountNumber = Math.random().toString().slice(2, 19).padStart(17, '0');
-
-        const user = new User({
+        const userData = {
             name,
             email: email.toLowerCase(),
-            password: hashedPassword,
-            accountNumber // Assign the generated account number
-        });
+            accountNumber,
+            isGoogleUser,
+            googleId
+        };
 
+        if (!isGoogleUser) {
+            userData.password = await bcrypt.hash(password, 10);
+        }
+
+        const user = new User(userData);
         await user.save();
+
+        // Generate JWT token for immediate login
+        const token = jwt.sign(
+            { 
+                userId: user._id,
+                email: user.email,
+                accountNumber: user.accountNumber
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+
         res.status(201).json({
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            balance: user.balance,
-            accountNumber: user.accountNumber // Include account number in response
+            success: true,
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                balance: user.balance,
+                accountNumber: user.accountNumber,
+                isGoogleUser: user.isGoogleUser,
+                isAdmin: user.isAdmin
+            }
         });
     } catch (error) {
         console.error('Error registering user:', error);
-        res.status(500).json({ error: 'Registration failed' });
+        res.status(500).json({ 
+            success: false,
+            error: 'Registration failed',
+            details: error.message
+        });
     }
 });
 
@@ -467,83 +504,93 @@ router.post('/transfer', async (req, res) => {
         const { fromEmail, toAccountNumber, amount } = req.body;
 
         if (!fromEmail || !toAccountNumber || !amount) {
-            return res.status(400).json({ error: 'Missing required fields' });
-        }
-
-        const sender = await User.findOne({ email: fromEmail });
-        const receiver = await User.findOne({ accountNumber: toAccountNumber });
-
-        if (!sender || !receiver) {
-            return res.status(404).json({ error: 'Sender or receiver not found' });
+            return res.status(400).json({
+                success: false,
+                error: 'Missing required fields',
+                details: 'fromEmail, toAccountNumber, and amount are required'
+            });
         }
 
         const numericAmount = parseFloat(amount);
         if (isNaN(numericAmount) || numericAmount <= 0) {
-            return res.status(400).json({ error: 'Invalid amount' });
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid amount',
+                details: 'Amount must be a positive number'
+            });
+        }
+
+        // Find sender and recipient
+        const sender = await User.findOne({ email: fromEmail });
+        const recipient = await User.findOne({ accountNumber: toAccountNumber });
+
+        if (!sender || !recipient) {
+            return res.status(404).json({
+                success: false,
+                error: 'User not found',
+                details: !sender ? 'Sender not found' : 'Recipient not found'
+            });
         }
 
         if (sender.balance < numericAmount) {
-            return res.status(400).json({ error: 'Insufficient funds' });
+            return res.status(400).json({
+                success: false,
+                error: 'Insufficient funds',
+                details: 'Sender does not have enough balance for this transfer'
+            });
         }
-
-        // Generate unique transaction ID
-        const transactionId = `TR-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
 
         // Update balances
         sender.balance -= numericAmount;
-        receiver.balance += numericAmount;
+        recipient.balance += numericAmount;
 
-        // Record transactions with detailed tracing
-        const transactionDate = new Date();
-        const senderTransaction = {
+        // Create transaction records
+        const timestamp = new Date();
+
+        // Sender's transaction
+        sender.transactions.push({
             type: 'transfer-sent',
             amount: numericAmount,
-            date: transactionDate,
-            from: sender.email,
-            to: receiver.email,
-            transactionId: transactionId,
-            status: 'completed'
-        };
+            date: timestamp,
+            balance: sender.balance,
+            description: `Transfer to ${recipient.name}`,
+            toAccount: recipient.accountNumber,
+            toEmail: recipient.email,
+            toName: recipient.name,
+            fromEmail: sender.email,
+            fromName: sender.name
+        });
 
-        const receiverTransaction = {
+        // Recipient's transaction
+        recipient.transactions.push({
             type: 'transfer-received',
             amount: numericAmount,
-            date: transactionDate,
-            from: sender.email,
-            to: receiver.email,
-            transactionId: transactionId,
-            status: 'completed'
-        };
-
-        sender.transactions.push(senderTransaction);
-        receiver.transactions.push(receiverTransaction);
-
-        await sender.save();
-        await receiver.save();
-
-        // Log transaction details with tracing
-        console.log('Transfer Trace:', {
-            transactionId,
-            sender: sender.email,
-            receiver: receiver.email,
-            amount: numericAmount,
-            timestamp: transactionDate
+            date: timestamp,
+            balance: recipient.balance,
+            description: `Transfer from ${sender.name}`,
+            fromAccount: sender.accountNumber,
+            fromEmail: sender.email,
+            fromName: sender.name,
+            toEmail: recipient.email,
+            toName: recipient.name
         });
 
-        res.json({ 
+        // Save both users
+        await Promise.all([sender.save(), recipient.save()]);
+
+        res.json({
+            success: true,
             message: 'Transfer successful',
-            transactionId: transactionId,
-            details: {
-                sender: sender.email,
-                receiver: receiver.email,
-                amount: numericAmount
-            }
+            newBalance: sender.balance,
+            transaction: sender.transactions[sender.transactions.length - 1]
         });
+
     } catch (error) {
         console.error('Transfer error:', error);
-        res.status(500).json({ 
-            error: 'Transfer failed', 
-            details: error.message 
+        res.status(500).json({
+            success: false,
+            error: 'Transfer failed',
+            details: error.message
         });
     }
 });
@@ -551,10 +598,13 @@ router.post('/transfer', async (req, res) => {
 // Google Authentication login/register
 router.post('/google-auth', async (req, res) => {
     try {
-        const { email, googleId, name, isGoogleUser } = req.body;
+        const { email, name, googleId } = req.body;
 
-        if (!email || !googleId || !name) {
-            return res.status(400).json({ error: 'Email, googleId, and name are required' });
+        if (!email || !name || !googleId) {
+            return res.status(400).json({
+                success: false,
+                error: 'Email, name, and googleId are required'
+            });
         }
 
         let user = await User.findOne({ 
@@ -564,26 +614,23 @@ router.post('/google-auth', async (req, res) => {
             ]
         });
 
-        if (!user) {
-            // Create new user if doesn't exist
-            const accountNumber = crypto.randomBytes(4).toString('hex').toUpperCase();
+        if (user) {
+            // Update existing user's Google ID if not set
+            if (!user.googleId) {
+                user.googleId = googleId;
+                user.isGoogleUser = true;
+                await user.save();
+            }
+        } else {
+            // Create new user with Google auth
+            const accountNumber = generateAccountNumber();
             user = new User({
                 name,
                 email: email.toLowerCase(),
                 googleId,
                 isGoogleUser: true,
-                accountNumber,
-                balance: 0,
-                transactions: [],
-                createdAt: new Date(),
-                updatedAt: new Date()
+                accountNumber
             });
-            await user.save();
-        } else if (!user.googleId) {
-            // Update existing email user with Google info
-            user.googleId = googleId;
-            user.isGoogleUser = true;
-            user.updatedAt = new Date();
             await user.save();
         }
 
@@ -600,6 +647,7 @@ router.post('/google-auth', async (req, res) => {
 
         res.json({
             success: true,
+            token,
             user: {
                 id: user._id,
                 name: user.name,
@@ -607,13 +655,16 @@ router.post('/google-auth', async (req, res) => {
                 balance: user.balance,
                 accountNumber: user.accountNumber,
                 isGoogleUser: user.isGoogleUser,
-                transactions: user.transactions
-            },
-            token
+                isAdmin: user.isAdmin
+            }
         });
     } catch (error) {
         console.error('Google auth error:', error);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({
+            success: false,
+            error: 'Google authentication failed',
+            details: error.message
+        });
     }
 });
 

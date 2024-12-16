@@ -1,33 +1,50 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-const transactionSchema = new mongoose.Schema({
-    type: String,
-    amount: Number,
-    date: Date,
-    from: String, // Email or ID of the sender
-    to: String    // Email or ID of the receiver
+const transactionSchema = new Schema({
+    type: {
+        type: String,
+        required: true,
+        enum: ['deposit', 'withdraw', 'transfer', 'transfer-sent', 'transfer-received']
+    },
+    amount: {
+        type: Number,
+        required: true
+    },
+    date: {
+        type: Date,
+        default: Date.now
+    },
+    description: String,
+    balance: Number,
+    fromAccount: String,
+    toAccount: String,
+    fromEmail: String,
+    toEmail: String,
+    fromName: String,
+    toName: String
 });
 
-const addressSchema = new mongoose.Schema({
+const addressSchema = new Schema({
     street: String,
     city: String,
     state: String,
     zipCode: String
 }, { _id: false });
 
-const communicationPreferencesSchema = new mongoose.Schema({
+const communicationPreferencesSchema = new Schema({
     emailNotifications: { type: Boolean, default: true },
     smsNotifications: { type: Boolean, default: true },
     paperlessStatements: { type: Boolean, default: false }
 }, { _id: false });
 
-const sessionSchema = new mongoose.Schema({
+const sessionSchema = new Schema({
     secret: String,
     createdAt: { type: Date, default: Date.now },
     expiresAt: Date
 }, { _id: false });
 
-const userSchema = new mongoose.Schema({
+const userSchema = new Schema({
     name: {
         type: String,
         required: true
@@ -35,7 +52,8 @@ const userSchema = new mongoose.Schema({
     email: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        lowercase: true
     },
     password: {
         type: String,
@@ -52,10 +70,26 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    balance: { type: Number, default: 0 },
-    accountNumber: { type: String, unique: true },
+    balance: {
+        type: Number,
+        default: 0
+    },
+    accountNumber: {
+        type: String,
+        required: true,
+        unique: true,
+        validate: {
+            validator: function(v) {
+                return /^\d{17}$/.test(v);
+            },
+            message: props => `${props.value} is not a valid account number! Must be 17 digits.`
+        }
+    },
+    isAdmin: {
+        type: Boolean,
+        default: false
+    },
     transactions: [transactionSchema],
-    isAdmin: { type: Boolean, default: false },
     phoneNumber: String,
     address: addressSchema,
     preferredName: String,
@@ -63,7 +97,10 @@ const userSchema = new mongoose.Schema({
         type: String, 
         default: 'https://ui-avatars.com/api/?background=0D8ABC&color=fff' // Default avatar URL
     },
-    language: { type: String, default: 'English' },
+    language: {
+        type: String,
+        default: 'English'
+    },
     communicationPreferences: {
         type: communicationPreferencesSchema,
         default: () => ({})
@@ -81,4 +118,10 @@ userSchema.methods.cleanExpiredSessions = async function() {
     }
 };
 
-module.exports = mongoose.model('User', userSchema);
+// Add indexes
+userSchema.index({ email: 1 });
+userSchema.index({ accountNumber: 1 });
+userSchema.index({ googleId: 1 }, { sparse: true });
+
+const User = mongoose.model('User', userSchema);
+module.exports = User;

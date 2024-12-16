@@ -17,7 +17,6 @@ import Button from '@mui/material/Button';
 import { useNavigate } from 'react-router-dom';
 
 const GoogleButton = styled(Button)(({ theme }) => ({
-    marginTop: '1rem',
     width: '100%',
     padding: '10px',
     borderRadius: '4px',

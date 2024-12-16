@@ -9,6 +9,31 @@ import { validateField } from '../../components/Validation/Validation';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FaUserCircle } from 'react-icons/fa';
+import { FcGoogle } from 'react-icons/fc';
+import { auth, googleProvider } from '../../firebase';
+import { signInWithPopup } from 'firebase/auth';
+import { styled } from '@mui/material/styles';
+import Button from '@mui/material/Button';
+import { useNavigate } from 'react-router-dom';
+
+const GoogleButton = styled(Button)(({ theme }) => ({
+    marginTop: '1rem',
+    width: '100%',
+    padding: '10px',
+    borderRadius: '4px',
+    border: '1px solid #ccc',
+    backgroundColor: '#fff',
+    color: '#757575',
+    textTransform: 'none',
+    fontWeight: 500,
+    '&:hover': {
+        backgroundColor: '#f5f5f5',
+        borderColor: '#a8a8a8',
+    },
+    '& .icon': {
+        marginRight: '10px',
+    }
+}));
 
 function Login() {
     const [status, setStatus] = useState('');
@@ -18,8 +43,8 @@ function Login() {
     const [validationErrors, setValidationErrors] = useState({});
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [isFormValid, setIsFormValid] = useState(false);
-    const [userType, setUserType] = useState('user'); 
-    const { showLogin, setShowLogin, users, setCurrentUser, currentUser, adminCredentials, setUserType: setContextUserType, loginUser } = useContext(UserContext);
+    const navigate = useNavigate();
+    const { showLogin, setShowLogin, loginUser, currentUser } = useContext(UserContext);
 
     useEffect(() => {
         setIsFormValid(
@@ -35,8 +60,6 @@ function Login() {
         setPassword('');
     }, []);
 
-  
-
     const handleChange = (e) => {
         const { id, value } = e.target;
         if (id === 'email') setEmail(value);
@@ -46,54 +69,63 @@ function Login() {
     const handleBlur = (e) => {
         const { id, value } = e.target;
         const errors = validateField(id, value, 'login');
-        setValidationErrors(errors);
+        setValidationErrors(prev => ({ ...prev, [id]: errors[id] }));
         if (errors[id]) {
             toast.error(errors[id]);
         }
     };
 
-    const clearForm = () => {
-        setEmail('');
-        setPassword('');
-        setValidationErrors({});
-    };
-
-    const handleLogin = async () => {
-        setLoading(true);
+    const handleLogin = async (e) => {
+        e.preventDefault();
         try {
-            if (userType === 'admin') {
-                if (email === adminCredentials.email && password === adminCredentials.password) {
-                    setCurrentUser({ name: 'Admin', email: adminCredentials.email });
-                    setContextUserType('admin');
-                    setStatus('');
-                    setShowLogin(false);
-                    toast.success('Welcome Admin');
-                    clearForm();
-                } else {
-                    toast.error('Invalid admin credentials.');
-                    clearForm();
-                }
+            setLoading(true);
+            const result = await loginUser({
+                email,
+                password,
+                isGoogleUser: false
+            });
+            
+            if (result.success) {
+                setShowLogin(false);
+                toast.success('Successfully logged in!');
+                navigate('/');
             } else {
-                await loginUser(email, password);
-                toast.success(`Welcome back!`);
-                clearForm();
+                toast.error(result.error || 'Login failed');
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Login failed');
-            clearForm();
+            console.error('Login error:', error);
+            toast.error(error.message || 'Invalid email or password');
         } finally {
             setLoading(false);
         }
     };
-    
-    const handleKeyPress = (e) => {
-        if (e.key === 'Enter' && isFormValid) {
-            handleLogin();
-        }
-    };
 
-    const togglePasswordVisibility = () => {
-        setPasswordVisible(!passwordVisible);
+    const handleGoogleLogin = async () => {
+        try {
+            setLoading(true);
+            const result = await signInWithPopup(auth, googleProvider);
+            const { user } = result;
+            
+            const loginResult = await loginUser({
+                email: user.email,
+                googleId: user.uid,
+                name: user.displayName,
+                isGoogleUser: true
+            });
+            
+            if (loginResult.success) {
+                setShowLogin(false);
+                toast.success('Successfully logged in with Google!');
+                navigate('/');
+            } else {
+                toast.error(loginResult.error || 'Google login failed');
+            }
+        } catch (error) {
+            console.error('Google login error:', error);
+            toast.error(error.message || 'Failed to login with Google');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -103,41 +135,60 @@ function Login() {
                 header="Login"
                 status={status}
                 body={showLogin ? (
-                    <form id="login-form" style={{ textAlign: 'left' }}>
+                    <form>
                         <FormInput
+                            type="email"
                             id="email"
-                            type="input"
                             value={email}
                             onChange={handleChange}
                             onBlur={handleBlur}
-                            onKeyPress={handleKeyPress}
-                            validationError={validationErrors.email}
+                            error={validationErrors.email}
                             placeholder="Email"
                         />
                         <br />
                         <FormInput
+                            type={passwordVisible ? "text" : "password"}
                             id="password"
-                            type={passwordVisible ? 'text' : 'password'}
                             value={password}
                             onChange={handleChange}
                             onBlur={handleBlur}
-                            onKeyPress={handleKeyPress}
-                            validationError={validationErrors.password}
-                            togglePasswordVisibility={togglePasswordVisibility}
-                            passwordVisible={passwordVisible}
+                            error={validationErrors.password}
                             placeholder="Password"
                         />
                         <br />
-                   
-                        <button type="button" className="btn btn-primary" onClick={handleLogin} disabled={userType === 'user' && !isFormValid}>Login</button>
+                        <div className="form-group">
+                            <button
+                                type="submit"
+                                className="btn btn-primary w-100 mb-3"
+                                disabled={!isFormValid || loading}
+                                onClick={handleLogin}
+                            >
+                                {loading ? (
+                                    <div className={styles.spinnerContainer}>
+                                        <ClipLoader color="#ffffff" loading={loading} size={20} />
+                                    </div>
+                                ) : (
+                                    'Login'
+                                )}
+                            </button>
+
+                            <GoogleButton
+                                onClick={handleGoogleLogin}
+                                disabled={loading}
+                                startIcon={<FcGoogle />}
+                            >
+                                Sign in with Google
+                            </GoogleButton>
+                        </div>
                     </form>
                 ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px' }}>
-                        <FaUserCircle size={150} color="white" style={{ marginBottom: '10px' }} />
-                        <h3>{currentUser.name}</h3>
-                        <p>{currentUser.email}</p>
-                        
-                    </div>
+                    currentUser && (
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px' }}>
+                            <FaUserCircle size={150} color="white" style={{ marginBottom: '10px' }} />
+                            <h3>{currentUser.name}</h3>
+                            <p>{currentUser.email}</p>
+                        </div>
+                    )
                 )}
             />
             {loading && (
@@ -145,13 +196,14 @@ function Login() {
                     <ClipLoader size={50} color={"#123abc"} loading={loading} />
                 </div>
             )}
-            <TooltipIcon 
+            <TooltipIcon
                 text={`
-                    Here we are displaying the login form. 
-                    If the user is not logged in, they will be prompted to log in.
-                `}
+                Here we are displaying the login form. 
+                If the user is not logged in, they will be prompted to log in.
+                If they are logged in, we display their information.
+            `}
             />
-            <ToastContainer style={{ top: '20px' }}/>
+            <ToastContainer />
         </>
     );
 }

@@ -6,6 +6,8 @@ import bankImg from '../../assets/money-bag.png';
 import sharedLogos from '../../Styles/sharedlogos.module.css';
 import TransactionHistory from '../../components/TransactionHistory/TransactionHistory';
 import axios from 'axios';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Balance() {
     const ctx = useContext(UserContext);
@@ -16,13 +18,15 @@ function Balance() {
         : process.env.REACT_APP_DEPLOY;
 
     const handleToggleTransactions = async () => {
-        if (!showTransactions) {
+        if (!showTransactions && ctx.currentUser) {
             try {
-                const response = await axios.get(`${API_URL}/users/${ctx.currentUser._id}/transactions`);
+                console.log('Fetching transactions for user:', ctx.currentUser);
+                const response = await axios.get(`${API_URL}/users/${ctx.currentUser.id}/transactions`);
                 console.log('Fetched transactions:', response.data); 
                 setTransactions(response.data);
             } catch (error) {
                 console.error('Error fetching transactions:', error.response?.data || error.message);
+                toast.error('Failed to load transaction history');
             }
         }
         setShowTransactions(!showTransactions);
@@ -63,11 +67,13 @@ function Balance() {
                     )
                 }
             />
-            {showTransactions && ctx.currentUser && (
-                <TransactionHistory 
-                    transactions={transactions} 
-                    currentUser={ctx.currentUser}
-                />
+            {showTransactions && ctx.currentUser && transactions.length > 0 && (
+                <div style={{ marginTop: '20px', width: '100%' }}>
+                    <TransactionHistory 
+                        transactions={transactions} 
+                        currentUser={ctx.currentUser}
+                    />
+                </div>
             )}
             <TooltipIcon 
                 text={`

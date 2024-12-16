@@ -83,6 +83,7 @@ router.post('/login', async (req, res) => {
 
         if (!email || !password) {
             return res.status(400).json({
+                success: false,
                 error: 'Email and password are required'
             });
         }
@@ -92,6 +93,7 @@ router.post('/login', async (req, res) => {
         
         if (!user) {
             return res.status(401).json({
+                success: false,
                 error: 'Invalid email or password'
             });
         }
@@ -100,59 +102,41 @@ router.post('/login', async (req, res) => {
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
             return res.status(401).json({
+                success: false,
                 error: 'Invalid email or password'
             });
         }
 
-        // Clean up expired sessions
-        await user.cleanExpiredSessions();
-
-        // Generate new session with unique secret
-        const sessionSecret = generateSecret();
-        const expiresAt = new Date();
-        expiresAt.setHours(expiresAt.getHours() + 24); // 24 hour expiration
-
-        const newSession = {
-            secret: sessionSecret,
-            expiresAt
-        };
-
-        user.activeSessions.push(newSession);
-        await user.save();
-
-        // Get the ID of the newly created session
-        const sessionId = user.activeSessions[user.activeSessions.length - 1]._id;
-
-        // Generate JWT token with session-specific secret
+        // Generate JWT token
         const token = jwt.sign(
             { 
                 userId: user._id,
                 email: user.email,
-                isAdmin: user.isAdmin,
-                sessionId: sessionId
+                accountNumber: user.accountNumber
             },
-            sessionSecret,
+            process.env.JWT_SECRET,
             { expiresIn: '24h' }
         );
 
         // Return user without password and include token
         res.json({
+            success: true,
             token,
             user: {
-                _id: user._id,
+                id: user._id,
                 name: user.name,
                 email: user.email,
                 balance: user.balance,
                 accountNumber: user.accountNumber,
                 isAdmin: user.isAdmin,
-                profilePicture: user.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=0D8ABC&color=fff`,
-                communicationPreferences: user.communicationPreferences
+                transactions: user.transactions || []
             }
         });
 
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({
+            success: false,
             error: 'Login failed',
             details: error.message
         });
@@ -268,15 +252,18 @@ router.post('/:userId/transaction', async (req, res) => {
             date: formatter.format(transactionDate)
         });
 
-        // Sort transactions by date in descending order (newest first)
-        const sortedTransactions = user.transactions.sort((a, b) => b.date - a.date);
+        // Get the latest transaction
+        const latestTransaction = user.transactions[user.transactions.length - 1];
 
         res.json({
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            balance: user.balance,
-            transactions: sortedTransactions
+            success: true,
+            newBalance: user.balance,
+            transaction: {
+                type: normalizedType,
+                amount: numericAmount,
+                balance: newBalance,
+                date: latestTransaction.date
+            }
         });
 
     } catch (error) {
@@ -285,43 +272,47 @@ router.post('/:userId/transaction', async (req, res) => {
             stack: error.stack
         });
         res.status(500).json({
+            success: false,
             error: 'Transaction failed',
-            message: error.message
+            details: error.message
         });
     }
 });
 
-// Get transactions for a specific user
+// Get user transactions
 router.get('/:userId/transactions', async (req, res) => {
     try {
         const { userId } = req.params;
 
         // Validate userId format
-        if (!ObjectId.isValid(userId)) {
-            return res.status(400).json({ 
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({
+                success: false,
                 error: 'Invalid user ID format',
-                userId 
+                userId
             });
         }
 
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({
+                success: false,
                 error: 'User not found',
-                message: 'Could not find user with provided ID',
                 userId
             });
         }
 
-        // Sort transactions by date in descending order (newest first)
-        const sortedTransactions = user.transactions.sort((a, b) => b.date - a.date);
+        // Return transactions in reverse chronological order
+        const transactions = user.transactions || [];
+        transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        res.json(sortedTransactions);
+        res.json(transactions);
     } catch (error) {
         console.error('Error fetching transactions:', error);
         res.status(500).json({
+            success: false,
             error: 'Failed to fetch transactions',
-            message: error.message
+            details: error.message
         });
     }
 });
@@ -554,6 +545,127 @@ router.post('/transfer', async (req, res) => {
             error: 'Transfer failed', 
             details: error.message 
         });
+    }
+});
+
+// Google Authentication login/register
+router.post('/google-auth', async (req, res) => {
+    try {
+        const { email, googleId, name, isGoogleUser } = req.body;
+
+        if (!email || !googleId || !name) {
+            return res.status(400).json({ error: 'Email, googleId, and name are required' });
+        }
+
+        let user = await User.findOne({ 
+            $or: [
+                { email: email.toLowerCase() },
+                { googleId }
+            ]
+        });
+
+        if (!user) {
+            // Create new user if doesn't exist
+            const accountNumber = crypto.randomBytes(4).toString('hex').toUpperCase();
+            user = new User({
+                name,
+                email: email.toLowerCase(),
+                googleId,
+                isGoogleUser: true,
+                accountNumber,
+                balance: 0,
+                transactions: [],
+                createdAt: new Date(),
+                updatedAt: new Date()
+            });
+            await user.save();
+        } else if (!user.googleId) {
+            // Update existing email user with Google info
+            user.googleId = googleId;
+            user.isGoogleUser = true;
+            user.updatedAt = new Date();
+            await user.save();
+        }
+
+        // Generate JWT token
+        const token = jwt.sign(
+            { 
+                userId: user._id,
+                email: user.email,
+                accountNumber: user.accountNumber
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+
+        res.json({
+            success: true,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                balance: user.balance,
+                accountNumber: user.accountNumber,
+                isGoogleUser: user.isGoogleUser,
+                transactions: user.transactions
+            },
+            token
+        });
+    } catch (error) {
+        console.error('Google auth error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Add transaction
+router.post('/:userId/transaction', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { type, amount } = req.body;
+
+        if (!userId || !type || !amount) {
+            return res.status(400).json({ error: 'User ID, transaction type, and amount are required' });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        let newBalance;
+        if (type === 'deposit') {
+            newBalance = user.balance + amount;
+        } else if (type === 'withdraw') {
+            if (user.balance < amount) {
+                return res.status(400).json({ error: 'Insufficient funds' });
+            }
+            newBalance = user.balance - amount;
+        } else {
+            return res.status(400).json({ error: 'Invalid transaction type' });
+        }
+
+        // Create transaction record
+        const transaction = {
+            type,
+            amount,
+            balance: newBalance,
+            date: new Date()
+        };
+
+        // Update user
+        user.balance = newBalance;
+        user.transactions.push(transaction);
+        user.updatedAt = new Date();
+        await user.save();
+
+        res.json({
+            success: true,
+            transaction,
+            newBalance
+        });
+    } catch (error) {
+        console.error('Transaction error:', error);
+        res.status(500).json({ error: error.message });
     }
 });
 

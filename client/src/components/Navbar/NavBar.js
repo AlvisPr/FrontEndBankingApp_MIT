@@ -18,7 +18,7 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 function NavBar() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { currentUser, handleLogout } = useContext(UserContext);
+    const { currentUser, logout } = useContext(UserContext);
     const [isCollapsed, setIsCollapsed] = useState(true);
     const [anchorEl, setAnchorEl] = useState(null);
     const [open, setOpen] = useState(false);
@@ -35,7 +35,8 @@ function NavBar() {
 
     const onLogout = () => {
         handleClose();
-        handleLogout();
+        logout();
+        navigate('/');
     };
 
     const handleSettings = () => {

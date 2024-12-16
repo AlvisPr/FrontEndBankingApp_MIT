@@ -28,9 +28,30 @@ const sessionSchema = new mongoose.Schema({
 }, { _id: false });
 
 const userSchema = new mongoose.Schema({
-    name: String,
-    email: { type: String, unique: true },
-    password: String,
+    name: {
+        type: String,
+        required: true
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    password: {
+        type: String,
+        required: function() {
+            return !this.googleId; // Password is required only if not using Google auth
+        }
+    },
+    googleId: {
+        type: String,
+        sparse: true,
+        unique: true
+    },
+    isGoogleUser: {
+        type: Boolean,
+        default: false
+    },
     balance: { type: Number, default: 0 },
     accountNumber: { type: String, unique: true },
     transactions: [transactionSchema],

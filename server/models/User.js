@@ -124,7 +124,6 @@ userSchema.methods.cleanExpiredSessions = async function() {
 };
 
 // Add indexes
-userSchema.index({ email: 1 });
 userSchema.index({ accountNumber: 1 });
 userSchema.index({ googleId: 1 }, { sparse: true });
 

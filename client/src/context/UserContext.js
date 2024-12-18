@@ -11,6 +11,7 @@ export const UserProvider = ({ children }) => {
     const [showLogin, setShowLogin] = useState(true);
     const [userType, setUserType] = useState('user');
     const [token, setToken] = useState(localStorage.getItem('token'));
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const storedToken = localStorage.getItem('token');
@@ -181,21 +182,25 @@ export const UserProvider = ({ children }) => {
         }
     };
 
+    const value = {
+        users,
+        currentUser,
+        showLogin,
+        setShowLogin,
+        userType,
+        setUserType,
+        loading,
+        setLoading,
+        loginUser,
+        createUser,
+        logTransaction,
+        logout,
+        setCurrentUser,
+        updateUserProfile
+    };
+
     return (
-        <UserContext.Provider value={{
-            users,
-            currentUser,
-            showLogin,
-            setShowLogin,
-            userType,
-            setUserType,
-            loginUser,
-            createUser,
-            logTransaction,
-            logout,
-            setCurrentUser,
-            updateUserProfile
-        }}>
+        <UserContext.Provider value={value}>
             {children}
         </UserContext.Provider>
     );

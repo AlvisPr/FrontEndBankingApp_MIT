@@ -391,6 +391,31 @@
     z-index: 0;
 }
 
+.carouselLoading {
+    width: 100%;
+    height: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+}
+
+.loadingSpinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(32, 132, 84, 0.1);
+    border-left-color: #208454;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 @media (max-width: 1400px) {
     .contentWrapper {
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -503,4 +528,22 @@
         position: static;
         margin-bottom: 40px;
     }
-} 
+}
+
+@media (max-width: 991.98px) {
+    .carouselSection {
+        display: none;
+    }
+}
+
+@media (min-width: 992px) {
+    .carouselSection {
+        display: block;
+    }
+}
+
+@media (max-width: 991.98px) {
+    :global(.navbar-collapse.show) ~ .homeContainer .carouselSection {
+        display: none;
+    }
+}

@@ -47,7 +47,7 @@ function NavBar() {
     return (
         <nav className="navbar navbar-expand-lg bg-success sticky-top">
             <div className="container-fluid">
-                <Link className="navbar-brand" to="/" onClick={() => setIsCollapsed(true)}>
+                <Link className="navbar-brand" to="/">
                     CashConnect
                 </Link>
 

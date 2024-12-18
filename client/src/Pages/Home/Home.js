@@ -16,6 +16,28 @@ import UserContext from '../../context/UserContext';
 function Home() {
     const [open, setOpen] = useState(false);
     const { currentUser } = useContext(UserContext);
+    const [carouselLoaded, setCarouselLoaded] = useState(false);
+    const [carouselImages, setCarouselImages] = useState([]);
+
+    useEffect(() => {
+        const loadCarouselImages = async () => {
+            // Simulate async loading of carousel images
+            const images = [
+                { image: bankImage3, caption: 'Experience Modern Online Banking', description: 'Manage your finances anytime, anywhere on mobile or on the web.' },
+                { image: bankImage2, caption: 'Empower Your Business', description: 'Easily manage your financial operations with our intuitive and user-friendly interface.' },
+                { image: bankImage4, caption: 'Your Security is Our Priority', description: 'Our team is making sure that your banking system is secure and active 24/7.' },
+                { image: bankImage5, caption: 'Purchase your own property', description: 'We offer the lowest interest rates in the market for motgage loans.' },
+                { image: bankImage6, caption: 'Savings Account', description: 'Save money for your next family trip and personal expenses.' }
+            ];
+            
+            // Simulate network delay
+            await new Promise(resolve => setTimeout(resolve, 500));
+            setCarouselImages(images);
+            setCarouselLoaded(true);
+        };
+
+        loadCarouselImages();
+    }, []);
 
     useEffect(() => {
         if (!currentUser) {
@@ -34,35 +56,6 @@ function Home() {
     const handleClose = () => {
         setOpen(false);
     };
-
-    const carouselItems = [
-        {
-            image: bankImage3,
-            caption: 'Experience Modern Online Banking',
-            description: 'Manage your finances anytime, anywhere on mobile or on the web.'
-        },
-        {
-            image: bankImage2,
-            caption: 'Empower Your Business',
-            description: 'Easily manage your financial operations with our intuitive and user-friendly interface.'
-            
-        },
-        {
-            image: bankImage4,
-            caption: 'Your Security is Our Priority',
-            description: 'Our team is making sure that your banking system is secure and active 24/7.'
-        },
-        {
-            image: bankImage5,
-            caption: 'Purchase your own property',
-            description: 'We offer the lowest interest rates in the market for motgage loans.'
-        },
-        {
-            image: bankImage6,
-            caption: 'Savings Account',
-            description: 'Save money for your next family trip and personal expenses.'
-        }
-    ]
 
     const socialIcons = [
         { icon: <FaFacebook />, link: 'https://www.facebook.com', alt: 'Facebook' },
@@ -126,23 +119,30 @@ function Home() {
                     </div>
 
                     <div className={styles.carouselSection}>
-                        <Carousel fade interval={10000} className={styles.customCarousel}>
-                            {carouselItems.map((item, index) => (
-                                <Carousel.Item key={index}>
-                                    <img
-                                        className="d-block w-100"
-                                        src={item.image}
-                                        alt={item.caption}
-                                    />
-                                    <Carousel.Caption className={styles.carouselCaption}>
-                                        <div className={styles.captionContent}>
-                                            <h3>{item.caption}</h3>
-                                            <p>{item.description}</p>
-                                        </div>
-                                    </Carousel.Caption>
-                                </Carousel.Item>
-                            ))}
-                        </Carousel>
+                        {carouselLoaded ? (
+                            <Carousel fade interval={10000} className={styles.customCarousel}>
+                                {carouselImages.map((item, index) => (
+                                    <Carousel.Item key={index}>
+                                        <img
+                                            className="d-block w-100"
+                                            src={item.image}
+                                            alt={item.caption}
+                                            loading="lazy"
+                                        />
+                                        <Carousel.Caption className={styles.carouselCaption}>
+                                            <div className={styles.captionContent}>
+                                                <h3>{item.caption}</h3>
+                                                <p>{item.description}</p>
+                                            </div>
+                                        </Carousel.Caption>
+                                    </Carousel.Item>
+                                ))}
+                            </Carousel>
+                        ) : (
+                            <div className={styles.carouselLoading}>
+                                <div className={styles.loadingSpinner}></div>
+                            </div>
+                        )}
                     </div>
                     
 

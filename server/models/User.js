@@ -39,7 +39,9 @@ const communicationPreferencesSchema = new Schema({
 }, { _id: false });
 
 const sessionSchema = new Schema({
-    secret: String,
+    token: String,
+    deviceInfo: String,
+    ip: String,
     createdAt: { type: Date, default: Date.now },
     expiresAt: Date
 }, { _id: false });

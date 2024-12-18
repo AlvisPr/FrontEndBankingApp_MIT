@@ -10,7 +10,7 @@ class UserDal {
     }
 
     async findUserByEmail(email) {
-        return await this.model.findOne({ email });
+        return await this.model.findOne({ email: email.toLowerCase() });
     }
 
     async findByGoogleId(googleId) {
@@ -48,6 +48,22 @@ class UserDal {
 
     async findUsersWithoutPassword() {
         return await this.model.find({}).select('-password');
+    }
+
+    async addActiveSession(userId, session) {
+        return await this.model.findByIdAndUpdate(
+            userId,
+            { $push: { activeSessions: session } },
+            { new: true }
+        );
+    }
+
+    async removeActiveSession(userId, token) {
+        return await this.model.findByIdAndUpdate(
+            userId,
+            { $pull: { activeSessions: { token } } },
+            { new: true }
+        );
     }
 
     async deleteUser(userId) {

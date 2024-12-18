@@ -266,15 +266,24 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
+        console.log('Login attempt for email:', email);
 
         // Find user by email
         const user = await userDal.findUserByEmail(email);
+        console.log('User found:', user ? 'yes' : 'no');
+        
         if (!user) {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
         // Verify password
+        console.log('Attempting password comparison');
+        console.log('Input password length:', password.length);
+        console.log('Stored hash length:', user.password.length);
+        
         const isMatch = await bcrypt.compare(password, user.password);
+        console.log('Password match:', isMatch ? 'yes' : 'no');
+        
         if (!isMatch) {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
@@ -289,6 +298,18 @@ router.post('/login', async (req, res) => {
             JWT_SECRET,
             { expiresIn: '24h' }
         );
+
+        // Add session to activeSessions array
+        const session = {
+            token,
+            deviceInfo: req.headers['user-agent'] || 'unknown',
+            ip: req.ip,
+            createdAt: new Date(),
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours from now
+        };
+
+        // Update user's active sessions
+        await userDal.addActiveSession(user._id, session);
 
         // Return user data and token
         const userData = {
@@ -325,23 +346,22 @@ router.post('/login', async (req, res) => {
  *       404:
  *         description: User not found
  */
-router.post('/logout', async (req, res) => {
+router.post('/logout', auth, async (req, res) => {
     try {
+        const token = req.header('Authorization')?.replace('Bearer ', '');
         const user = await userDal.findUserById(req.user.userId);
+        
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.status(404).json({ message: 'User not found' });
         }
+        
+        // Remove the specific session from activeSessions array
+        await userDal.removeActiveSession(req.user.userId, token);
 
-        // Remove the current session
-        user.activeSessions = user.activeSessions.filter(session => 
-            session._id.toString() !== req.user.sessionId
-        );
-        await user.save();
-
-        res.json({ message: 'Logged out successfully' });
+        res.json({ success: true, message: 'Logged out successfully' });
     } catch (error) {
         console.error('Logout error:', error);
-        res.status(500).json({ error: 'Logout failed' });
+        res.status(500).json({ message: 'Server error during logout' });
     }
 });
 
@@ -809,7 +829,7 @@ router.delete('/:userId', auth, isAdmin, async (req, res) => {
 
         // Validate userId format
         if (!ObjectId.isValid(userId)) {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 error: 'Invalid user ID format',
                 userId 
             });

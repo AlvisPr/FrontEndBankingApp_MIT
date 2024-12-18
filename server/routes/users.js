@@ -56,6 +56,8 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const userDal = require('../dal/UserDal');
 
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+
 // Helper function to generate a random secret
 const generateSecret = () => {
     return crypto.randomBytes(64).toString('hex');
@@ -204,7 +206,7 @@ router.post('/register', async (req, res) => {
                 email: user.email,
                 accountNumber: user.accountNumber
             },
-            process.env.JWT_SECRET,
+            JWT_SECRET,
             { expiresIn: '24h' }
         );
 
@@ -284,7 +286,7 @@ router.post('/login', async (req, res) => {
                 email: user.email,
                 accountNumber: user.accountNumber
             },
-            user.password,
+            JWT_SECRET,
             { expiresIn: '24h' }
         );
 
@@ -582,26 +584,81 @@ router.get('/:userId/transactions', async (req, res) => {
  *       404:
  *         description: User not found
  */
-router.patch('/:userId/profile', async (req, res) => {
+router.put('/:userId/profile', auth, async (req, res) => {
     try {
         const { userId } = req.params;
         const profileData = req.body;
 
-        // Validate userId
+        // Validate userId format
         if (!mongoose.Types.ObjectId.isValid(userId)) {
-            return res.status(400).json({ error: 'Invalid user ID' });
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid user ID format'
+            });
         }
 
-        // Find and update user
-        const updatedUser = await userDal.updateUserProfile(userId, profileData);
+        // Create update object with all possible fields
+        const updateData = {
+            $set: {}
+        };
+
+        // Only include fields that are present in the request
+        if (profileData.phoneNumber) updateData.$set.phoneNumber = profileData.phoneNumber;
+        if (profileData.email) updateData.$set.email = profileData.email;
+        if (profileData.preferredName) updateData.$set.preferredName = profileData.preferredName;
+        if (profileData.language) updateData.$set.language = profileData.language;
+        
+        // Handle address fields
+        if (profileData.address) {
+            updateData.$set.address = {};
+            if (profileData.address.street) updateData.$set.address.street = profileData.address.street;
+            if (profileData.address.city) updateData.$set.address.city = profileData.address.city;
+            if (profileData.address.state) updateData.$set.address.state = profileData.address.state;
+            if (profileData.address.zipCode) updateData.$set.address.zipCode = profileData.address.zipCode;
+        }
+
+        // Handle communication preferences
+        if (profileData.communicationPreferences) {
+            updateData.$set.communicationPreferences = {};
+            if (typeof profileData.communicationPreferences.emailNotifications === 'boolean') {
+                updateData.$set.communicationPreferences.emailNotifications = profileData.communicationPreferences.emailNotifications;
+            }
+            if (typeof profileData.communicationPreferences.smsNotifications === 'boolean') {
+                updateData.$set.communicationPreferences.smsNotifications = profileData.communicationPreferences.smsNotifications;
+            }
+            if (typeof profileData.communicationPreferences.paperlessStatements === 'boolean') {
+                updateData.$set.communicationPreferences.paperlessStatements = profileData.communicationPreferences.paperlessStatements;
+            }
+        }
+
+        console.log('Update data:', updateData); // Add this for debugging
+
+        // Update user profile
+        const updatedUser = await userDal.findByIdAndUpdate(userId, updateData);
+
         if (!updatedUser) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.status(404).json({
+                success: false,
+                error: 'User not found'
+            });
         }
 
-        res.json(updatedUser);
+        // Remove sensitive data before sending response
+        const userResponse = {
+            ...updatedUser.toObject(),
+            password: undefined
+        };
+
+        res.json({
+            success: true,
+            user: userResponse
+        });
     } catch (error) {
-        console.error('Error updating profile:', error);
-        res.status(500).json({ error: error.message });
+        console.error('Error updating user profile:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Failed to update profile'
+        });
     }
 });
 
@@ -1025,7 +1082,7 @@ router.post('/google-auth', async (req, res) => {
                 email: user.email,
                 accountNumber: user.accountNumber
             },
-            process.env.JWT_SECRET,
+            JWT_SECRET,
             { expiresIn: '24h' }
         );
 
@@ -1139,6 +1196,111 @@ router.post('/:userId/transaction', async (req, res) => {
     } catch (error) {
         console.error('Transaction error:', error);
         res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * @swagger
+ * /users/{userId}/profile:
+ *   put:
+ *     summary: Update user profile
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               phoneNumber:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               address:
+ *                 type: object
+ *                 properties:
+ *                   street:
+ *                     type: string
+ *                   city:
+ *                     type: string
+ *                   state:
+ *                     type: string
+ *                   zipCode:
+ *                     type: string
+ *               preferredName:
+ *                 type: string
+ *               language:
+ *                 type: string
+ *               communicationPreferences:
+ *                 type: object
+ *                 properties:
+ *                   emailNotifications:
+ *                     type: boolean
+ *                   smsNotifications:
+ *                     type: boolean
+ *                   paperlessStatements:
+ *                     type: boolean
+ */
+router.put('/:userId/profile', auth, async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const profileData = req.body;
+
+        // Validate userId format
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid user ID format'
+            });
+        }
+
+        // Update user profile
+        const updatedUser = await userDal.findByIdAndUpdate(
+            userId,
+            {
+                $set: {
+                    phoneNumber: profileData.phoneNumber,
+                    email: profileData.email,
+                    address: profileData.address,
+                    preferredName: profileData.preferredName,
+                    language: profileData.language,
+                    communicationPreferences: profileData.communicationPreferences
+                }
+            },
+            { new: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({
+                success: false,
+                error: 'User not found'
+            });
+        }
+
+        // Remove sensitive data before sending response
+        const userResponse = {
+            ...updatedUser.toObject(),
+            password: undefined
+        };
+
+        res.json({
+            success: true,
+            user: userResponse
+        });
+    } catch (error) {
+        console.error('Error updating user profile:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Failed to update profile'
+        });
     }
 });
 

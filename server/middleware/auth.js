@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+
 const auth = async (req, res, next) => {
     try {
         // Get token from header
@@ -12,29 +14,28 @@ const auth = async (req, res, next) => {
             return res.status(401).json({ error: 'No authentication token, access denied' });
         }
 
-        // Decode token without verification to get user ID
-        const decoded = jwt.decode(token);
-        console.log('Decoded token:', decoded);
-        
-        if (!decoded || !decoded.userId) {
-            console.log('Invalid token format:', decoded);
-            return res.status(401).json({ error: 'Invalid token format' });
-        }
-
-        // Find user
-        const user = await User.findById(decoded.userId);
-        if (!user) {
-            console.log('User not found for ID:', decoded.userId);
-            return res.status(401).json({ error: 'User not found' });
-        }
-
-        // Verify token with user's password hash as secret
         try {
-            jwt.verify(token, user.password);
+            // Verify token with JWT_SECRET
+            const decoded = jwt.verify(token, JWT_SECRET);
+            console.log('Decoded token:', decoded);
+            
+            if (!decoded || !decoded.userId) {
+                console.log('Invalid token format:', decoded);
+                return res.status(401).json({ error: 'Invalid token format' });
+            }
+
+            // Find user
+            const user = await User.findById(decoded.userId);
+            if (!user) {
+                console.log('User not found for ID:', decoded.userId);
+                return res.status(401).json({ error: 'User not found' });
+            }
+
             req.user = {
                 userId: decoded.userId,
                 email: decoded.email,
-                accountNumber: decoded.accountNumber
+                accountNumber: decoded.accountNumber,
+                isGoogleUser: user.isGoogleUser
             };
             console.log('Token verified successfully for user:', req.user);
             next();

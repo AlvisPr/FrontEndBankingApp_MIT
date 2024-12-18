@@ -152,6 +152,35 @@ export const UserProvider = ({ children }) => {
         delete axios.defaults.headers.common['Authorization'];
     };
 
+    const updateUserProfile = async (profileData) => {
+        try {
+            if (!currentUser) {
+                throw new Error('User must be logged in to update profile');
+            }
+
+            const userId = currentUser._id || currentUser.id;
+            if (!userId) {
+                throw new Error('User ID is not available');
+            }
+
+            const response = await axios.put(`${API_URL}/users/${userId}/profile`, profileData);
+
+            if (response.data.success) {
+                const updatedUser = {
+                    ...currentUser,
+                    ...response.data.user
+                };
+                setCurrentUser(updatedUser);
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+                return { success: true, user: updatedUser };
+            }
+            throw new Error(response.data.error || 'Failed to update profile');
+        } catch (error) {
+            console.error('Update profile error:', error.response?.data || error);
+            throw error.response?.data || { message: 'Failed to update profile' };
+        }
+    };
+
     return (
         <UserContext.Provider value={{
             users,
@@ -164,7 +193,8 @@ export const UserProvider = ({ children }) => {
             createUser,
             logTransaction,
             logout,
-            setCurrentUser
+            setCurrentUser,
+            updateUserProfile
         }}>
             {children}
         </UserContext.Provider>

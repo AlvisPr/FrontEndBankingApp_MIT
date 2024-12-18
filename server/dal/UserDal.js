@@ -80,6 +80,26 @@ class UserDal {
         const user = new this.model(userData);
         return await user.save();
     }
+
+    async findByIdAndUpdate(userId, update, options = {}) {
+        const defaultOptions = {
+            new: true,           // Return the modified document
+            runValidators: true  // Run model validators
+        };
+        
+        const mergedOptions = { ...defaultOptions, ...options };
+        
+        // If we're using $set, keep it as is, otherwise wrap in $set
+        const finalUpdate = update.$set ? update : { $set: update };
+        
+        try {
+            const updatedUser = await this.model.findByIdAndUpdate(userId, finalUpdate, mergedOptions);
+            return updatedUser;
+        } catch (error) {
+            console.error('Error in findByIdAndUpdate:', error);
+            throw error;
+        }
+    }
 }
 
 module.exports = new UserDal();

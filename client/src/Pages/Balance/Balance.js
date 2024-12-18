@@ -8,20 +8,23 @@ import TransactionHistory from '../../components/TransactionHistory/TransactionH
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { API_URL } from '../../config';
 
 function Balance() {
     const ctx = useContext(UserContext);
     const [showTransactions, setShowTransactions] = useState(false);
     const [transactions, setTransactions] = useState([]);
-    const API_URL = process.env.NODE_ENV === 'development'
-        ? process.env.REACT_APP_DEVELOP
-        : process.env.REACT_APP_DEPLOY;
 
     const handleToggleTransactions = async () => {
         if (!showTransactions && ctx.currentUser) {
             try {
+                const userId = ctx.currentUser._id || ctx.currentUser.id;
+                if (!userId) {
+                    throw new Error('User ID is not available');
+                }
+                
                 console.log('Fetching transactions for user:', ctx.currentUser);
-                const response = await axios.get(`${API_URL}/users/${ctx.currentUser.id}/transactions`);
+                const response = await axios.get(`${API_URL}/users/${userId}/transactions`);
                 console.log('Fetched transactions:', response.data); 
                 setTransactions(response.data);
             } catch (error) {

@@ -71,6 +71,10 @@ const userSchema = new Schema({
         type: Boolean,
         default: false
     },
+    phoneNumber: {
+        type: String,
+        trim: true
+    },
     photoURL: {
         type: String,
         default: null

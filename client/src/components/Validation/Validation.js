@@ -29,13 +29,13 @@ export const validateField = (fieldName, value, ctx, context) => {
             }
             break;
         case 'phoneNumber':
-            if (value && !/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/.test(value)) {
-                errors.phoneNumber = 'Invalid phone number format (e.g., 123-456-7890)';
+            if (value && value.trim() === '') {
+                errors.phoneNumber = 'Phone number is required';
             }
             break;
         case 'zipCode':
-            if (value && !/^[0-9]{5}(?:-[0-9]{4})?$/.test(value)) {
-                errors.zipCode = 'Invalid ZIP code format (e.g., 12345 or 12345-6789)';
+            if (value && value.trim() === '') {
+                errors.zipCode = 'ZIP code is required';
             }
             break;
         case 'city':
@@ -92,7 +92,7 @@ export const validateProfileData = (data) => {
     if (!data.email || data.email.trim() === '') {
         errors.email = 'Email is required';
     }
-    if (!data.phoneNumber || data.phoneNumber.trim() === '') {
+    if (data.phoneNumber && data.phoneNumber.trim() === '') {
         errors.phoneNumber = 'Phone number is required';
     }
     if (!data.address.street || data.address.street.trim() === '') {
@@ -104,7 +104,7 @@ export const validateProfileData = (data) => {
     if (!data.address.state || data.address.state.trim() === '') {
         errors.state = 'State is required';
     }
-    if (!data.address.zipCode || data.address.zipCode.trim() === '') {
+    if (data.address && data.address.zipCode && data.address.zipCode.trim() === '') {
         errors.zipCode = 'ZIP code is required';
     }
     if (!data.preferredName || data.preferredName.trim() === '') {
@@ -114,12 +114,6 @@ export const validateProfileData = (data) => {
     // Format validation
     if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
         errors.email = 'Invalid email format';
-    }
-    if (data.phoneNumber && !/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/.test(data.phoneNumber)) {
-        errors.phoneNumber = 'Invalid phone number format (e.g., 123-456-7890)';
-    }
-    if (data.address.zipCode && !/^\d{5}(-\d{4})?$/.test(data.address.zipCode)) {
-        errors.zipCode = 'Invalid ZIP code format (e.g., 12345 or 12345-6789)';
     }
 
     return {

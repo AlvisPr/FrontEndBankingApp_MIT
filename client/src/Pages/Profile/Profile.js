@@ -23,6 +23,32 @@ import ClipLoader from 'react-spinners/ClipLoader';
 import styles from "../../Styles/spinner.module.css";
 import { validateProfileData } from '../../components/Validation/Validation';
 
+// Custom toast styles that match the app's notification style
+const successToastStyle = {
+    background: 'white',
+    color: '#333',
+    borderRadius: '8px',
+    padding: '12px 24px',
+    fontSize: '14px',
+    fontWeight: '500',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    border: '1px solid #e0e0e0'
+};
+
+const errorToastStyle = {
+    ...successToastStyle,
+    borderLeft: '4px solid #ff4444'
+};
+
+// Custom toast container styles
+const toastContainerStyle = {
+    top: '20px',
+    right: '20px'
+};
+
 function Profile() {
     const theme = useTheme();
     const { currentUser, updateUserProfile } = useContext(UserContext);
@@ -66,10 +92,31 @@ function Profile() {
     });
 
     const handleInputChange = (field, value) => {
-        setFormData(prev => ({
-            ...prev,
-            [field]: value
-        }));
+        if (field === 'phoneNumber') {
+            // Remove all non-numeric characters
+            const numericValue = value.replace(/\D/g, '');
+            
+            // Format the phone number as XXX-XXX-XXXX
+            let formattedValue = '';
+            if (numericValue.length <= 3) {
+                formattedValue = numericValue;
+            } else if (numericValue.length <= 6) {
+                formattedValue = `${numericValue.slice(0, 3)}-${numericValue.slice(3)}`;
+            } else {
+                formattedValue = `${numericValue.slice(0, 3)}-${numericValue.slice(3, 6)}-${numericValue.slice(6, 10)}`;
+            }
+            
+            setFormData(prev => ({
+                ...prev,
+                [field]: formattedValue
+            }));
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                [field]: value
+            }));
+        }
+        
         // Clear error for the field when user starts typing
         if (errors[field]) {
             setErrors(prev => ({
@@ -111,14 +158,15 @@ function Profile() {
         const validation = validateProfileData(formData);
         if (!validation.isValid) {
             setErrors(validation.errors);
-            // Show error toast for missing fields
             toast.error('Please fill in all required fields correctly', {
                 position: "top-right",
                 autoClose: 3000,
-                hideProgressBar: false,
+                hideProgressBar: true,
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
+                style: errorToastStyle,
+                icon: '⚠️'
             });
             return;
         }
@@ -129,19 +177,23 @@ function Profile() {
             toast.success('Profile updated successfully!', {
                 position: "top-right",
                 autoClose: 3000,
-                hideProgressBar: false,
+                hideProgressBar: true,
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
+                style: successToastStyle,
+                icon: '✓'
             });
         } catch (error) {
             toast.error(error.message || 'Failed to update profile', {
                 position: "top-right",
                 autoClose: 3000,
-                hideProgressBar: false,
+                hideProgressBar: true,
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
+                style: errorToastStyle,
+                icon: '⚠️'
             });
         } finally {
             setLoading(false);
@@ -169,16 +221,17 @@ function Profile() {
     return (
         <>
             <ToastContainer
-                style={{ top: '80px' }}
+                position="top-right"
+                style={toastContainerStyle}
                 autoClose={3000}
-                hideProgressBar={false}
-                newestOnTop={true}
+                hideProgressBar
+                newestOnTop={false}
                 closeOnClick
                 rtl={false}
                 pauseOnFocusLoss
                 draggable
                 pauseOnHover
-                theme="colored"
+                theme="light"
             />
             {loading && (
                 <div className={styles.spinner}>

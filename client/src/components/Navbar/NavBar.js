@@ -73,7 +73,8 @@ function NavBar() {
                     <span className="navbar-toggler-icon"></span>
                 </button>
 
-                <div className={`navbar-collapse ${isCollapsed ? '' : 'show'}`}>
+                {/* Desktop Menu */}
+                <div className={styles.desktopMenu}>
                     <ul className="navbar-nav me-auto mb-2 mb-lg-0" style={{ gap: '0', display: 'flex', alignItems: 'center' }}>
                         {currentUser && !currentUser.isAdmin && (
                             <>
@@ -135,16 +136,137 @@ function NavBar() {
 
                     <div className="navbar-nav">
                         {currentUser ? (
-                            <>
-                                <div className={styles.userProfile} onClick={handleClick}>
+                            <div className="d-flex align-items-center">
+                                <div className={styles.userProfile}>
                                     <Avatar 
                                         src={currentUser.profilePicture}
                                         alt={currentUser.name}
                                         className={styles.avatar}
                                     />
                                     <span className={styles.userName}>{currentUser.name}</span>
+                                </div>
+                                <IconButton
+                                    size="small"
+                                    onClick={() => handleNavigation('/profile')}
+                                    sx={{ 
+                                        ml: 1,
+                                        color: 'white',
+                                        '&:hover': {
+                                            backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                        }
+                                    }}
+                                    title="Settings"
+                                >
+                                    <SettingsIcon />
+                                </IconButton>
+                                <IconButton
+                                    size="small"
+                                    onClick={onLogout}
+                                    sx={{ 
+                                        ml: 1,
+                                        color: 'white',
+                                        '&:hover': {
+                                            backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                        }
+                                    }}
+                                    title="Logout"
+                                >
+                                    <LogoutIcon />
+                                </IconButton>
+                            </div>
+                        ) : (
+                            <>
+                                <li className="nav-item">
+                                    <Link to="/login" className="nav-link">
+                                        <LoginIcon className="me-1" /> Login
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link to="/createaccount" className="nav-link">
+                                        <PersonAddIcon className="me-1" /> Create Account
+                                    </Link>
+                                </li>
+                            </>
+                        )}
+                    </div>
+                </div>
+
+                {/* Mobile Menu */}
+                <div className={`${styles.mobileMenu} ${!isCollapsed ? styles.mobileMenuOpen : ''}`}>
+                    <ul className="navbar-nav me-auto mb-2 mb-lg-0" style={{ gap: '0', display: 'flex', alignItems: 'center' }}>
+                        {currentUser && !currentUser.isAdmin && (
+                            <>
+                                <li className="nav-item" style={{ marginRight: '-4px' }}>
+                                    <Link 
+                                        className={`nav-link ${location.pathname === '/balance' ? 'active' : ''}`} 
+                                        to="/balance" 
+                                        style={{ display: 'flex', alignItems: 'center', gap: '2px', padding: '8px 4px' }}
+                                        onClick={() => handleNavigation('/balance')}
+                                    >
+                                        <AccountBalanceWalletIcon fontSize="small" /> Balance
+                                    </Link>
+                                </li>
+                                <li className="nav-item" style={{ marginRight: '-4px' }}>
+                                    <Link 
+                                        className={`nav-link ${location.pathname === '/deposit' ? 'active' : ''}`} 
+                                        to="/deposit" 
+                                        style={{ display: 'flex', alignItems: 'center', gap: '2px', padding: '8px 4px' }}
+                                        onClick={() => handleNavigation('/deposit')}
+                                    >
+                                        <AddCircleOutlineIcon fontSize="small" /> Deposit
+                                    </Link>
+                                </li>
+                                <li className="nav-item" style={{ marginRight: '-4px' }}>
+                                    <Link 
+                                        className={`nav-link ${location.pathname === '/withdraw' ? 'active' : ''}`} 
+                                        to="/withdraw" 
+                                        style={{ display: 'flex', alignItems: 'center', gap: '2px', padding: '8px 4px' }}
+                                        onClick={() => handleNavigation('/withdraw')}
+                                    >
+                                        <RemoveCircleOutlineIcon fontSize="small" /> Withdraw
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link 
+                                        className={`nav-link ${location.pathname === '/transfer' ? 'active' : ''}`} 
+                                        to="/transfer" 
+                                        style={{ display: 'flex', alignItems: 'center', gap: '2px', padding: '8px 4px' }}
+                                        onClick={() => handleNavigation('/transfer')}
+                                    >
+                                        <SwapHorizIcon fontSize="small" /> Transfer
+                                    </Link>
+                                </li>
+                            </>
+                        )}
+                        {currentUser && currentUser.isAdmin && (
+                            <li className="nav-item">
+                                <Link 
+                                    className={`nav-link ${location.pathname === '/admin' ? 'active' : ''}`} 
+                                    to="/admin" 
+                                    style={{ display: 'flex', alignItems: 'center', gap: '2px', padding: '8px 4px' }}
+                                    onClick={() => handleNavigation('/admin')}
+                                >
+                                    <AdminPanelSettingsIcon fontSize="small" /> Admin Panel
+                                </Link>
+                            </li>
+                        )}
+                    </ul>
+
+                    <div className="navbar-nav mt-auto">
+                        {currentUser ? (
+                            <div className="d-flex align-items-center justify-content-between w-100 p-3">
+                                <div className={styles.userProfile}>
+                                    <Avatar 
+                                        src={currentUser.profilePicture}
+                                        alt={currentUser.name}
+                                        className={styles.avatar}
+                                    />
+                                    <span className={styles.userName}>{currentUser.name}</span>
+                                </div>
+                                <div>
                                     <IconButton
                                         size="small"
+                                        onClick={() => handleNavigation('/profile')}
                                         sx={{ 
                                             ml: 1,
                                             color: 'white',
@@ -152,45 +274,26 @@ function NavBar() {
                                                 backgroundColor: 'rgba(255, 255, 255, 0.1)'
                                             }
                                         }}
+                                        title="Settings"
                                     >
-                                        <AccountCircleIcon />
+                                        <SettingsIcon />
+                                    </IconButton>
+                                    <IconButton
+                                        size="small"
+                                        onClick={onLogout}
+                                        sx={{ 
+                                            ml: 1,
+                                            color: 'white',
+                                            '&:hover': {
+                                                backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                            }
+                                        }}
+                                        title="Logout"
+                                    >
+                                        <LogoutIcon />
                                     </IconButton>
                                 </div>
-                                <Menu
-                                    anchorEl={anchorEl}
-                                    open={open}
-                                    onClose={handleClose}
-                                    onClick={handleClose}
-                                    PaperProps={{
-                                        elevation: 3,
-                                        sx: {
-                                            mt: 1.5,
-                                            backgroundColor: '#198754',
-                                            color: 'white',
-                                            minWidth: '200px',
-                                            '& .MuiMenuItem-root': {
-                                                padding: '10px 20px',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '8px',
-                                                '&:hover': {
-                                                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                                                }
-                                            }
-                                        }
-                                    }}
-                                    transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-                                    anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-                                >
-                                    <MenuItem onClick={handleSettings}>
-                                        <SettingsIcon /> Settings
-                                    </MenuItem>
-                                    <Divider />
-                                    <MenuItem onClick={onLogout}>
-                                        <LogoutIcon /> Logout
-                                    </MenuItem>
-                                </Menu>
-                            </>
+                            </div>
                         ) : (
                             <>
                                 <li className="nav-item">

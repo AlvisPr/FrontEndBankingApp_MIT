@@ -42,9 +42,7 @@ function Transfer() {
         const accountErrors = validateField('accountNumber', toAccountNumber);
         const amountErrors = validateField('amount', amount);
         const errors = { ...accountErrors, ...amountErrors };
-        const API_URL = process.env.NODE_ENV === 'development'
-            ? process.env.REACT_APP_DEVELOP
-            : process.env.REACT_APP_DEPLOY;
+        const API_URL = 'http://localhost:3001/api';
 
         if (Object.keys(errors).length > 0) {
             setValidationErrors(errors);

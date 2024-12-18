@@ -45,10 +45,10 @@
  *           type: string
  */
 
+const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
-const mongoose = require('mongoose');
 const { ObjectId } = mongoose.Types;
 const isAdmin = require('../middleware/isAdmin');
 const jwt = require('jsonwebtoken');
@@ -827,6 +827,9 @@ router.delete('/:userId', async (req, res) => {
  *         description: User not found
  */
 router.post('/transfer', async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    
     try {
         const { fromEmail, toAccountNumber, amount } = req.body;
 
@@ -847,11 +850,12 @@ router.post('/transfer', async (req, res) => {
             });
         }
 
-        // Find sender and recipient
+        // Find sender and recipient within the transaction session
         const sender = await userDal.findUserByEmail(fromEmail);
-        const recipient = await userDal.findUserByAccountNumber(toAccountNumber);
+        const recipient = await userDal.findByAccountNumber(toAccountNumber);
 
         if (!sender || !recipient) {
+            await session.abortTransaction();
             return res.status(404).json({
                 success: false,
                 error: 'User not found',
@@ -860,6 +864,7 @@ router.post('/transfer', async (req, res) => {
         }
 
         if (sender.balance < numericAmount) {
+            await session.abortTransaction();
             return res.status(400).json({
                 success: false,
                 error: 'Insufficient funds',
@@ -867,58 +872,76 @@ router.post('/transfer', async (req, res) => {
             });
         }
 
-        // Update balances
-        sender.balance -= numericAmount;
-        recipient.balance += numericAmount;
-
-        // Create transaction records
         const timestamp = new Date();
 
-        // Sender's transaction
-        sender.transactions.push({
-            type: 'transfer-sent',
-            amount: numericAmount,
-            date: timestamp,
-            balance: sender.balance,
-            description: `Transfer to ${recipient.name}`,
-            toAccount: recipient.accountNumber,
-            toEmail: recipient.email,
-            toName: recipient.name,
-            fromEmail: sender.email,
-            fromName: sender.name
-        });
+        try {
+            // Update sender's balance and add transaction
+            const updatedSender = await userDal.updateBalance(sender._id, sender.balance - numericAmount);
+            if (!updatedSender) {
+                throw new Error('Failed to update sender balance');
+            }
 
-        // Recipient's transaction
-        recipient.transactions.push({
-            type: 'transfer-received',
-            amount: numericAmount,
-            date: timestamp,
-            balance: recipient.balance,
-            description: `Transfer from ${sender.name}`,
-            fromAccount: sender.accountNumber,
-            fromEmail: sender.email,
-            fromName: sender.name,
-            toEmail: recipient.email,
-            toName: recipient.name
-        });
+            await userDal.addTransaction(sender._id, {
+                type: 'transfer-sent',
+                amount: numericAmount,
+                date: timestamp,
+                balance: sender.balance - numericAmount,
+                description: `Transfer to ${recipient.name}`,
+                toAccount: recipient.accountNumber,
+                toEmail: recipient.email,
+                toName: recipient.name,
+                fromEmail: sender.email,
+                fromName: sender.name
+            });
 
-        // Save both users
-        await Promise.all([sender.save(), recipient.save()]);
+            // Update recipient's balance and add transaction
+            const updatedRecipient = await userDal.updateBalance(recipient._id, recipient.balance + numericAmount);
+            if (!updatedRecipient) {
+                throw new Error('Failed to update recipient balance');
+            }
 
-        res.json({
-            success: true,
-            message: 'Transfer successful',
-            newBalance: sender.balance,
-            transaction: sender.transactions[sender.transactions.length - 1]
-        });
+            await userDal.addTransaction(recipient._id, {
+                type: 'transfer-received',
+                amount: numericAmount,
+                date: timestamp,
+                balance: recipient.balance + numericAmount,
+                description: `Transfer from ${sender.name}`,
+                fromAccount: sender.accountNumber,
+                fromEmail: sender.email,
+                fromName: sender.name,
+                toEmail: recipient.email,
+                toName: recipient.name
+            });
+
+            await session.commitTransaction();
+
+            res.json({
+                success: true,
+                message: 'Transfer successful',
+                newBalance: sender.balance - numericAmount,
+                transaction: {
+                    type: 'transfer-sent',
+                    amount: numericAmount,
+                    date: timestamp,
+                    description: `Transfer to ${recipient.name}`
+                }
+            });
+
+        } catch (error) {
+            await session.abortTransaction();
+            throw error;
+        }
 
     } catch (error) {
+        await session.abortTransaction();
         console.error('Transfer error:', error);
         res.status(500).json({
             success: false,
             error: 'Transfer failed',
             details: error.message
         });
+    } finally {
+        session.endSession();
     }
 });
 

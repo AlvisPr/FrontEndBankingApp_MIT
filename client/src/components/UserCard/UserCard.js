@@ -1,6 +1,7 @@
 import React from 'react';
-import { Card as BootstrapCard } from 'react-bootstrap';
 import styles from './UserCard.module.css';
+import { Card as BootstrapCard } from 'react-bootstrap';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 function UserCard({ user }) {
     const getInitials = (name) => {
@@ -19,6 +20,25 @@ function UserCard({ user }) {
             month: 'long',
             day: 'numeric'
         });
+    };
+
+    // Get member since date
+    const getMemberSince = (user) => {
+        console.log('User data for member since:', {
+            metadata: user?.metadata,
+            createdAt: user?.createdAt,
+            user: user
+        });
+        // Firebase auth stores the creation time in metadata
+        const creationTime = user?.metadata?.creationTime;
+        if (creationTime) {
+            return formatDate(creationTime);
+        }
+        // Fallback to createdAt if available
+        if (user?.createdAt) {
+            return formatDate(user.createdAt);
+        }
+        return formatDate(new Date().toISOString()); // Use current date as fallback
     };
 
     // Format transaction count
@@ -56,26 +76,30 @@ function UserCard({ user }) {
         <div className={styles.cardContainer}>
             <BootstrapCard className={styles.card}>
                 <div className={styles.cardHeader}>
-                    <h2>User Profile</h2>
-                    <div className={styles.balance}>
-                        Balance: ${getBalance(user)}
-                    </div>
+                    <h2>Account Details</h2>
                 </div>
                 <BootstrapCard.Body className={styles.cardBody}>
                     <div className={styles.avatarSection}>
                         {user?.photoURL ? (
                             <img 
                                 src={user.photoURL} 
-                                alt={getUserName(user)} 
+                                alt="User avatar" 
                                 className={styles.avatar}
                             />
                         ) : (
-                            <div className={styles.avatarInitials}>
-                                {getInitials(getUserName(user))}
-                            </div>
+                            <AccountCircleIcon 
+                                className={styles.avatar}
+                                sx={{ 
+                                    fontSize: 150,
+                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                    borderRadius: '50%',
+                                    border: '3px solid rgba(255, 255, 255, 0.3)',
+                                    padding: '8px'
+                                }} 
+                            />
                         )}
                     </div>
-                    
                     <div className={styles.userInfo}>
                         <div className={styles.infoRow}>
                             <span className={styles.label}>Name:</span>
@@ -91,9 +115,7 @@ function UserCard({ user }) {
                         </div>
                         <div className={styles.infoRow}>
                             <span className={styles.label}>Member Since:</span>
-                            <span className={styles.value}>
-                                {formatDate(user?.createdAt)}
-                            </span>
+                            <span className={styles.value}>{getMemberSince(user)}</span>
                         </div>
                         <div className={styles.infoRow}>
                             <span className={styles.label}>Transactions:</span>

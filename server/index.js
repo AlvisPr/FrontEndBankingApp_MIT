@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./swagger');
 require('dotenv').config();
 
 const app = express();
@@ -12,6 +14,9 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization', 'Admin-Password', 'user-id'],
     credentials: true
 }));
+
+// Swagger Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Middleware to extract user ID from headers or token
 app.use((req, res, next) => {

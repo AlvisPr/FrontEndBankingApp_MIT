@@ -1,12 +1,59 @@
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       required:
+ *         - email
+ *         - name
+ *       properties:
+ *         _id:
+ *           type: string
+ *           description: Auto-generated MongoDB ID
+ *         email:
+ *           type: string
+ *           format: email
+ *           description: User's email address
+ *         name:
+ *           type: string
+ *           description: User's full name
+ *         accountNumber:
+ *           type: string
+ *           description: User's bank account number
+ *         balance:
+ *           type: number
+ *           description: Current account balance
+ *         isAdmin:
+ *           type: boolean
+ *           description: User's admin status
+ *     Transaction:
+ *       type: object
+ *       required:
+ *         - type
+ *         - amount
+ *       properties:
+ *         type:
+ *           type: string
+ *           enum: [deposit, withdraw, transfer, transfer-sent, transfer-received]
+ *         amount:
+ *           type: number
+ *         date:
+ *           type: string
+ *           format: date-time
+ *         description:
+ *           type: string
+ */
+
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const { ObjectId } = mongoose.Types;
 const isAdmin = require('../middleware/isAdmin');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const userDal = require('../dal/UserDal');
 
 // Helper function to generate a random secret
 const generateSecret = () => {
@@ -18,10 +65,29 @@ const generateAccountNumber = () => {
     return Math.random().toString().slice(2, 19).padStart(17, '0');
 };
 
-// Get all users
+/**
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: Get all users
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
+ *       500:
+ *         description: Server error
+ */
 router.get('/', async (req, res) => {
     try {
-        const users = await User.find({}).select('-password');
+        const users = await userDal.findUsersWithoutPassword();
         res.json(users);
     } catch (error) {
         console.error('Error fetching users:', error);
@@ -29,10 +95,29 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Get all users (admin only)
+/**
+ * @swagger
+ * /users/all:
+ *   get:
+ *     summary: Get all users (admin only)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
+ *       500:
+ *         description: Server error
+ */
 router.get('/all', isAdmin, async (req, res) => {
     try {
-        const users = await User.find({}).select('-password');
+        const users = await userDal.findUsersWithoutPassword();
         res.json(users);
     } catch (error) {
         console.error('Error fetching users:', error);
@@ -40,7 +125,37 @@ router.get('/all', isAdmin, async (req, res) => {
     }
 });
 
-// Register new user
+/**
+ * @swagger
+ * /users/register:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *               - name
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *                 format: password
+ *               name:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: User created successfully
+ *       400:
+ *         description: Invalid input or email already exists
+ */
 router.post('/register', async (req, res) => {
     try {
         const { name, email, password, isGoogleUser = false, googleId = null } = req.body;
@@ -52,7 +167,7 @@ router.post('/register', async (req, res) => {
             });
         }
 
-        const existingUser = await User.findOne({ email: email.toLowerCase() });
+        const existingUser = await userDal.findUserByEmail(email.toLowerCase());
         if (existingUser) {
             return res.status(400).json({ 
                 success: false,
@@ -75,7 +190,7 @@ router.post('/register', async (req, res) => {
             userData.password = await bcrypt.hash(password, 10);
         }
 
-        const user = new User(userData);
+        const user = await userDal.createUser(userData);
         await user.save();
 
         // Generate JWT token for immediate login
@@ -112,7 +227,36 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// Login user
+/**
+ * @swagger
+ * /users/login:
+ *   post:
+ *     summary: Login a user
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *                 format: password
+ *     responses:
+ *       200:
+ *         description: User logged in successfully
+ *       400:
+ *         description: Invalid input
+ *       401:
+ *         description: Invalid email or password
+ */
 router.post('/login', async (req, res) => {
     try {
         console.log('Login attempt:', req.body);
@@ -126,7 +270,7 @@ router.post('/login', async (req, res) => {
         }
 
         // Find user by email
-        const user = await User.findOne({ email: email.toLowerCase() });
+        const user = await userDal.findUserByEmail(email.toLowerCase());
         
         if (!user) {
             return res.status(401).json({
@@ -180,10 +324,23 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// Logout endpoint
+/**
+ * @swagger
+ * /users/logout:
+ *   post:
+ *     summary: Logout a user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User logged out successfully
+ *       404:
+ *         description: User not found
+ */
 router.post('/logout', async (req, res) => {
     try {
-        const user = await User.findById(req.user.userId);
+        const user = await userDal.findUserById(req.user.userId);
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
@@ -201,7 +358,44 @@ router.post('/logout', async (req, res) => {
     }
 });
 
-// Handle transactions (deposit/withdraw)
+/**
+ * @swagger
+ * /users/{userId}/transaction:
+ *   post:
+ *     summary: Handle transactions (deposit/withdraw)
+ *     tags: [Transactions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: User ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - type
+ *               - amount
+ *             properties:
+ *               type:
+ *                 type: string
+ *                 enum: [deposit, withdraw]
+ *               amount:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: Transaction successful
+ *       400:
+ *         description: Invalid input or insufficient funds
+ *       404:
+ *         description: User not found
+ */
 router.post('/:userId/transaction', async (req, res) => {
     try {
         const { userId } = req.params;
@@ -228,7 +422,7 @@ router.post('/:userId/transaction', async (req, res) => {
             });
         }
 
-        const user = await User.findById(userId);
+        const user = await userDal.findUserById(userId);
         if (!user) {
             return res.status(404).json({
                 error: 'User not found',
@@ -269,54 +463,76 @@ router.post('/:userId/transaction', async (req, res) => {
         });
 
         const transactionDate = new Date();
-        user.transactions.push({
+        const transaction = {
             type: normalizedType,
             amount: numericAmount,
             balance: newBalance,
             date: transactionDate
-        });
+        };
 
-        // Update balance
-        user.balance = newBalance;
+        // Update balance and add transaction
+        await userDal.updateBalance(userId, newBalance);
+        const updatedUser = await userDal.addTransaction(userId, transaction);
 
-        // Save and return updated user
-        await user.save();
+        if (!updatedUser) {
+            throw new Error('Failed to update user after transaction');
+        }
+
         console.log('Transaction successful:', {
             userId,
             type: normalizedType,
             amount: numericAmount,
-            newBalance: user.balance,
+            newBalance: updatedUser.balance,
             date: formatter.format(transactionDate)
         });
 
-        // Get the latest transaction
-        const latestTransaction = user.transactions[user.transactions.length - 1];
-
         res.json({
             success: true,
-            newBalance: user.balance,
+            newBalance: updatedUser.balance,
             transaction: {
                 type: normalizedType,
                 amount: numericAmount,
                 balance: newBalance,
-                date: latestTransaction.date
+                date: transactionDate
             }
         });
 
     } catch (error) {
-        console.error('Transaction error:', {
-            message: error.message,
-            stack: error.stack
-        });
-        res.status(500).json({
-            success: false,
-            error: 'Transaction failed',
+        console.error('Transaction error:', error);
+        res.status(500).json({ 
+            error: 'Failed to process transaction',
             details: error.message
         });
     }
 });
 
-// Get user transactions
+/**
+ * @swagger
+ * /users/{userId}/transactions:
+ *   get:
+ *     summary: Get user transactions
+ *     tags: [Transactions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: List of transactions
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Transaction'
+ *       404:
+ *         description: User not found
+ */
 router.get('/:userId/transactions', async (req, res) => {
     try {
         const { userId } = req.params;
@@ -330,7 +546,7 @@ router.get('/:userId/transactions', async (req, res) => {
             });
         }
 
-        const user = await User.findById(userId);
+        const user = await userDal.findUserById(userId);
         if (!user) {
             return res.status(404).json({
                 success: false,
@@ -354,7 +570,33 @@ router.get('/:userId/transactions', async (req, res) => {
     }
 });
 
-// Update user profile
+/**
+ * @swagger
+ * /users/{userId}/profile:
+ *   patch:
+ *     summary: Update user profile
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: User ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: User profile updated successfully
+ *       404:
+ *         description: User not found
+ */
 router.patch('/:userId/profile', async (req, res) => {
     try {
         const { userId } = req.params;
@@ -366,21 +608,7 @@ router.patch('/:userId/profile', async (req, res) => {
         }
 
         // Find and update user
-        const updatedUser = await User.findByIdAndUpdate(
-            userId,
-            {
-                $set: {
-                    phoneNumber: profileData.phoneNumber,
-                    email: profileData.email,
-                    address: profileData.address,
-                    preferredName: profileData.preferredName,
-                    language: profileData.language,
-                    communicationPreferences: profileData.communicationPreferences
-                }
-            },
-            { new: true, runValidators: true }
-        ).select('-password');
-
+        const updatedUser = await userDal.updateUserProfile(userId, profileData);
         if (!updatedUser) {
             return res.status(404).json({ error: 'User not found' });
         }
@@ -392,13 +620,45 @@ router.patch('/:userId/profile', async (req, res) => {
     }
 });
 
-// Change user password
+/**
+ * @swagger
+ * /users/{userId}/password:
+ *   patch:
+ *     summary: Change user password
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: User ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - newPassword
+ *             properties:
+ *               newPassword:
+ *                 type: string
+ *                 format: password
+ *     responses:
+ *       200:
+ *         description: Password updated successfully
+ *       404:
+ *         description: User not found
+ */
 router.patch('/:userId/password', async (req, res) => {
     try {
         const { userId } = req.params;
         const { newPassword } = req.body;
 
-        const user = await User.findById(userId);
+        const user = await userDal.findUserById(userId);
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
@@ -414,7 +674,38 @@ router.patch('/:userId/password', async (req, res) => {
     }
 });
 
-// Delete user with admin password verification
+/**
+ * @swagger
+ * /users/{userId}:
+ *   delete:
+ *     summary: Delete user with admin password verification
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: User ID
+ *     headers:
+ *       admin-password:
+ *         schema:
+ *           type: string
+ *           format: password
+ *         required: true
+ *         description: Admin password
+ *     responses:
+ *       200:
+ *         description: User deleted successfully
+ *       400:
+ *         description: Invalid user ID format
+ *       403:
+ *         description: Admin access required or invalid admin password
+ *       404:
+ *         description: User not found
+ */
 router.delete('/:userId', async (req, res) => {
     try {
         const { userId } = req.params;
@@ -435,7 +726,7 @@ router.delete('/:userId', async (req, res) => {
             });
         }
 
-        const adminUser = await User.findById(req.userId);
+        const adminUser = await userDal.findUserById(req.userId);
         if (!adminUser || !adminUser.isAdmin) {
             console.error('Admin access required:', {
                 userId: req.userId,
@@ -460,7 +751,7 @@ router.delete('/:userId', async (req, res) => {
         }
 
         // Find user to be deleted
-        const userToDelete = await User.findById(userId);
+        const userToDelete = await userDal.findUserById(userId);
         if (!userToDelete) {
             return res.status(404).json({ 
                 error: 'User not found',
@@ -469,7 +760,7 @@ router.delete('/:userId', async (req, res) => {
         }
 
         // Delete the user
-        await User.deleteOne({ _id: userId });
+        await userDal.deleteUser(userId);
 
         // Log successful deletion
         console.log('User deleted successfully:', {
@@ -498,7 +789,40 @@ router.delete('/:userId', async (req, res) => {
     }
 });
 
-// Transfer money between users
+/**
+ * @swagger
+ * /users/transfer:
+ *   post:
+ *     summary: Transfer money between accounts
+ *     tags: [Transactions]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - fromEmail
+ *               - toAccountNumber
+ *               - amount
+ *             properties:
+ *               fromEmail:
+ *                 type: string
+ *                 format: email
+ *               toAccountNumber:
+ *                 type: string
+ *               amount:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: Transfer successful
+ *       400:
+ *         description: Invalid input or insufficient funds
+ *       404:
+ *         description: User not found
+ */
 router.post('/transfer', async (req, res) => {
     try {
         const { fromEmail, toAccountNumber, amount } = req.body;
@@ -521,8 +845,8 @@ router.post('/transfer', async (req, res) => {
         }
 
         // Find sender and recipient
-        const sender = await User.findOne({ email: fromEmail });
-        const recipient = await User.findOne({ accountNumber: toAccountNumber });
+        const sender = await userDal.findUserByEmail(fromEmail);
+        const recipient = await userDal.findUserByAccountNumber(toAccountNumber);
 
         if (!sender || !recipient) {
             return res.status(404).json({
@@ -595,7 +919,36 @@ router.post('/transfer', async (req, res) => {
     }
 });
 
-// Google Authentication login/register
+/**
+ * @swagger
+ * /users/google-auth:
+ *   post:
+ *     summary: Google Authentication login/register
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - name
+ *               - googleId
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               name:
+ *                 type: string
+ *               googleId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: User logged in or registered successfully
+ *       500:
+ *         description: Server error
+ */
 router.post('/google-auth', async (req, res) => {
     try {
         const { email, name, googleId } = req.body;
@@ -607,12 +960,7 @@ router.post('/google-auth', async (req, res) => {
             });
         }
 
-        let user = await User.findOne({ 
-            $or: [
-                { email: email.toLowerCase() },
-                { googleId }
-            ]
-        });
+        let user = await userDal.findUserByEmailOrGoogleId(email.toLowerCase(), googleId);
 
         if (user) {
             // Update existing user's Google ID if not set
@@ -624,14 +972,13 @@ router.post('/google-auth', async (req, res) => {
         } else {
             // Create new user with Google auth
             const accountNumber = generateAccountNumber();
-            user = new User({
+            user = await userDal.createUser({
                 name,
                 email: email.toLowerCase(),
                 googleId,
                 isGoogleUser: true,
                 accountNumber
             });
-            await user.save();
         }
 
         // Generate JWT token
@@ -668,7 +1015,44 @@ router.post('/google-auth', async (req, res) => {
     }
 });
 
-// Add transaction
+/**
+ * @swagger
+ * /users/{userId}/transaction:
+ *   post:
+ *     summary: Add transaction
+ *     tags: [Transactions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: User ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - type
+ *               - amount
+ *             properties:
+ *               type:
+ *                 type: string
+ *                 enum: [deposit, withdraw]
+ *               amount:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: Transaction added successfully
+ *       400:
+ *         description: Invalid input or insufficient funds
+ *       404:
+ *         description: User not found
+ */
 router.post('/:userId/transaction', async (req, res) => {
     try {
         const { userId } = req.params;
@@ -678,7 +1062,7 @@ router.post('/:userId/transaction', async (req, res) => {
             return res.status(400).json({ error: 'User ID, transaction type, and amount are required' });
         }
 
-        const user = await User.findById(userId);
+        const user = await userDal.findUserById(userId);
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }

@@ -284,7 +284,7 @@
 }
 
 .carouselSection {
-    margin: 2rem 0;
+    margin: 1.2rem 0;
     width: 800px;
     height: 503px;
     margin-left: auto;
@@ -340,9 +340,9 @@
 }
 
 .carouselCaption {
-    left: auto;
-    right: 100px;
-    bottom: 30px;
+    right: auto;
+    left: 100px;
+    bottom: 40px;
     width: 90%;
     padding: 0;
 }

@@ -1,29 +1,28 @@
-const BaseDal = require('./BaseDal');
 const User = require('../models/User');
 
-class UserDal extends BaseDal {
+class UserDal {
     constructor() {
-        super(User);
+        this.model = User;
     }
 
     async findUserById(userId) {
-        return this.findById(userId);
+        return await this.model.findById(userId);
     }
 
-    async findByEmail(email) {
-        return this.findOne({ email });
+    async findUserByEmail(email) {
+        return await this.model.findOne({ email });
     }
 
     async findByGoogleId(googleId) {
-        return this.findOne({ googleId });
+        return await this.model.findOne({ googleId });
     }
 
     async findByAccountNumber(accountNumber) {
-        return this.findOne({ accountNumber });
+        return await this.model.findOne({ accountNumber });
     }
 
     async findUserByEmailOrGoogleId(email, googleId) {
-        return this.findOne({ 
+        return await this.model.findOne({ 
             $or: [
                 { email: email.toLowerCase() },
                 { googleId }
@@ -32,11 +31,15 @@ class UserDal extends BaseDal {
     }
 
     async updateBalance(userId, newBalance) {
-        return this.update(userId, { balance: newBalance });
+        return await this.model.findByIdAndUpdate(
+            userId,
+            { $set: { balance: newBalance } },
+            { new: true }
+        );
     }
 
     async addTransaction(userId, transaction) {
-        return this.model.findByIdAndUpdate(
+        return await this.model.findByIdAndUpdate(
             userId,
             { $push: { transactions: transaction } },
             { new: true }
@@ -44,11 +47,11 @@ class UserDal extends BaseDal {
     }
 
     async findUsersWithoutPassword() {
-        return this.model.find({}).select('-password');
+        return await this.model.find({}).select('-password');
     }
 
     async updateSession(userId, sessionData) {
-        return this.model.findByIdAndUpdate(
+        return await this.model.findByIdAndUpdate(
             userId,
             { $push: { activeSessions: sessionData } },
             { new: true }
@@ -56,7 +59,7 @@ class UserDal extends BaseDal {
     }
 
     async removeSession(userId, sessionId) {
-        return this.model.findByIdAndUpdate(
+        return await this.model.findByIdAndUpdate(
             userId,
             { $pull: { activeSessions: { _id: sessionId } } },
             { new: true }
@@ -64,8 +67,13 @@ class UserDal extends BaseDal {
     }
 
     async getTransactions(userId) {
-        const user = await this.findById(userId);
+        const user = await this.model.findById(userId);
         return user ? user.transactions : [];
+    }
+
+    async createUser(userData) {
+        const user = new this.model(userData);
+        return await user.save();
     }
 }
 

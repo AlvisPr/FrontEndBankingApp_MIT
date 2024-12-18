@@ -182,9 +182,12 @@ router.post('/register', async (req, res) => {
             name,
             email: email.toLowerCase(),
             accountNumber,
-            isGoogleUser,
-            googleId
+            isGoogleUser
         };
+
+        if (googleId) {
+            userData.googleId = googleId;
+        }
 
         if (!isGoogleUser) {
             userData.password = await bcrypt.hash(password, 10);
@@ -951,7 +954,7 @@ router.post('/transfer', async (req, res) => {
  */
 router.post('/google-auth', async (req, res) => {
     try {
-        const { email, name, googleId } = req.body;
+        const { email, name, googleId, photoURL } = req.body;
 
         if (!email || !name || !googleId) {
             return res.status(400).json({
@@ -963,11 +966,19 @@ router.post('/google-auth', async (req, res) => {
         let user = await userDal.findUserByEmailOrGoogleId(email.toLowerCase(), googleId);
 
         if (user) {
-            // Update existing user's Google ID if not set
-            if (!user.googleId) {
-                user.googleId = googleId;
-                user.isGoogleUser = true;
-                await user.save();
+            // Update existing user's Google ID and photo if not set
+            if (!user.googleId || user.photoURL !== photoURL) {
+                user = await userDal.model.findByIdAndUpdate(
+                    user._id,
+                    {
+                        $set: {
+                            googleId,
+                            isGoogleUser: true,
+                            photoURL: photoURL || user.photoURL
+                        }
+                    },
+                    { new: true }
+                );
             }
         } else {
             // Create new user with Google auth
@@ -977,7 +988,9 @@ router.post('/google-auth', async (req, res) => {
                 email: email.toLowerCase(),
                 googleId,
                 isGoogleUser: true,
-                accountNumber
+                photoURL,
+                accountNumber,
+                createdAt: new Date()
             });
         }
 
@@ -999,18 +1012,19 @@ router.post('/google-auth', async (req, res) => {
                 id: user._id,
                 name: user.name,
                 email: user.email,
-                balance: user.balance,
                 accountNumber: user.accountNumber,
-                isGoogleUser: user.isGoogleUser,
-                isAdmin: user.isAdmin
+                balance: user.balance,
+                isAdmin: user.isAdmin,
+                photoURL: user.photoURL,
+                createdAt: user.createdAt,
+                transactions: user.transactions || []
             }
         });
     } catch (error) {
         console.error('Google auth error:', error);
         res.status(500).json({
             success: false,
-            error: 'Google authentication failed',
-            details: error.message
+            error: 'Failed to authenticate with Google'
         });
     }
 });

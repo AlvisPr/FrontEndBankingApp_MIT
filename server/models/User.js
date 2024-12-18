@@ -53,12 +53,13 @@ const userSchema = new Schema({
         type: String,
         required: true,
         unique: true,
-        lowercase: true
+        lowercase: true,
+        trim: true
     },
     password: {
         type: String,
         required: function() {
-            return !this.googleId; // Password is required only if not using Google auth
+            return !this.isGoogleUser; // Password is required only if not using Google auth
         }
     },
     googleId: {
@@ -69,6 +70,10 @@ const userSchema = new Schema({
     isGoogleUser: {
         type: Boolean,
         default: false
+    },
+    photoURL: {
+        type: String,
+        default: null
     },
     balance: {
         type: Number,
@@ -90,20 +95,14 @@ const userSchema = new Schema({
         default: false
     },
     transactions: [transactionSchema],
-    phoneNumber: String,
     address: addressSchema,
-    preferredName: String,
-    profilePicture: { 
-        type: String, 
-        default: 'https://ui-avatars.com/api/?background=0D8ABC&color=fff' // Default avatar URL
-    },
-    language: {
-        type: String,
-        default: 'English'
-    },
     communicationPreferences: {
         type: communicationPreferencesSchema,
         default: () => ({})
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
     },
     activeSessions: [sessionSchema]
 });

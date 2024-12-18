@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Card from '../../components/Card/Card';
+import UserCard from '../../components/UserCard/UserCard';
 import bankImg from '../../assets/logo-no-background.png';
 import bankImage2 from '../../assets/confident-good-looking-female-entrepreneur-pointing-her-credit-card-against-isolated-background.jpg';
 import bankImage3 from '../../assets/onlinebanking.jpg';
@@ -10,17 +11,21 @@ import { FaFacebook, FaTwitter, FaInstagram, FaReact, FaDatabase, FaLock, FaUser
 import { Dialog, DialogContent } from '@mui/material';
 import { Carousel } from 'react-bootstrap';
 import styles from './Home.module.css';
+import UserContext from '../../context/UserContext';
 
 function Home() {
     const [open, setOpen] = useState(false);
+    const { currentUser } = useContext(UserContext);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setOpen(true);
-        }, 2000);
+        if (!currentUser) {
+            const timer = setTimeout(() => {
+                setOpen(true);
+            }, 2000);
 
-        return () => clearTimeout(timer);
-    }, []);
+            return () => clearTimeout(timer);
+        }
+    }, [currentUser]);
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -29,8 +34,6 @@ function Home() {
     const handleClose = () => {
         setOpen(false);
     };
-
-
 
     const carouselItems = [
         {
@@ -92,97 +95,103 @@ function Home() {
 
     return (
         <div className={styles.homeContainer}>
-            <div className={styles.cardSection}>
-                <Card
-                    bgcolor="success"
-                    txtcolor="white"
-                    header="Home"
-                    title=""
-                    text=""
-                    body={(
-                        <img
-                            src={bankImg}
-                            className="img-fluid"
-                            alt="Bank"
-                            style={{ filter: 'brightness(0) invert(1)' }}
+            {currentUser ? (
+                <UserCard user={currentUser} />
+            ) : (
+                <>
+                    <div className={styles.cardSection}>
+                        <Card
+                            bgcolor="success"
+                            txtcolor="white"
+                            header="Home"
+                            title=""
+                            text=""
+                            body={(
+                                <img
+                                    src={bankImg}
+                                    className="img-fluid"
+                                    alt="Bank"
+                                    style={{ filter: 'brightness(0) invert(1)' }}
+                                />
+                            )}
+                            socialIcons={socialIcons}
                         />
-                    )}
-                    socialIcons={socialIcons}
-                />
-                <button 
-                    onClick={handleClickOpen} 
-                    className={styles.learnMoreButton}
-                    aria-label="Learn more about our features"
-                >
-                    Learn More
-                </button>
-            </div>
-
-            <div className={styles.carouselSection}>
-                <Carousel fade interval={10000} className={styles.customCarousel}>
-                    {carouselItems.map((item, index) => (
-                        <Carousel.Item key={index}>
-                            <img
-                                className="d-block w-100"
-                                src={item.image}
-                                alt={item.caption}
-                            />
-                            <Carousel.Caption className={styles.carouselCaption}>
-                                <div className={styles.captionContent}>
-                                    <h3>{item.caption}</h3>
-                                    <p>{item.description}</p>
-                                </div>
-                            </Carousel.Caption>
-                        </Carousel.Item>
-                    ))}
-                </Carousel>
-            </div>
-            
-
-            <Dialog
-                open={open}
-                onClose={handleClose}
-                className={styles.dialog}
-                PaperProps={{
-                    className: styles.dialogPaper
-                }}
-                BackdropProps={{
-                    style: { backgroundColor: 'rgba(0, 0, 0, 0.5)' }
-                }}
-                aria-labelledby="features-dialog-title"
-            >
-                <div className={styles.dialogHeader}>
-                    <h2 id="features-dialog-title" className={styles.dialogTitle}>
-                        Banking Features
-                    </h2>
-                    <button 
-                        onClick={handleClose} 
-                        className={styles.closeButton}
-                        aria-label="Close dialog"
-                    >
-                        <FaTimes />
-                    </button>
-                </div>
-                <DialogContent className={styles.dialogContent}>
-                    <div className={styles.contentWrapper}>
-                        {dialogContent.map((section, index) => (
-                            <div 
-                                key={index} 
-                                className={styles.section}
-                                tabIndex={0}
-                                role="article"
-                                aria-labelledby={`section-title-${index}`}
-                            >
-                                <div className={styles.sectionHeader}>
-                                    {section.icon}
-                                    <h3 id={`section-title-${index}`}>{section.title}</h3>
-                                </div>
-                                <p className={styles.textBlock}>{section.text}</p>
-                            </div>
-                        ))}
+                        <button 
+                            onClick={handleClickOpen} 
+                            className={styles.learnMoreButton}
+                            aria-label="Learn more about our features"
+                        >
+                            Learn More
+                        </button>
                     </div>
-                </DialogContent>
-            </Dialog>
+
+                    <div className={styles.carouselSection}>
+                        <Carousel fade interval={10000} className={styles.customCarousel}>
+                            {carouselItems.map((item, index) => (
+                                <Carousel.Item key={index}>
+                                    <img
+                                        className="d-block w-100"
+                                        src={item.image}
+                                        alt={item.caption}
+                                    />
+                                    <Carousel.Caption className={styles.carouselCaption}>
+                                        <div className={styles.captionContent}>
+                                            <h3>{item.caption}</h3>
+                                            <p>{item.description}</p>
+                                        </div>
+                                    </Carousel.Caption>
+                                </Carousel.Item>
+                            ))}
+                        </Carousel>
+                    </div>
+                    
+
+                    <Dialog
+                        open={open}
+                        onClose={handleClose}
+                        className={styles.dialog}
+                        PaperProps={{
+                            className: styles.dialogPaper
+                        }}
+                        BackdropProps={{
+                            style: { backgroundColor: 'rgba(0, 0, 0, 0.5)' }
+                        }}
+                        aria-labelledby="features-dialog-title"
+                    >
+                        <div className={styles.dialogHeader}>
+                            <h2 id="features-dialog-title" className={styles.dialogTitle}>
+                                Banking Features
+                            </h2>
+                            <button 
+                                onClick={handleClose} 
+                                className={styles.closeButton}
+                                aria-label="Close dialog"
+                            >
+                                <FaTimes />
+                            </button>
+                        </div>
+                        <DialogContent className={styles.dialogContent}>
+                            <div className={styles.contentWrapper}>
+                                {dialogContent.map((section, index) => (
+                                    <div 
+                                        key={index} 
+                                        className={styles.section}
+                                        tabIndex={0}
+                                        role="article"
+                                        aria-labelledby={`section-title-${index}`}
+                                    >
+                                        <div className={styles.sectionHeader}>
+                                            {section.icon}
+                                            <h3 id={`section-title-${index}`}>{section.title}</h3>
+                                        </div>
+                                        <p className={styles.textBlock}>{section.text}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </DialogContent>
+                    </Dialog>
+                </>
+            )}
         </div>
     );
 }

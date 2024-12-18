@@ -109,6 +109,7 @@ function Login() {
                 email: user.email,
                 googleId: user.uid,
                 name: user.displayName,
+                photoURL: user.photoURL,
                 isGoogleUser: true
             });
             

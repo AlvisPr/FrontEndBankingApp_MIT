@@ -245,6 +245,24 @@
     backface-visibility: hidden;
 }
 
+:global(.navbar-collapse) {
+    transition: height 0.35s ease;
+}
+
+:global(.navbar-collapse:not(.show)) {
+    display: none;
+}
+
+:global(.navbar-collapse.show) {
+    transition: height 0.35s ease;
+}
+
+@media (max-width: 991px) {
+    :global(.navbar-collapse.show) {
+        display: block;
+    }
+}
+
 @media (min-width: 992px) {
     .navbarCollapse {
         flex-direction: row;
@@ -326,4 +344,3 @@
         margin-right: 0;
     }
 }
-

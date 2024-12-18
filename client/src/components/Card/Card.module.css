@@ -2,15 +2,25 @@
     position: relative;
     display: flex;
     align-items: center;
+    justify-content: center;
+    width: 100%;
 }
 
 .cardContainer {
     margin: 20px;
     max-width: 500px;
-    width: 100%;
+    width: calc(100% - 40px);
     position: relative;
     z-index: 1;
     animation: slideIn 0.8s ease-out;
+}
+
+@media screen and (max-width: 768px) {
+    .cardContainer {
+        margin: 15px;
+        width: calc(100% - 10px);
+        max-width: 90%;
+    }
 }
 
 @keyframes slideIn {
@@ -147,7 +157,7 @@ button {
     }
 
     .card {
-        width: 90%;
+        width: 99%;
         max-width: 600px;
         margin: 16px auto;
         margin-top: 80px;

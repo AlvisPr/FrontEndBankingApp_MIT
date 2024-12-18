@@ -145,7 +145,6 @@ function Login() {
                             error={validationErrors.email}
                             placeholder="Email"
                         />
-                        <br />
                         <FormInput
                             type={passwordVisible ? "text" : "password"}
                             id="password"
@@ -154,8 +153,9 @@ function Login() {
                             onBlur={handleBlur}
                             error={validationErrors.password}
                             placeholder="Password"
+                            togglePasswordVisibility={() => setPasswordVisible(!passwordVisible)}
+                            passwordVisible={passwordVisible}
                         />
-                        <br />
                         <div className="form-group">
                             <button
                                 type="submit"

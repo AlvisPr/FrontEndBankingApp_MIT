@@ -140,7 +140,6 @@ function CreateAccount() {
                             error={validationErrors.name}
                             placeholder="Name"
                         />
-                        <br />
                         <FormInput
                             type="input"
                             id="email"
@@ -150,7 +149,6 @@ function CreateAccount() {
                             error={validationErrors.email}
                             placeholder="Email"
                         />
-                        <br />
                         <FormInput
                             type={passwordVisible ? "text" : "password"}
                             id="password"
@@ -159,8 +157,9 @@ function CreateAccount() {
                             onBlur={handleBlur}
                             error={validationErrors.password}
                             placeholder="Password"
+                            togglePasswordVisibility={() => setPasswordVisible(!passwordVisible)}
+                            passwordVisible={passwordVisible}
                         />
-                        <br />
                         <div className="form-group">
                             <button
                                 type="submit"

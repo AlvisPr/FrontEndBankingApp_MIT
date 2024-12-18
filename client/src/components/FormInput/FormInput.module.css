@@ -1,5 +1,6 @@
 .formInputContainer {
     position: relative;
+    margin-bottom: 1.5rem;
 }
 
 
@@ -16,3 +17,31 @@
     border-right: 1px solid #ccc;
 }
 
+
+.passwordToggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    color: #666;
+}
+
+.passwordToggle:hover {
+    color: #333;
+}
+
+.validationIcon {
+    position: absolute;
+    right: -30px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-radius: 50%;
+    background-color: white;
+    padding: 5px;
+}

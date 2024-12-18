@@ -2,9 +2,18 @@ import React from 'react';
 import { FaCheck, FaTimes, FaEye, FaEyeSlash, FaEnvelope, FaLock, FaUser } from 'react-icons/fa';
 import styles from './FormInput.module.css';
 
-
-
-function FormInput({ id, type, value, onChange, onBlur, onKeyPress, validationError, togglePasswordVisibility, passwordVisible }) {
+function FormInput({ 
+    id, 
+    type, 
+    value, 
+    onChange, 
+    onBlur, 
+    onKeyPress, 
+    error, 
+    placeholder,
+    togglePasswordVisibility,
+    passwordVisible 
+}) {
     return (
         <div className={styles.formInputContainer}>
             <div className={styles.iconContainer}>
@@ -16,34 +25,26 @@ function FormInput({ id, type, value, onChange, onBlur, onKeyPress, validationEr
                 type={type}
                 className="form-control"
                 id={id}
-                placeholder={`Enter ${id}`}
+                placeholder={placeholder || `Enter ${id}`}
                 value={value}
                 onChange={onChange}
                 onBlur={onBlur}
                 onKeyPress={onKeyPress}
-                style={{ paddingLeft: '50px', borderColor: validationError ? 'red' : '' }}
+                style={{ paddingLeft: '50px', paddingRight: id === 'password' ? '40px' : '10px', borderColor: error ? 'red' : '' }}
             />
-            {id === 'password' && (
+            {id === 'password' && togglePasswordVisibility && (
                 <button
                     type="button"
                     onClick={togglePasswordVisibility}
-                    style={{
-                        position: 'absolute',
-                        right: '10px',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer'
-                    }}
+                    className={styles.passwordToggle}
                 >
                     {passwordVisible ? <FaEyeSlash /> : <FaEye />}
                 </button>
             )}
-            {validationError ? (
-                <FaTimes style={{ color: 'red', position: 'absolute', right: '-30px', top: '50%', transform: 'translateY(-50%)', borderRadius: '50%', backgroundColor: 'white', padding: '5px' }} />
+            {error ? (
+                <FaTimes className={styles.validationIcon} style={{ color: 'red' }} />
             ) : (
-                value && <FaCheck style={{ color: 'green', position: 'absolute', right: '-30px', top: '50%', transform: 'translateY(-50%)', borderRadius: '50%', backgroundColor: 'white', padding: '5px' }} />
+                value && <FaCheck className={styles.validationIcon} style={{ color: 'green' }} />
             )}
         </div>
     );

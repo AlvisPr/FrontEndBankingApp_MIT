@@ -4,7 +4,7 @@ const User = require('../models/User');
 const isAdmin = async (req, res, next) => {
     try {
         console.log('isAdmin middleware called');
-        const user = await User.findById(req.userId);
+        const user = await User.findById(req.user.userId);
         if (user && user.isAdmin) {
             console.log('User is admin:', user.email);
             next();

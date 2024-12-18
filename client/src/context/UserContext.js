@@ -13,14 +13,38 @@ export const UserProvider = ({ children }) => {
     const [token, setToken] = useState(localStorage.getItem('token'));
 
     useEffect(() => {
-        if (token) {
-            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        const storedToken = localStorage.getItem('token');
+        console.log('Token from localStorage:', storedToken);
+        
+        if (storedToken) {
+            setToken(storedToken);
+            // Set up axios interceptor for all requests
+            const interceptor = axios.interceptors.request.use(
+                (config) => {
+                    config.headers.Authorization = `Bearer ${storedToken}`;
+                    console.log('Request headers:', config.headers);
+                    return config;
+                },
+                (error) => {
+                    console.error('Interceptor error:', error);
+                    return Promise.reject(error);
+                }
+            );
+
             const userData = JSON.parse(localStorage.getItem('user'));
+            console.log('User data from localStorage:', userData);
+            
             if (userData) {
                 setCurrentUser(userData);
                 setUserType(userData.isAdmin ? 'admin' : 'user');
             }
+
+            // Clean up interceptor on unmount
+            return () => {
+                axios.interceptors.request.eject(interceptor);
+            };
         } else {
+            console.log('No token found in localStorage');
             delete axios.defaults.headers.common['Authorization'];
         }
     }, [token]);
@@ -31,9 +55,11 @@ export const UserProvider = ({ children }) => {
             const endpoint = userData.isGoogleUser ? 'google-auth' : 'login';
             
             const response = await axios.post(`${API_URL}/users/${endpoint}`, userData);
+            console.log('Login response:', response.data);
 
             if (response.data.success) {
                 const { user, token } = response.data;
+                console.log('Setting token:', token);
                 localStorage.setItem('token', token);
                 localStorage.setItem('user', JSON.stringify(user));
                 setToken(token);
@@ -57,7 +83,12 @@ export const UserProvider = ({ children }) => {
         try {
             console.log('Starting transaction:', { type, amount, currentUser });
             
-            const response = await axios.post(`${API_URL}/users/${currentUser.id}/transaction`, {
+            const userId = currentUser._id || currentUser.id;
+            if (!userId) {
+                throw new Error('User ID is not available');
+            }
+
+            const response = await axios.post(`${API_URL}/users/${userId}/transaction`, {
                 type: type.toLowerCase(),
                 amount: parseFloat(amount)
             });

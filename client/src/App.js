@@ -10,6 +10,7 @@ import Balance from './Pages/Balance/Balance';
 import AllData from './components/AllData/AllData';
 import Footer from './components/Footer/Footer';
 import { UserProvider, useUser } from './context/UserContext';
+import AdminPanel from './components/AdminPanel/AdminPanel';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 import './App.css';
@@ -41,6 +42,7 @@ function AppContent() {
                     <Route path="/transfer" element={<Transfer />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/alldata" element={<AllData />} />
+                    <Route path="/admin" element={<AdminPanel />} />
                     <Route path="*" element={<Home />} />
                 </Routes>
                 {!currentUser && <CanvasAnimation />}

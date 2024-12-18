@@ -50,6 +50,11 @@ class UserDal {
         return await this.model.find({}).select('-password');
     }
 
+    async deleteUser(userId) {
+        const result = await this.model.findByIdAndDelete(userId);
+        return result;
+    }
+
     async updateSession(userId, sessionData) {
         return await this.model.findByIdAndUpdate(
             userId,

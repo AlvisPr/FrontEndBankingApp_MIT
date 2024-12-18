@@ -51,6 +51,7 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const { ObjectId } = mongoose.Types;
 const isAdmin = require('../middleware/isAdmin');
+const auth = require('../middleware/auth');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const userDal = require('../dal/UserDal');
@@ -262,68 +263,49 @@ router.post('/register', async (req, res) => {
  */
 router.post('/login', async (req, res) => {
     try {
-        console.log('Login attempt:', req.body);
         const { email, password } = req.body;
 
-        if (!email || !password) {
-            return res.status(400).json({
-                success: false,
-                error: 'Email and password are required'
-            });
-        }
-
         // Find user by email
-        const user = await userDal.findUserByEmail(email.toLowerCase());
-        
+        const user = await userDal.findUserByEmail(email);
         if (!user) {
-            return res.status(401).json({
-                success: false,
-                error: 'Invalid email or password'
-            });
+            return res.status(401).json({ message: 'Invalid email or password' });
         }
 
-        // Use bcrypt to compare the password
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
-            return res.status(401).json({
-                success: false,
-                error: 'Invalid email or password'
-            });
+        // Verify password
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Invalid email or password' });
         }
 
-        // Generate JWT token
+        // Create token
         const token = jwt.sign(
             { 
                 userId: user._id,
                 email: user.email,
                 accountNumber: user.accountNumber
             },
-            process.env.JWT_SECRET,
+            user.password,
             { expiresIn: '24h' }
         );
 
-        // Return user without password and include token
+        // Return user data and token
+        const userData = {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            accountNumber: user.accountNumber,
+            balance: user.balance,
+            isAdmin: user.isAdmin
+        };
+
         res.json({
             success: true,
-            token,
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                balance: user.balance,
-                accountNumber: user.accountNumber,
-                isAdmin: user.isAdmin,
-                transactions: user.transactions || []
-            }
+            user: userData,
+            token
         });
-
     } catch (error) {
         console.error('Login error:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Login failed',
-            details: error.message
-        });
+        res.status(500).json({ message: 'Server error during login' });
     }
 });
 
@@ -679,9 +661,71 @@ router.patch('/:userId/password', async (req, res) => {
 
 /**
  * @swagger
+ * /users/{userId}/password:
+ *   put:
+ *     summary: Update user password
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - newPassword
+ *             properties:
+ *               newPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password updated successfully
+ *       400:
+ *         description: Invalid request
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
+ */
+router.put('/:userId/password', auth, isAdmin, async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { newPassword } = req.body;
+
+        if (!newPassword) {
+            return res.status(400).json({ message: 'New password is required' });
+        }
+
+        // Hash the new password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        // Update the user's password
+        const user = await userDal.findUserById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        user.password = hashedPassword;
+        await user.save();
+
+        res.json({ message: 'Password updated successfully' });
+    } catch (error) {
+        console.error('Error updating password:', error);
+        res.status(500).json({ message: 'Error updating password' });
+    }
+});
+
+/**
+ * @swagger
  * /users/{userId}:
  *   delete:
- *     summary: Delete user with admin password verification
+ *     summary: Delete user
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -692,27 +736,19 @@ router.patch('/:userId/password', async (req, res) => {
  *           type: string
  *         required: true
  *         description: User ID
- *     headers:
- *       admin-password:
- *         schema:
- *           type: string
- *           format: password
- *         required: true
- *         description: Admin password
  *     responses:
  *       200:
  *         description: User deleted successfully
  *       400:
  *         description: Invalid user ID format
  *       403:
- *         description: Admin access required or invalid admin password
+ *         description: Admin access required
  *       404:
  *         description: User not found
  */
-router.delete('/:userId', async (req, res) => {
+router.delete('/:userId', auth, isAdmin, async (req, res) => {
     try {
         const { userId } = req.params;
-        const adminPassword = req.headers['admin-password'];
 
         // Validate userId format
         if (!ObjectId.isValid(userId)) {
@@ -722,73 +758,38 @@ router.delete('/:userId', async (req, res) => {
             });
         }
 
-        // Validate admin password presence
-        if (!adminPassword) {
-            return res.status(400).json({ 
-                error: 'Admin password is required in headers'
-            });
-        }
-
-        const adminUser = await userDal.findUserById(req.userId);
-        if (!adminUser || !adminUser.isAdmin) {
-            console.error('Admin access required:', {
-                userId: req.userId,
-                adminUser
-            });
-            return res.status(403).json({ 
-                error: 'Admin access required',
-                details: 'User not found or not authorized as admin'
-            });
-        }
-
-        // Verify admin password
-        const isPasswordValid = await bcrypt.compare(adminPassword, adminUser.password);
-        if (!isPasswordValid) {
-            console.error('Invalid admin password:', {
-                userId: req.userId,
-                adminPassword
-            });
-            return res.status(403).json({ 
-                error: 'Invalid admin password'
-            });
-        }
-
-        // Find user to be deleted
-        const userToDelete = await userDal.findUserById(userId);
-        if (!userToDelete) {
-            return res.status(404).json({ 
-                error: 'User not found',
-                userId 
+        // Check if trying to delete self
+        if (userId === req.user.userId) {
+            return res.status(400).json({
+                error: 'Cannot delete your own account'
             });
         }
 
         // Delete the user
-        await userDal.deleteUser(userId);
+        const result = await userDal.deleteUser(userId);
+        if (!result) {
+            return res.status(404).json({ error: 'User not found' });
+        }
 
         // Log successful deletion
         console.log('User deleted successfully:', {
             deletedUserId: userId,
-            adminId: req.userId,
+            adminId: req.user.userId,
             timestamp: new Date().toISOString(),
-            userEmail: userToDelete.email
+            userEmail: result.email
         });
 
         res.json({ 
             message: 'User deleted successfully',
-            deletedUserId: userId
+            deletedUser: {
+                id: result._id,
+                email: result.email,
+                name: result.name
+            }
         });
-
     } catch (error) {
-        console.error('Error deleting user:', {
-            error: error.message,
-            stack: error.stack,
-            userId: req.params.userId
-        });
-
-        res.status(500).json({ 
-            error: 'Failed to delete user',
-            details: error.message
-        });
+        console.error('Error deleting user:', error);
+        res.status(500).json({ error: 'Error deleting user' });
     }
 });
 

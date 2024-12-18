@@ -8,31 +8,60 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import bankImg from '../../assets/atm.png';
 import sharedLogos from '../../Styles/sharedlogos.module.css';
+import { validateField } from '../../components/Validation/Validation';
 
 function Withdraw() {
     const [amount, setAmount] = useState('');
-    const [status, setStatus] = useState('');
     const [loading, setLoading] = useState(false);
+    const [validationErrors, setValidationErrors] = useState({});
     const ctx = useContext(UserContext);
 
-    function handleWithdraw() {
-        if (isNaN(amount) || amount <= 0) {
-            toast.error('Error: Invalid amount');
+    const handleChange = (e) => {
+        const { value } = e.target;
+        setAmount(value);
+        // Clear validation error when user starts typing
+        if (validationErrors.amount) {
+            setValidationErrors({});
+        }
+    };
+
+    const handleBlur = () => {
+        const errors = validateField('amount', amount);
+        setValidationErrors(errors);
+        if (errors.amount) {
+            toast.error(errors.amount);
+        }
+    };
+
+    const handleWithdraw = () => {
+        // Validate amount
+        const errors = validateField('amount', amount);
+        if (Object.keys(errors).length > 0) {
+            setValidationErrors(errors);
+            toast.error(errors.amount);
             return;
         }
-        if (amount > ctx.currentUser.balance) {
-            toast.error('Error: Insufficient funds');
+
+        // Check for sufficient funds
+        if (parseFloat(amount) > ctx.currentUser.balance) {
+            toast.error('Insufficient funds for withdrawal');
             return;
         }
+
         setLoading(true);
         setTimeout(() => {
-            ctx.logTransaction('Withdraw', parseFloat(amount));
-            setStatus('');
-            setAmount('');
-            setLoading(false);
-            toast.success(`Success: Withdrew $${amount}`);
+            try {
+                ctx.logTransaction('Withdraw', parseFloat(amount));
+                setAmount('');
+                setValidationErrors({});
+                toast.success(`Successfully withdrew $${amount}`);
+            } catch (error) {
+                toast.error('Withdrawal failed. Please try again.');
+            } finally {
+                setLoading(false);
+            }
         }, 700);
-    }
+    };
 
     return (
         <>
@@ -40,25 +69,31 @@ function Withdraw() {
                 bgcolor="danger"
                 header="Withdraw"
                 balance={ctx.currentUser ? ` Balance |  $${ctx.currentUser.balance}` : ''}
-                status={status}
                 body={
                     ctx.currentUser ? (
                         <>
                             <input 
-                                type="input" 
-                                className="form-control" 
+                                type="number"
+                                className={`form-control ${validationErrors.amount ? 'is-invalid' : ''}`}
                                 id="amount" 
                                 placeholder="Enter amount" 
                                 value={amount} 
-                                onChange={e => setAmount(e.currentTarget.value)} 
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                min="0"
+                                step="0.01"
                             /><br />
                             <button 
                                 type="submit" 
                                 className="btn btn-light" 
                                 onClick={handleWithdraw} 
-                                disabled={!amount}
+                                disabled={!amount || loading || Object.keys(validationErrors).length > 0}
                             >
-                                Withdraw
+                                {loading ? (
+                                    <ClipLoader size={20} color={"#000000"} loading={loading} />
+                                ) : (
+                                    'Withdraw'
+                                )}
                             </button>
                             <br />
                             <br />
@@ -71,18 +106,20 @@ function Withdraw() {
                     )
                 }
             />
-            {loading && (
-                <div className={styles.spinner}>
-                    <ClipLoader size={50} color={"#123abc"} loading={loading} />
-                </div>
-            )}
             <TooltipIcon
-                text={`
-                Here we are displaying the withdraw form. 
-                If the user is not logged in, they will be prompted to log in.
-            `}
+                text="Here we are displaying the withdraw form. If the user is not logged in, they will be prompted to log in."
             />
-            <ToastContainer style={{ top: '20px' }}/>
+            <ToastContainer 
+                position="top-right"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+            />
         </>
     );
 }

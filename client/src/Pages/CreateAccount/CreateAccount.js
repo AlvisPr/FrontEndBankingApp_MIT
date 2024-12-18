@@ -10,7 +10,6 @@ import { auth, googleProvider } from '../../firebase';
 import { signInWithPopup } from 'firebase/auth';
 import { styled } from '@mui/material/styles';
 import Button from '@mui/material/Button';
-import axios from 'axios';
 import { ClipLoader } from 'react-spinners';
 import styles from "../../Styles/spinner.module.css";
 import UserCard from '../../components/UserCard/UserCard';
@@ -44,34 +43,80 @@ function CreateAccount() {
     const { createUser, currentUser } = useContext(UserContext);
 
     useEffect(() => {
+        // Validate form whenever inputs change
+        const errors = {};
+        if (name) {
+            const nameErrors = validateField('name', name);
+            if (nameErrors.name) errors.name = nameErrors.name;
+        }
+        if (email) {
+            const emailErrors = validateField('email', email);
+            if (emailErrors.email) errors.email = emailErrors.email;
+        }
+        if (password) {
+            const passwordErrors = validateField('password', password);
+            if (passwordErrors.password) errors.password = passwordErrors.password;
+        }
+        
+        setValidationErrors(errors);
         setIsFormValid(
-            !validationErrors.name &&
-            !validationErrors.email &&
-            !validationErrors.password &&
+            !Object.keys(errors).length &&
             name &&
             email &&
             password
         );
-    }, [validationErrors, name, email, password]);
+    }, [name, email, password]);
 
     const handleChange = (e) => {
         const { id, value } = e.target;
         if (id === 'name') setName(value);
         if (id === 'email') setEmail(value);
         if (id === 'password') setPassword(value);
+
+        // Clear validation error when user starts typing
+        if (validationErrors[id]) {
+            setValidationErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[id];
+                return newErrors;
+            });
+        }
     };
 
     const handleBlur = (e) => {
         const { id, value } = e.target;
         const errors = validateField(id, value);
-        setValidationErrors(prev => ({
-            ...prev,
-            [id]: errors[id]
-        }));
+        if (errors[id]) {
+            setValidationErrors(prev => ({
+                ...prev,
+                [id]: errors[id]
+            }));
+            toast.error(errors[id]);
+        }
     };
 
     const handleCreate = async (e) => {
         e.preventDefault();
+
+        // Final validation before submission
+        const nameErrors = validateField('name', name);
+        const emailErrors = validateField('email', email);
+        const passwordErrors = validateField('password', password);
+
+        const allErrors = {
+            ...nameErrors,
+            ...emailErrors,
+            ...passwordErrors
+        };
+
+        if (Object.keys(allErrors).length > 0) {
+            setValidationErrors(allErrors);
+            Object.values(allErrors).forEach(error => {
+                if (error) toast.error(error);
+            });
+            return;
+        }
+
         try {
             setLoading(true);
             await createUser({
@@ -81,8 +126,14 @@ function CreateAccount() {
                 isGoogleUser: false
             });
             toast.success('Account created successfully!');
+            // Clear form
+            setName('');
+            setEmail('');
+            setPassword('');
+            setValidationErrors({});
         } catch (error) {
-            toast.error(error.message || 'Failed to create account');
+            console.error('Create account error:', error);
+            toast.error(error.message || 'Failed to create account. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -100,83 +151,94 @@ function CreateAccount() {
                 name: user.displayName,
                 isGoogleUser: true
             });
+            
             toast.success('Account created successfully with Google!');
         } catch (error) {
-            console.error('Google signup error:', error);
-            toast.error(error.message || 'Failed to create account with Google. Please try again.');
+            console.error('Google sign up error:', error);
+            toast.error(error.message || 'Failed to create account with Google');
         } finally {
             setLoading(false);
         }
     };
 
+    if (currentUser) {
+        return <UserCard user={currentUser} />;
+    }
+
     return (
         <>
-            {currentUser ? (
-                <UserCard user={currentUser} />
-            ) : (
-                <Card
-                    bgcolor="primary"
-                    header="Create Account"
-                    body={
-                        <>
-                            <FormInput
-                                type="input"
-                                id="name"
-                                value={name}
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                error={validationErrors.name}
-                                placeholder="Name"
-                            />
-                            <FormInput
-                                type="input"
-                                id="email"
-                                value={email}
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                error={validationErrors.email}
-                                placeholder="Email"
-                            />
-                            <FormInput
-                                type={passwordVisible ? "text" : "password"}
-                                id="password"
-                                value={password}
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                error={validationErrors.password}
-                                placeholder="Password"
-                                togglePasswordVisibility={() => setPasswordVisible(!passwordVisible)}
-                                passwordVisible={passwordVisible}
-                            />
-                            <div className="form-group">
-                                <button
-                                    type="submit"
-                                    className="btn btn-primary w-100 mb-3"
-                                    disabled={!isFormValid || loading}
-                                    onClick={handleCreate}
-                                >
-                                    {loading ? (
-                                        <div className={styles.spinnerContainer}>
-                                            <ClipLoader color="#ffffff" loading={loading} size={20} />
-                                        </div>
-                                    ) : (
-                                        'Create Account'
-                                    )}
-                                </button>
+            <Card
+                bgcolor="primary"
+                header="Create Account"
+                body={
+                    <>
+                        <FormInput
+                            type="input"
+                            id="name"
+                            value={name}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            error={validationErrors.name}
+                            placeholder="Name"
+                        />
+                        <FormInput
+                            type="input"
+                            id="email"
+                            value={email}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            error={validationErrors.email}
+                            placeholder="Email"
+                        />
+                        <FormInput
+                            type={passwordVisible ? "text" : "password"}
+                            id="password"
+                            value={password}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            error={validationErrors.password}
+                            placeholder="Password"
+                            togglePasswordVisibility={() => setPasswordVisible(!passwordVisible)}
+                            passwordVisible={passwordVisible}
+                        />
+                        <div className="form-group">
+                            <button
+                                type="submit"
+                                className="btn btn-primary w-100 mb-3"
+                                disabled={!isFormValid || loading}
+                                onClick={handleCreate}
+                            >
+                                {loading ? (
+                                    <div className={styles.spinnerContainer}>
+                                        <ClipLoader color="#ffffff" loading={loading} size={20} />
+                                    </div>
+                                ) : (
+                                    'Create Account'
+                                )}
+                            </button>
 
-                                <GoogleButton
-                                    onClick={handleGoogleSignUp}
-                                    disabled={loading}
-                                    startIcon={<FcGoogle />}
-                                >
-                                    Sign up with Google
-                                </GoogleButton>
-                            </div>
-                        </>
-                    }
-                />
-            )}
-            <ToastContainer style={{ top: '20px' }} />
+                            <GoogleButton
+                                onClick={handleGoogleSignUp}
+                                disabled={loading}
+                                startIcon={<FcGoogle />}
+                            >
+                                Sign up with Google
+                            </GoogleButton>
+                        </div>
+                    </>
+                }
+            />
+            <ToastContainer 
+                position="top-right"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+            />
         </>
     );
 }

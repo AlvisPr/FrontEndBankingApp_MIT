@@ -1,87 +1,59 @@
-export const validateField = (fieldName, value, ctx, context) => {
-    let errors = {};
-    switch (fieldName) {
-        case 'name':
-            if (context === 'createAccount') {
-                if (!value) {
-                    errors.name = 'Name is required';
-                } else if (value.length < 2) {
-                    errors.name = 'Name should be at least 2 characters long';
-                }
-            }
-            break;
-        case 'email':
-            if (!value) {
-                errors.email = 'Email is required';
-            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-                errors.email = 'Invalid email format';
-            } else if (context === 'createAccount' && ctx.users.some(user => user.email === value)) {
-                errors.email = 'This email is already in use';
-            }
-            break;
-        case 'password':
-            if (!value) {
-                errors.password = 'Password is required';
-            } else if (value.length < 8) {
-                errors.password = 'Password should be at least 8 characters long';
-            } else if (!/\d/.test(value) || !/[a-zA-Z]/.test(value)) {
-                errors.password = 'Password should contain both letters and numbers';
-            }
-            break;
-        case 'phoneNumber':
-            if (value && value.trim() === '') {
-                errors.phoneNumber = 'Phone number is required';
-            }
-            break;
-        case 'zipCode':
-            if (value && value.trim() === '') {
-                errors.zipCode = 'ZIP code is required';
-            }
-            break;
-        case 'city':
-            if (value && value.length < 2) {
-                errors.city = 'City should be at least 2 characters long';
-            }
-            break;
-        case 'state':
-            if (value && value.length < 2) {
-                errors.state = 'Please enter a valid state';
-            }
-            break;
-        case 'preferredName':
-            if (value && value.length < 2) {
-                errors.preferredName = 'Preferred name should be at least 2 characters long';
-            }
-            break;
-        case 'street':
-            if (value && value.length < 2) {
-                errors.street = 'Street address should be at least 2 characters long';
-            }
-            break;
-        case 'accountNumber':
-            if (!value) {
-                errors.accountNumber = 'Account number is required';
-            } else if (!/^\d{17}$/.test(value)) {
-                errors.accountNumber = 'Account number must be 17 digits';
-            }
-            break;
-        case 'routingNumber':
-            if (!value) {
-                errors.routingNumber = 'Routing number is required';
-            } else if (!/^\d{9}$/.test(value)) {
-                errors.routingNumber = 'Routing number must be 9 digits';
-            }
-            break;
+export const validateField = (fieldId, value) => {
+    const errors = {};
+
+    switch (fieldId) {
         case 'amount':
             if (!value) {
-                errors.amount = 'Amount is required';
+                errors[fieldId] = 'Amount is required';
             } else if (isNaN(value) || parseFloat(value) <= 0) {
-                errors.amount = 'Amount must be a positive number';
+                errors[fieldId] = 'Please enter a valid positive number';
+            } else if (value.length > 6) {
+                errors[fieldId] = 'Amount cannot exceed 6 digits';
+            } else if (value.includes('.') && value.split('.')[1].length > 2) {
+                errors[fieldId] = 'Amount cannot have more than 2 decimal places';
             }
             break;
+
+        case 'accountNumber':
+            if (!value) {
+                errors[fieldId] = 'Account number is required';
+            } else if (!/^\d{10}$/.test(value)) {
+                errors[fieldId] = 'Account number must be 10 digits';
+            }
+            break;
+
+        case 'email':
+            if (!value) {
+                errors[fieldId] = 'Email is required';
+            } else if (!/\S+@\S+\.\S+/.test(value)) {
+                errors[fieldId] = 'Please enter a valid email address';
+            }
+            break;
+
+        case 'password':
+            if (!value) {
+                errors[fieldId] = 'Password is required';
+            } else if (value.length < 8) {
+                errors[fieldId] = 'Password must be at least 8 characters';
+            } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(value)) {
+                errors[fieldId] = 'Password must contain uppercase, lowercase and numbers';
+            }
+            break;
+
+        case 'name':
+            if (!value) {
+                errors[fieldId] = 'Name is required';
+            } else if (value.length < 2) {
+                errors[fieldId] = 'Name must be at least 2 characters';
+            } else if (!/^[a-zA-Z\s]*$/.test(value)) {
+                errors[fieldId] = 'Name can only contain letters and spaces';
+            }
+            break;
+
         default:
             break;
     }
+
     return errors;
 };
 

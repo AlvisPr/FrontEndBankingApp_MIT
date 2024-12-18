@@ -7,19 +7,37 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import bankImg from '../../assets/salary.png';
 import sharedLogos from '../../Styles/sharedlogos.module.css';
+import { validateField } from '../../components/Validation/Validation';
 
 function Deposit() {
     const [amount, setAmount] = useState('');
     const [loading, setLoading] = useState(false);
+    const [validationErrors, setValidationErrors] = useState({});
     const ctx = useContext(UserContext);
 
-    async function handleDeposit() {
-        if (isNaN(amount) || amount <= 0) {
-            toast.error('Error: Invalid amount');
-            return;
+    const handleChange = (e) => {
+        const { value } = e.target;
+        setAmount(value);
+        // Clear validation error when user starts typing
+        if (validationErrors.amount) {
+            setValidationErrors({});
         }
-        if (amount.length > 6) {
-            toast.error('Error: Amount exceeds 6 digits');
+    };
+
+    const handleBlur = () => {
+        const errors = validateField('amount', amount);
+        setValidationErrors(errors);
+        if (errors.amount) {
+            toast.error(errors.amount);
+        }
+    };
+
+    const handleDeposit = async () => {
+        // Validate amount
+        const errors = validateField('amount', amount);
+        if (Object.keys(errors).length > 0) {
+            setValidationErrors(errors);
+            toast.error(errors.amount);
             return;
         }
 
@@ -27,14 +45,15 @@ function Deposit() {
         try {
             await ctx.logTransaction('deposit', parseFloat(amount));
             setAmount('');
-            toast.success(`Success: Deposited $${amount}`);
+            setValidationErrors({});
+            toast.success(`Successfully deposited $${amount}`);
         } catch (error) {
             console.error('Deposit error:', error);
-            toast.error(`Error: ${error.error || 'Transaction failed'}`);
+            toast.error(error.message || 'Deposit failed. Please try again.');
         } finally {
             setLoading(false);
         }
-    }
+    };
 
     return (
         <>
@@ -46,21 +65,24 @@ function Deposit() {
                     ctx.currentUser ? (
                         <>
                             <input 
-                                type="input" 
-                                className="form-control" 
+                                type="number"
+                                className={`form-control ${validationErrors.amount ? 'is-invalid' : ''}`}
                                 id="amount" 
                                 placeholder="Enter amount" 
                                 value={amount} 
-                                onChange={e => setAmount(e.currentTarget.value)} 
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                min="0"
+                                step="0.01"
                             /><br />
                             <button 
                                 type="submit" 
                                 className="btn btn-light" 
                                 onClick={handleDeposit} 
-                                disabled={!amount || loading}
+                                disabled={!amount || loading || Object.keys(validationErrors).length > 0}
                             >
                                 {loading ? (
-                                    <ClipLoader color="#000000" size={20} />
+                                    <ClipLoader size={20} color={"#000000"} loading={loading} />
                                 ) : (
                                     'Deposit'
                                 )}
@@ -76,7 +98,20 @@ function Deposit() {
                     )
                 }
             />
-            <ToastContainer />
+            <TooltipIcon
+                text="Here we are displaying the deposit form. If the user is not logged in, they will be prompted to log in."
+            />
+            <ToastContainer 
+                position="top-right"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+            />
         </>
     );
 }

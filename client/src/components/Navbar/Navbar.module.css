@@ -102,6 +102,26 @@
     letter-spacing: 0.3px;
 }
 
+.navbar :global(.nav-link) {
+    color: white !important;
+    padding: 0.5rem 1rem !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    margin: 0 2px;
+}
+
+.navbar :global(.nav-link:hover) {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.navbar :global(.nav-link.active) {
+    background-color: rgba(255, 255, 255, 0.15);
+    font-weight: 500;
+}
+
 :global(.nav-link) {
     display: flex !important;
     align-items: center !important;
@@ -164,13 +184,12 @@
     transition: all 0.3s ease;
 }
 
-:global(.navbar-toggler:hover) {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.6) !important;
-}
-
+:global(.navbar-toggler:hover),
 :global(.navbar-toggler:focus) {
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25);
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.6) !important;
+    box-shadow: none !important;
+    outline: none !important;
 }
 
 :global(.navbar-toggler-icon) {
@@ -353,7 +372,85 @@
 }
 
 .mobileMenu {
-    display: none;
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100vh;
+    background-color: #2e7d32;
+    transition: left 0.3s ease-in-out;
+    z-index: 1001;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    /* Hide default scrollbar for webkit browsers */
+    &::-webkit-scrollbar {
+        display: none;
+    }
+    /* Hide scrollbar for Firefox */
+    scrollbar-width: none;
+    /* Hide scrollbar for IE and Edge */
+    -ms-overflow-style: none;
+}
+
+/* Alternative styling if you want to show a custom scrollbar */
+/*
+.mobileMenu::-webkit-scrollbar {
+    width: 8px;
+}
+
+.mobileMenu::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.mobileMenu::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.mobileMenu::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+*/
+
+.mobileMenuOpen {
+    left: 0;
+}
+
+.mobileMenu :global(.navbar-nav) {
+    padding: 1rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.mobileMenu :global(.banking-actions) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.mobileMenu :global(.user-actions) {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobileMenu :global(.nav-item) {
+    width: 100%;
+}
+
+.mobileMenu :global(.nav-link) {
+    width: 100%;
+    padding: 1rem !important;
+    margin: 0.25rem 0;
+    border-radius: 8px;
+}
+
+@media (min-width: 992px) {
+    .mobileMenu {
+        display: none !important;
+    }
 }
 
 @media (max-width: 991px) {

@@ -1,7 +1,7 @@
 .cardContainer {
     margin: 20px;
-    max-width: 500px;
-    width: 100%;
+    width: 500px;
+    
     position: relative;
     z-index: 1;
     animation: slideIn 0.8s ease-out;
@@ -23,9 +23,9 @@
     transition: transform 0.5s, box-shadow 0.5s;
     backdrop-filter: blur(5px);
     background-color: #208454 !important;
-    padding: 20px;
+    padding: 10px;
     margin: 10px;
-    width: 400px;
+    width: 450px;
     height: auto !important;
     min-height: 500px;
     transform: scale(1);
@@ -46,6 +46,7 @@
     justify-content: space-between;
     background-color: rgba(255, 255, 255, 0.1);
     margin: -20px -20px 20px -20px;
+    
 }
 
 .cardHeader h2 {
@@ -77,7 +78,8 @@
 
 .userInfo {
     color: white;
-    padding: 0 1rem;
+    padding: 0 1.5rem;
+    
 }
 
 .infoRow {
@@ -85,21 +87,33 @@
     justify-content: space-between;
     align-items: center;
     padding: 1rem 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    
+    transition: all 0.3s ease;
 }
 
 .infoRow:last-child {
     border-bottom: none;
 }
 
+.infoRow:hover {
+    padding-left: 10px;
+}
+
 .label {
     font-weight: 500;
     color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
 }
 
 .value {
     font-weight: 600;
     color: white;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+.infoRow:hover .value {
+    transform: translateX(-5px);
 }
 
 .avatarPlaceholder {
@@ -195,7 +209,7 @@
     font-weight: 600;
     font-size: 0.9rem;
     padding: 0.2rem 0.5rem;
-    background: rgba(21, 101, 192, 0.2);
+    
     border-radius: 4px;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }

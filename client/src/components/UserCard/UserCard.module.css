@@ -1,6 +1,6 @@
 .cardContainer {
     margin: 20px;
-    width: 500px;
+    width: 450px;
     
     position: relative;
     z-index: 1;
@@ -24,8 +24,8 @@
     backdrop-filter: blur(5px);
     background-color: #208454 !important;
     padding: 10px;
-    margin: 10px;
-    width: 450px;
+    margin: 0;
+    width: 100%;
     height: auto !important;
     min-height: 500px;
     transform: scale(1);
@@ -45,8 +45,7 @@
     display: flex;
     justify-content: space-between;
     background-color: rgba(255, 255, 255, 0.1);
-    margin: -20px -20px 20px -20px;
-    
+    margin: -10px -10px 20px -10px;
 }
 
 .cardHeader h2 {

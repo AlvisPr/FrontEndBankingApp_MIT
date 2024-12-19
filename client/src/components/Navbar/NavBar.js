@@ -67,6 +67,17 @@ function NavBar() {
                             CashConnect
                         </Link>
                         
+                        {currentUser && currentUser.isAdmin && (
+                            <Link 
+                                className={`nav-link d-none d-lg-flex ${location.pathname === '/admin' ? 'active' : ''}`} 
+                                to="/admin" 
+                                style={{ display: 'flex', alignItems: 'center', gap: '2px', padding: '8px 4px' }}
+                                onClick={() => handleNavigation('/admin')}
+                            >
+                                <AdminPanelSettingsIcon fontSize="small" /> Admin Panel
+                            </Link>
+                        )}
+                        
                         {currentUser && !currentUser.isAdmin && (
                             <div className="d-none d-lg-flex">
                                 <Link 
@@ -113,18 +124,6 @@ function NavBar() {
                 {/* Desktop Menu */}
                 <div className={styles.desktopMenu}>
                     <ul className="navbar-nav me-auto mb-2 mb-lg-0" style={{ gap: '0', display: 'flex', alignItems: 'center' }}>
-                        {currentUser && currentUser.isAdmin && (
-                            <li className="nav-item">
-                                <Link 
-                                    className={`nav-link ${location.pathname === '/admin' ? 'active' : ''}`} 
-                                    to="/admin" 
-                                    style={{ display: 'flex', alignItems: 'center', gap: '2px', padding: '8px 4px' }}
-                                    onClick={() => handleNavigation('/admin')}
-                                >
-                                    <AdminPanelSettingsIcon fontSize="small" /> Admin Panel
-                                </Link>
-                            </li>
-                        )}
                     </ul>
 
                     <div className="navbar-nav">
@@ -248,18 +247,6 @@ function NavBar() {
                                                 </Link>
                                             </li>
                                         </>
-                                    )}
-                                    {currentUser.isAdmin && (
-                                        <li className="nav-item">
-                                            <Link 
-                                                className={`nav-link ${location.pathname === '/admin' ? 'active' : ''}`} 
-                                                to="/admin" 
-                                                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-                                                onClick={() => handleNavigation('/admin')}
-                                            >
-                                                <AdminPanelSettingsIcon /> Admin Panel
-                                            </Link>
-                                        </li>
                                     )}
                                 </div>
                                 <div className="user-actions mt-auto">

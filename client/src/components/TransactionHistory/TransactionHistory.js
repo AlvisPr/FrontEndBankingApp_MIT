@@ -1,264 +1,256 @@
 import React from 'react';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Paper,
-    Typography,
-    Box
-} from '@mui/material';
-import { format } from 'date-fns';
 import PropTypes from 'prop-types';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
+import { 
+    Table, 
+    TableBody, 
+    TableCell, 
+    TableContainer, 
+    TableHead, 
+    TableRow, 
+    Paper, 
+    Box,
+    Typography,
+    IconButton
+} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import { getTransactionEmails, formatDate, getTransactionIcon, formatTransactionType, getTypeColor, getRowStyle } from './transactionUtils';
 
-function TransactionHistory({ transactions = [], currentUser }) {
-    if (!transactions || transactions.length === 0) {
-        return (
-            <Typography variant="body1" style={{ padding: '20px', textAlign: 'center' }}>
-                No transactions to display
-            </Typography>
-        );
-    }
+const TransactionHistory = ({ transactions, onClose, isMobile }) => {
+    const containerStyles = {
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'relative'
+    };
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
-        return format(date, 'MM/dd/yyyy HH:mm');
-    };
-
-    const getTransactionEmails = (transaction) => {
-        switch (transaction.type) {
-            case 'transfer-sent':
-                return {
-                    from: transaction.fromEmail || 'N/A',
-                    to: transaction.toEmail || 'N/A'
-                };
-            case 'transfer-received':
-                return {
-                    from: transaction.fromEmail || 'N/A',
-                    to: transaction.toEmail || 'N/A'
-                };
-            case 'deposit':
-            case 'withdraw':
-                return {
-                    from: '-',
-                    to: '-'
-                };
-            default:
-                return {
-                    from: 'N/A',
-                    to: 'N/A'
-                };
-        }
-    };
-
-    const getTransactionIcon = (type) => {
-        switch (type) {
-            case 'deposit':
-                return <ArrowDownwardIcon sx={{ color: '#2e7d32', fontSize: '1rem' }} />;
-            case 'withdraw':
-                return <ArrowUpwardIcon sx={{ color: '#d32f2f', fontSize: '1rem' }} />;
-            case 'transfer-sent':
-                return <SwapHorizIcon sx={{ color: '#1976d2', fontSize: '1rem', transform: 'rotate(90deg)' }} />;
-            case 'transfer-received':
-                return <SwapHorizIcon sx={{ color: '#1976d2', fontSize: '1rem', transform: 'rotate(-90deg)' }} />;
-            default:
-                return null;
-        }
-    };
-
-    const getTypeColor = (type) => {
-        switch (type) {
-            case 'deposit':
-                return '#2e7d32';
-            case 'withdraw':
-                return '#d32f2f';
-            case 'transfer-sent':
-            case 'transfer-received':
-                return '#1976d2';
-            default:
-                return 'inherit';
-        }
-    };
-
-    const getRowStyle = (type) => {
-        switch (type) {
-            case 'deposit':
-                return { backgroundColor: 'rgba(46, 125, 50, 0.1)' }; // Light green
-            case 'withdraw':
-                return { backgroundColor: 'rgba(211, 47, 47, 0.1)' }; // Light red
-            case 'transfer-sent':
-            case 'transfer-received':
-                return { backgroundColor: 'rgba(25, 118, 210, 0.1)' }; // Light blue
-            default:
-                return {};
-        }
-    };
-
-    const formatTransactionType = (type) => {
-        return type.split('-').map(word => 
-            word.charAt(0).toUpperCase() + word.slice(1)
-        ).join(' ');
+        return date.toLocaleString('en-US', {
+            month: '2-digit',
+            day: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
     };
 
     return (
-        <TableContainer
-            component={Paper}
-            sx={{
-                maxHeight: '60vh',
-                overflowY: 'auto',
-                overflowX: 'auto',
-                marginRight: '30px',
-                marginTop: '20px',
-                borderRadius: '16px',
-                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-                '& .MuiTableCell-root': {
+        <div style={{...containerStyles, background: 'none'}}>
+            {isMobile && (
+                <Box sx={{ 
+                    bgcolor: '#208454',
                     padding: '12px 16px',
-                    whiteSpace: 'nowrap',
-                    fontSize: '0.875rem'
-                },
-                '& .MuiPaper-root': {
-                    borderRadius: '16px',
-                },
-                background: 'rgba(255, 255, 255, 0.9)',
-                backdropFilter: 'blur(10px)',
-                '&::-webkit-scrollbar': {
-                    display: 'none'
-                }
-            }}
-        >
-            <Table stickyHeader size="small" aria-label="transaction history table">
-                <TableHead>
-                    <TableRow>
-                        <TableCell
-                            sx={{
-                                fontWeight: 'bold',
-                                backgroundColor: '#208454 !important',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 2,
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+                }}>
+                    <Typography variant="subtitle1" sx={{ color: 'white', fontWeight: 500 }}>
+                        Transaction History
+                    </Typography>
+                    {onClose && (
+                        <IconButton
+                            onClick={onClose}
+                            sx={{ 
                                 color: 'white',
-                                '&:first-of-type': {
-                                    borderTopLeftRadius: '16px',
-                                }
+                                padding: '4px'
                             }}
+                            size="small"
                         >
-                            Type
-                        </TableCell>
-                        <TableCell
-                            sx={{
-                                fontWeight: 'bold',
-                                backgroundColor: '#208454 !important',
-                                color: 'white'
-                            }}
-                        >
-                            Amount
-                        </TableCell>
-                        <TableCell
-                            sx={{
-                                fontWeight: 'bold',
-                                backgroundColor: '#208454 !important',
-                                color: 'white'
-                            }}
-                        >
-                            Date
-                        </TableCell>
-                        <TableCell
-                            sx={{
-                                fontWeight: 'bold',
-                                backgroundColor: '#208454 !important',
-                                color: 'white'
-                            }}
-                        >
-                            From
-                        </TableCell>
-                        <TableCell
-                            sx={{
-                                fontWeight: 'bold',
-                                backgroundColor: '#208454 !important',
-                                color: 'white'
-                            }}
-                        >
-                            To
-                        </TableCell>
-                        <TableCell
-                            sx={{
-                                fontWeight: 'bold',
-                                backgroundColor: '#208454 !important',
-                                color: 'white',
-                                '&:last-child': {
-                                    borderTopRightRadius: '16px',
-                                }
-                            }}
-                        >
-                            Transaction ID
-                        </TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {transactions.map((transaction, index) => {
-                        const { from, to } = getTransactionEmails(transaction);
-                        const typeColor = getTypeColor(transaction.type);
-                        return (
-                            <TableRow
-                                key={index}
-                                sx={{
-                                    ...getRowStyle(transaction.type),
-                                    '&:hover': {
-                                        filter: 'brightness(0.95)',
-                                        transition: 'all 0.3s ease-in-out'
-                                    },
-                                    '&:last-child td, &:last-child th': { border: 0 }
-                                }}
-                            >
-                                <TableCell>
-                                    <Box sx={{ 
-                                        display: 'flex', 
-                                        alignItems: 'center', 
-                                        gap: 1,
+                            <CloseIcon fontSize="small" />
+                        </IconButton>
+                    )}
+                </Box>
+            )}
+            <TableContainer 
+                component={Paper}
+                sx={{
+                    ...(isMobile ? {
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        height: '100vh',
+                        width: '100%',
+                        position: 'relative',
+                        zIndex: 1,
+                        borderRadius: 0,
+                        margin: 0,
+                        padding: 0,
+                        left: 0,
+                        right: 0,
+                        '& .MuiTableCell-root': {
+                            padding: '4px 6px',
+                            fontSize: '0.75rem',
+                            lineHeight: '1',
+                            height: '32px',
+                            whiteSpace: 'normal',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis'
+                        }
+                    } : {
+                        maxHeight: '500px',
+                        minWidth: '300px',
+                        width: '100%',
+                        position: 'relative',
+                        borderRadius: '12px',
+                        '& .MuiTableCell-root': {
+                            padding: '8px 16px',
+                            fontSize: '0.875rem',
+                            lineHeight: '1.2',
+                            height: '40px',
+                            whiteSpace: 'nowrap'
+                        }
+                    }),
+                    overflowY: 'auto',
+                    overflowX: 'auto',
+                    boxShadow: 'none',
+                    backgroundColor: 'white',
+                    WebkitOverflowScrolling: 'touch',
+                    msOverflowStyle: 'none',
+                    scrollbarWidth: 'none',
+                    '&::-webkit-scrollbar': {
+                        display: 'none'
+                    },
+                    '& .MuiTable-root': {
+                        borderRadius: 'inherit',
+                        overflow: 'visible',
+                        width: '100%',
+                        borderCollapse: 'separate',
+                        borderSpacing: 0,
+                        tableLayout: 'fixed'
+                    },
+                    '& .MuiTableHead-root': {
+                        '& .MuiTableCell-root:first-of-type': {
+                            borderTopLeftRadius: isMobile ? 0 : '12px'
+                        },
+                        '& .MuiTableCell-root:last-child': {
+                            borderTopRightRadius: isMobile ? 0 : '12px'
+                        }
+                    },
+                    '& .MuiTableBody-root': {
+                        backgroundColor: 'white'
+                    }
+                }}
+            >
+                <Table stickyHeader size="small" sx={{ 
+                    minWidth: isMobile ? '100%' : '800px',
+                    height: isMobile ? '100%' : 'auto',
+                    tableLayout: 'fixed',
+                    '& .MuiTableCell-stickyHeader': {
+                        backgroundColor: '#208454 !important',
+                        color: 'white',
+                        fontWeight: 500,
+                        padding: isMobile ? '4px 6px' : '8px 16px',
+                        fontSize: isMobile ? '0.75rem' : '0.875rem',
+                        height: isMobile ? '32px' : '40px',
+                        borderBottom: 'none'
+                    }
+                }}>
+                    <TableHead sx={{
+                        position: 'sticky',
+                        top: 0,
+                        backgroundColor: '#208454',
+                        zIndex: 2,
+                        '& th': {
+                            position: 'sticky',
+                            top: 0,
+                            backgroundColor: '#208454',
+                            color: 'white',
+                            fontWeight: 500,
+                            padding: isMobile ? '4px 6px' : '8px 16px',
+                            fontSize: isMobile ? '0.75rem' : '0.875rem',
+                            height: isMobile ? '32px' : '40px',
+                            borderBottom: 'none'
+                        }
+                    }}>
+                        <TableRow>
+                            <TableCell width={isMobile ? "15%" : "15%"} sx={{ position: 'sticky', top: 0, zIndex: 2 }}>Type</TableCell>
+                            <TableCell width={isMobile ? "15%" : "10%"} sx={{ position: 'sticky', top: 0, zIndex: 2 }}>Amount</TableCell>
+                            <TableCell width={isMobile ? "15%" : "15%"} sx={{ position: 'sticky', top: 0, zIndex: 2 }}>Date</TableCell>
+                            <TableCell width={isMobile ? "20%" : "20%"} sx={{ position: 'sticky', top: 0, zIndex: 2 }}>From</TableCell>
+                            <TableCell width={isMobile ? "20%" : "20%"} sx={{ position: 'sticky', top: 0, zIndex: 2 }}>To</TableCell>
+                            <TableCell width={isMobile ? "15%" : "20%"} sx={{ position: 'sticky', top: 0, zIndex: 2 }}>Transaction ID</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {transactions.map((transaction, index) => {
+                            const { from, to } = getTransactionEmails(transaction);
+                            const typeColor = getTypeColor(transaction.type);
+                            return (
+                                <TableRow
+                                    key={index}
+                                    sx={{
+                                        ...getRowStyle(transaction.type),
+                                        height: isMobile ? '32px' : '40px'
+                                    }}
+                                >
+                                    <TableCell>
+                                        <Box sx={{ 
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            color: typeColor,
+                                            fontWeight: 500,
+                                            fontSize: isMobile ? '0.75rem' : '0.875rem',
+                                            height: '100%'
+                                        }}>
+                                            {formatTransactionType(transaction.type)}
+                                        </Box>
+                                    </TableCell>
+                                    <TableCell sx={{ 
+                                        fontWeight: 500, 
                                         color: typeColor,
-                                        fontWeight: 500
+                                        fontSize: isMobile ? '0.75rem' : '0.875rem'
                                     }}>
-                                        {formatTransactionType(transaction.type)}
-                                        {getTransactionIcon(transaction.type)}
-                                    </Box>
-                                </TableCell>
-                                <TableCell sx={{ fontWeight: 500, color: typeColor }}>
-                                    ${transaction.amount.toFixed(2)}
-                                </TableCell>
-                                <TableCell>
-                                    {formatDate(transaction.date)}
-                                </TableCell>
-                                <TableCell sx={{ 
-                                    maxWidth: '200px',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis'
-                                }}>
-                                    {from}
-                                </TableCell>
-                                <TableCell sx={{ 
-                                    maxWidth: '200px',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis'
-                                }}>
-                                    {to}
-                                </TableCell>
-                                <TableCell sx={{
-                                    color: '#666',
-                                    fontSize: '0.8rem',
-                                    maxWidth: '150px',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis'
-                                }}>
-                                    {transaction._id}
-                                </TableCell>
-                            </TableRow>
-                        );
-                    })}
-                </TableBody>
-            </Table>
-        </TableContainer>
+                                        ${transaction.amount.toFixed(2)}
+                                    </TableCell>
+                                    <TableCell sx={{
+                                        fontSize: isMobile ? '0.75rem' : '0.875rem'
+                                    }}>
+                                        {formatDate(transaction.date)}
+                                    </TableCell>
+                                    <TableCell sx={{ 
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        fontSize: isMobile ? '0.75rem' : '0.875rem',
+                                        ...(isMobile && {
+                                            maxWidth: 0,
+                                            wordBreak: 'break-word'
+                                        })
+                                    }}>
+                                        {from}
+                                    </TableCell>
+                                    <TableCell sx={{ 
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        fontSize: isMobile ? '0.75rem' : '0.875rem',
+                                        ...(isMobile && {
+                                            maxWidth: 0,
+                                            wordBreak: 'break-word'
+                                        })
+                                    }}>
+                                        {to}
+                                    </TableCell>
+                                    <TableCell sx={{ 
+                                        color: '#666',
+                                        fontSize: '0.75rem',
+                                        maxWidth: '100px',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis'
+                                    }}>
+                                        {transaction._id}
+                                    </TableCell>
+                                </TableRow>
+                            );
+                        })}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        </div>
     );
 }
 
@@ -273,7 +265,8 @@ TransactionHistory.propTypes = {
             _id: PropTypes.string
         })
     ),
-    currentUser: PropTypes.object
+    onClose: PropTypes.func,
+    isMobile: PropTypes.bool
 };
 
 export default TransactionHistory;

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import Card from '../../components/Card/Card';
 import UserContext from '../../context/UserContext';
 import TooltipIcon from '../../components/Tooltip/Tooltip';
@@ -9,11 +9,16 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { API_URL } from '../../config';
+import { useMediaQuery, Dialog, IconButton, useTheme } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 
 function Balance() {
-    const ctx = useContext(UserContext);
+    const [show] = useState(true);
     const [showTransactions, setShowTransactions] = useState(false);
     const [transactions, setTransactions] = useState([]);
+    const ctx = useContext(UserContext);
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
     const handleToggleTransactions = async () => {
         if (!showTransactions && ctx.currentUser) {
@@ -36,54 +41,132 @@ function Balance() {
     };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Card
-                bgcolor="primary"
-                header={ctx.currentUser ? null : "Balance"}
-                body={
-                    ctx.currentUser ? (
-                        <>
-                            <h1 style={{display: "flex" , justifyContent: "center"}}> ${ctx.currentUser.balance}</h1>
-                            <div className={sharedLogos.centeredImage}>
-                                <img src={bankImg} alt='balance-img'  style={{height:"180px"}}/>
-                            </div>
-                            <button 
-                                onClick={handleToggleTransactions} 
-                                style={{ 
-                                    marginTop: '10px', 
-                                    borderRadius: "15px", 
-                                    padding: "10px 20px", 
-                                    backgroundColor: "#388e3c", 
-                                    color: "white", 
-                                    cursor: "pointer",
-                                    transition: "background-color 0.3s ease",
-                                    border: "1px solid #388e3c"
-                                }}
-                                onMouseOver={(e) => e.target.style.backgroundColor = "#2e7d32"}
-                                onMouseOut={(e) => e.target.style.backgroundColor = "#388e3c"}
-                            >
-                                {showTransactions ? 'Hide Transaction History' : 'Show Transaction History'}
-                            </button>
-                        </>
-                    ) : (
-                        <h3>Please log in to view your balance</h3>
-                    )
-                }
-            />
+        <div style={{ 
+            display: 'flex', 
+            flexDirection: isMobile ? 'column' : 'row', 
+            justifyContent: 'space-between', 
+            position: 'relative',
+            minHeight: '100%'
+        }}>
+            <div style={{ 
+                position: 'sticky',
+                top: 0,
+                left: 0,
+                zIndex: 2,
+                maxWidth: isMobile ? '100%' : '400px'
+            }}>
+                <Card
+                    bgcolor="primary"
+                    header={ctx.currentUser ? null : "Balance"}
+                    body={
+                        ctx.currentUser ? (
+                            <>
+                                <h1 style={{
+                                    display: "flex", 
+                                    justifyContent: "center", 
+                                    fontSize: isMobile ? "2rem" : "2.5rem",
+                                    margin: isMobile ? "10px 0" : "20px 0"
+                                }}> 
+                                    ${ctx.currentUser.balance}
+                                </h1>
+                                <div className={sharedLogos.centeredImage}>
+                                    <img 
+                                        src={bankImg} 
+                                        alt='balance-img'  
+                                        style={{
+                                            height: isMobile ? "120px" : "180px",
+                                            margin: isMobile ? "10px 0" : "20px 0"
+                                        }}
+                                    />
+                                </div>
+                                <button 
+                                    onClick={handleToggleTransactions} 
+                                    style={{ 
+                                        marginTop: '10px', 
+                                        borderRadius: "15px", 
+                                        padding: "10px 20px", 
+                                        backgroundColor: "#388e3c", 
+                                        color: "white", 
+                                        cursor: "pointer",
+                                        transition: "background-color 0.3s ease",
+                                        border: "1px solid #388e3c",
+                                        width: '100%'
+                                    }}
+                                    onMouseOver={(e) => e.target.style.backgroundColor = "#2e7d32"}
+                                    onMouseOut={(e) => e.target.style.backgroundColor = "#388e3c"}
+                                >
+                                    {showTransactions ? 'Hide Transaction History' : 'Show Transaction History'}
+                                </button>
+                            </>
+                        ) : (
+                            <h3>Please log in to view your balance</h3>
+                        )
+                    }
+                />
+            </div>
             {showTransactions && ctx.currentUser && transactions.length > 0 && (
-                <div style={{ marginTop: '20px', width: '100%' }}>
+                <Dialog
+                    open={showTransactions}
+                    onClose={() => setShowTransactions(false)}
+                    fullScreen={isMobile}
+                    maxWidth={false}
+                    disableEscapeKeyDown
+                    onBackdropClick={() => {}}
+                    PaperProps={{
+                        style: isMobile ? {
+                            width: '100%',
+                            height: '100%',
+                            margin: 0,
+                            padding: 0,
+                            overflow: 'hidden',
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            zIndex: 1300,
+                            background: 'none',
+                            boxShadow: 'none'
+                        } : {
+                            width: 'calc(100% - 480px)', 
+                            maxWidth: '1200px',
+                            marginTop: '110px',
+                            marginLeft: '480px',
+                            padding: 0,
+                            overflow: 'hidden',
+                            background: 'none',
+                            boxShadow: 'none'
+                        }
+                    }}
+                    sx={{
+                        '& .MuiDialog-container': {
+                            alignItems: isMobile ? 'stretch' : 'flex-start'
+                        },
+                        '& .MuiBackdrop-root': {
+                            display: 'none'
+                        },
+                        '& .MuiPaper-root': {
+                            background: 'none',
+                            boxShadow: 'none',
+                            margin: isMobile ? 0 : undefined
+                        },
+                        '@media (max-width: 960px)': {
+                            '& .MuiDialog-paper': {
+                                width: '100%',
+                                height: '100%',
+                                margin: 0,
+                                maxHeight: 'none'
+                            }
+                        }
+                    }}
+                >
                     <TransactionHistory 
                         transactions={transactions} 
                         currentUser={ctx.currentUser}
+                        isMobile={isMobile}
+                        onClose={() => setShowTransactions(false)}
                     />
-                </div>
+                </Dialog>
             )}
-            <TooltipIcon 
-                text={`
-                    Here we are displaying the current user's balance. 
-                    If the user is not logged in, they will be prompted to log in.
-                `}
-            />
         </div>
     );
 }

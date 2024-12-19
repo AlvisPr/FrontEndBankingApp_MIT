@@ -17,8 +17,8 @@ export const validateField = (fieldId, value) => {
         case 'accountNumber':
             if (!value) {
                 errors[fieldId] = 'Account number is required';
-            } else if (!/^\d{10}$/.test(value)) {
-                errors[fieldId] = 'Account number must be 10 digits';
+            } else if (!/^\d{17}$/.test(value)) {
+                errors[fieldId] = 'Account number must be 17 digits';
             }
             break;
 

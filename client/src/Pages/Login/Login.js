@@ -92,7 +92,7 @@ function Login() {
                 toast.error(result.error || 'Login failed');
             }
         } catch (error) {
-            console.error('Login error:', error);
+            // console.error('Login error:', error);
             toast.error(error.message || 'Invalid email or password');
         } finally {
             setLoading(false);
@@ -121,7 +121,7 @@ function Login() {
                 toast.error(loginResult.error || 'Google login failed');
             }
         } catch (error) {
-            console.error('Google login error:', error);
+            // console.error('Google login error:', error);
             toast.error(error.message || 'Failed to login with Google');
         } finally {
             setLoading(false);

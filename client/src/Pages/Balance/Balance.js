@@ -28,12 +28,12 @@ function Balance() {
                     throw new Error('User ID is not available');
                 }
                 
-                console.log('Fetching transactions for user:', ctx.currentUser);
+                // console.log('Fetching transactions for user:', ctx.currentUser);
                 const response = await axios.get(`${API_URL}/users/${userId}/transactions`);
-                console.log('Fetched transactions:', response.data); 
+                // console.log('Fetched transactions:', response.data); 
                 setTransactions(response.data);
             } catch (error) {
-                console.error('Error fetching transactions:', error.response?.data || error.message);
+                // console.error('Error fetching transactions:', error.response?.data || error.message);
                 toast.error('Failed to load transaction history');
             }
         }

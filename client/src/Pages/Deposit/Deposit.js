@@ -48,7 +48,7 @@ function Deposit() {
             setValidationErrors({});
             toast.success(`Successfully deposited $${amount}`);
         } catch (error) {
-            console.error('Deposit error:', error);
+            // console.error('Deposit error:', error);
             toast.error(error.message || 'Deposit failed. Please try again.');
         } finally {
             setLoading(false);

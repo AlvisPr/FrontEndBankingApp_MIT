@@ -15,7 +15,7 @@ const CreateAccount = () => {
             password: password
         };
         
-        console.log('About to send this data:', userData);
+        // console.log('About to send this data:', userData);
 
         if (!email || !password) {
             alert('Please fill in both email and password');

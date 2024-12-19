@@ -46,7 +46,7 @@ function UserTable({ users, open, handleToggle, handleMenuOpen, menuAnchorEl, ha
             const user = users[selectedUserIndex];
             removeUser(user.email, adminPassword)
                 .catch(error => {
-                    console.error('Failed to delete user:', error);
+                    // console.error('Failed to delete user:', error);
                     alert('Failed to delete user. Please check the console for more details.');
                 });
         }

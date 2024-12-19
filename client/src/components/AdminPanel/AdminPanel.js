@@ -47,7 +47,7 @@ function Row({ user, onDelete, onPasswordChange, currentUserId }) {
             const response = await axios.get(`http://localhost:3001/api/users/${user._id}/transactions`);
             setTransactions(response.data);
         } catch (error) {
-            console.error('Error fetching transactions:', error);
+            // console.error('Error fetching transactions:', error);
         }
         setLoading(false);
     };
@@ -301,7 +301,7 @@ function AdminPanel() {
             setUsers(response.data);
         } catch (err) {
             setError('Failed to fetch users');
-            console.error('Error fetching users:', err);
+            // console.error('Error fetching users:', err);
         }
     };
 

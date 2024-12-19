@@ -24,11 +24,11 @@ function UserCard({ user }) {
 
     // Get member since date
     const getMemberSince = (user) => {
-        console.log('User data for member since:', {
-            metadata: user?.metadata,
-            createdAt: user?.createdAt,
-            user: user
-        });
+        // console.log('User data for member since:', {
+        //     metadata: user?.metadata,
+        //     createdAt: user?.createdAt,
+        //     user: user
+        // });
         // Firebase auth stores the creation time in metadata
         const creationTime = user?.metadata?.creationTime;
         if (creationTime) {

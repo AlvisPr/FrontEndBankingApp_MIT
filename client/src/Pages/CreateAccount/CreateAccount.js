@@ -132,7 +132,7 @@ function CreateAccount() {
             setPassword('');
             setValidationErrors({});
         } catch (error) {
-            console.error('Create account error:', error);
+            // console.error('Create account error:', error);
             toast.error(error.message || 'Failed to create account. Please try again.');
         } finally {
             setLoading(false);
@@ -154,7 +154,7 @@ function CreateAccount() {
             
             toast.success('Account created successfully with Google!');
         } catch (error) {
-            console.error('Google sign up error:', error);
+            // console.error('Google sign up error:', error);
             toast.error(error.message || 'Failed to create account with Google');
         } finally {
             setLoading(false);

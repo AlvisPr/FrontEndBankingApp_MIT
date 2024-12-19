@@ -40,7 +40,7 @@ function AllData() {
                 })
                 .catch(error => {
                     alert('Incorrect password');
-                    console.error('Error removing user:', error);
+                    // console.error('Error removing user:', error);
                 });
         }
     }, [password, currentUser, removeUser, users, userToRemove]);
@@ -80,7 +80,9 @@ function AllData() {
                     setNewPassword('');
                     setSelectedUser(null);
                 })
-                .catch(error => console.error('Error updating password:', error));
+                .catch(error => {
+                    console.error('Error updating password:', error);
+                  });
         }
     }, [selectedUser, newPassword, users, changeUserPassword, setUsers]);
 

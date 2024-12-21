@@ -7,7 +7,7 @@ import bankImage3 from '../../assets/onlinebanking.jpg';
 import bankImage4 from '../../assets/securebanking2.jpeg';
 import bankImage5 from '../../assets/mortgage2.jpeg';
 import bankImage6 from '../../assets/savemoney.jpeg';
-import { FaFacebook, FaTwitter, FaInstagram, FaReact, FaDatabase, FaLock, FaUserShield, FaTimes } from 'react-icons/fa';
+import { FaFacebook, FaTwitter, FaInstagram, FaReact, FaDatabase, FaLock, FaUserShield, FaTimes, FaInfoCircle } from 'react-icons/fa';
 import { Dialog, DialogContent } from '@mui/material';
 import { Carousel } from 'react-bootstrap';
 import styles from './Home.module.css';
@@ -18,6 +18,7 @@ function Home() {
     const { currentUser } = useContext(UserContext);
     const [carouselLoaded, setCarouselLoaded] = useState(false);
     const [carouselImages, setCarouselImages] = useState([]);
+    const [showInfoTooltip, setShowInfoTooltip] = useState(false);
 
     useEffect(() => {
         const loadCarouselImages = async () => {
@@ -190,6 +191,20 @@ function Home() {
                             </div>
                         </DialogContent>
                     </Dialog>
+
+                    <div 
+                        className={styles.infoCircle}
+                        onMouseEnter={() => setShowInfoTooltip(true)}
+                        onMouseLeave={() => setShowInfoTooltip(false)}
+                    >
+                        <FaInfoCircle />
+                        {showInfoTooltip && (
+                            <div className={styles.tooltip}>
+                               
+This is a fictitious banking site created for educational purposes as part of the MIT Full Stack Development with MERN course. It serves as a Capstone project and should not be used for real transactions or sensitive information.
+                            </div>
+                        )}
+                    </div>
                 </>
             )}
         </div>

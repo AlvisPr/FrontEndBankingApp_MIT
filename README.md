@@ -68,9 +68,9 @@ To get the project up and running, follow these steps:
 
 ![Home Page](./readme%20assets/HomePage.png)
 
-**Balance Page**
+**About**
 
-![Balance Page](./readme%20assets/BalancePage.png)
+![About Page](./readme%20assets/AboutPage.png)
 
 ## License
 This project is licensed under the ISC License. See the [LICENSE](./LICENSE) file for more details.

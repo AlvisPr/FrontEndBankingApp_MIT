@@ -70,7 +70,7 @@ To get the project up and running, follow these steps:
 
 **About**
 
-![About Page](./readme%20assets/AboutPage.png)
+![About](./readme%20assets/Features.png)
 
 ## License
 This project is licensed under the ISC License. See the [LICENSE](./LICENSE) file for more details.
